@@ -32,7 +32,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {
     this.isProd = this.configService.get<string>('nodeEnv') === 'production';
-    this.frontendUrl = this.configService.get<string>('frontendUrl') || 'http://localhost:3000';
+    this.frontendUrl = this.configService.get<string>('frontendUrl') || 'http://localhost:7200';
   }
 
   private setSessionCookie(res: Response, token: string) {

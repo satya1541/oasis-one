@@ -37,6 +37,12 @@
       "skillPath": "skills/gpt-tasteskill/SKILL.md",
       "computedHash": "11bf97d9ddfc5b946e46d650e9a81237f1765c32f465ad4a5befa39e74ff1662"
     },
+    "gravitas": {
+      "source": "udaysharmadev/Gravitas",
+      "sourceType": "github",
+      "skillPath": "skills/gravitas/SKILL.md",
+      "computedHash": "1ef9a8048a626aafe7c87f74cefaf030e71cff6231abad5e917cc5d9cd1fdefb"
+    },
     "high-end-visual-design": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",

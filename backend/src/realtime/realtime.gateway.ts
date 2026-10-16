@@ -47,7 +47,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     try {
       // 1. Origin verification
       const origin = client.handshake.headers.origin;
-      const allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:3000'];
+      const allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:7200'];
       
       if (origin && !allowedOrigins.some(a => origin.startsWith(a))) {
         this.logger.warn(`WS connection rejected: unauthorized origin ${origin}`);

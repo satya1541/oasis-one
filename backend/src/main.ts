@@ -14,9 +14,9 @@ async function bootstrap() {
   });
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('port') || 4000;
+  const port = configService.get<number>('port') || 7500;
   const isProd = configService.get<string>('nodeEnv') === 'production';
-  const frontendUrl = configService.get<string>('frontendUrl') || 'http://localhost:3000';
+  const frontendUrl = configService.get<string>('frontendUrl') || 'http://localhost:7200';
   const allowedOrigins = configService.get<string[]>('wsAllowedOrigins') || [frontendUrl];
   const trustProxy = configService.get<number>('trustProxy') || 1;
 

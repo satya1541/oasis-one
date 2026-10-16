@@ -13,7 +13,7 @@ export class CsrfGuard implements CanActivate {
   private readonly allowedOrigins: string[];
 
   constructor(private readonly configService: ConfigService) {
-    this.allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:3000'];
+    this.allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:7200'];
   }
 
   canActivate(context: ExecutionContext): boolean {

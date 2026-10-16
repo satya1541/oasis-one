@@ -1,9 +1,9 @@
 export const configuration = () => ({
-  port: parseInt(process.env.PORT || '4000', 10),
+  port: parseInt(process.env.PORT || '7500', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL,
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
-  wsAllowedOrigins: (process.env.WS_ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(s => s.trim()),
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:7200',
+  wsAllowedOrigins: (process.env.WS_ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:7200').split(',').map(s => s.trim()),
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   
   auth: {
@@ -13,7 +13,7 @@ export const configuration = () => ({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/v1/auth/google/callback',
+      callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:7200/api/v1/auth/google/callback',
     },
   },
 
@@ -24,7 +24,7 @@ export const configuration = () => ({
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
     from: process.env.MAIL_FROM || 'OASIS ONE <no-reply@oasis.community>',
-    logoUrl: process.env.EMAIL_LOGO_URL || 'http://localhost:3000/brand/oasis-logo-email.png',
+    logoUrl: process.env.EMAIL_LOGO_URL || 'http://localhost:7200/brand/oasis-logo-email.png',
     grievanceEmail: process.env.GRIEVANCE_EMAIL || 'grievance@oasis.community',
     oversightEmail: process.env.OVERSIGHT_EMAIL || 'oversight@oasis.community',
   },

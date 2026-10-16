@@ -40,7 +40,7 @@ export class AdminController {
     private readonly realtime: RealtimeService,
     private readonly config: ConfigService,
   ) {
-    this.frontendUrl = this.config.get<string>('frontendUrl') || 'http://localhost:3000';
+    this.frontendUrl = this.config.get<string>('frontendUrl') || 'http://localhost:7200';
   }
 
   // 1. One-time Bootstrap (Public)

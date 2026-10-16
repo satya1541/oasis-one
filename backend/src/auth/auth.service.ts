@@ -46,7 +46,7 @@ export class AuthService {
       this.configService.get<string>('auth.fieldEncryptionKey') ||
       '2db43747f3af14adaeaec4751f89e14f7861a862f41e520a71c7e796ef450789';
     this.frontendUrl =
-      this.configService.get<string>('frontendUrl') || 'http://localhost:3000';
+      this.configService.get<string>('frontendUrl') || 'http://localhost:7200';
 
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('auth.google.clientId'),

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { authenticator } from 'otplib';
 import crypto from 'node:crypto';
 
-const BASE_URL = 'http://localhost:4000/api/v1';
+const BASE_URL = 'http://localhost:7500/api/v1';
 const prisma = new PrismaClient();
 const FIELD_ENCRYPTION_KEY = '2db43747f3af14adaeaec4751f89e14f7861a862f41e520a71c7e796ef450789';
 
