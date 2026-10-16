@@ -1,26 +1,113 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme: ivory canvas, navy ink */
+  --bg: #FBF7EE;
+  --surface: #FFFFFF;
+  --surface-2: #F4EEDF;
+  --primary-soft: #ECE7D8;
+  --accent-soft: #F6EBD3;
+  --border: #D9CDAE;           /* decorative hairlines */
+  --border-strong: #978E77;    /* input borders (3:1) */
+  --text: #1E1F33;
+  --muted: #656482;
+  --primary: #1E1F33;
+  --primary-hover: #303143;
+  --on-primary: #FCF6E3;
+  --accent: #86601F;           /* gold for text, icons and focus rings on light surfaces */
+  --accent-fill: #E9C68C;      /* filled gold chips/badges, always with navy text */
+  --success: #187952;
+  --warning: #B83E0B;
+  --danger: #B64536;
+  --info: #296DAC;
+  --brand-navy: #1E1F33;
+  --brand-gold: #F3D3A2;
+  --brand-cream: #FCF6E3;      /* logo colors, fixed in both themes */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow-1: 0 1px 2px rgb(30 31 51 / 0.06), 0 1px 1px rgb(30 31 51 / 0.04);
+  --shadow-2: 0 8px 24px -8px rgb(30 31 51 / 0.18), 0 2px 6px rgb(30 31 51 / 0.06);
+  --shadow-3: 0 24px 60px -20px rgb(30 31 51 / 0.35);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Dark theme: the logo's own navy */
+  --bg: #1E1F33;
+  --surface: #2C2C3F;
+  --surface-2: #343547;
+  --primary-soft: #3A363F;
+  --accent-soft: #32303C;
+  --border: #4B4C5C;
+  --border-strong: #757596;
+  --text: #FCF6E3;
+  --muted: #A9A7C4;
+  --primary: #E9C68C;
+  --primary-hover: #F3D3A2;
+  --on-primary: #1E1F33;
+  --accent: #F3D3A2;
+  --accent-fill: #E9C68C;
+  --success: #5FD3A3;
+  --warning: #FF9A5A;
+  --danger: #FF8A7A;
+  --info: #7DB4F0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent-soft: var(--accent-soft);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-cream: var(--brand-cream);
+
+  --font-display: var(--font-jost), sans-serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle grain and aesthetic utilities */
+.astrolabe-rotate {
+  animation: astrolabe-spin 60s linear infinite;
+}
+
+@keyframes astrolabe-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .astrolabe-rotate {
+    animation: none;
+  }
 }
