@@ -25,9 +25,9 @@ import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { AdminLevelGuard } from '../common/guards/admin-level.guard';
-import { RequireAdminLevel } from '../common/decorators/admin-level.decorator';
+import { RequireAdminLevel, AdminLevel } from '../common/decorators/admin-level.decorator';
 import { ConfigService } from '@nestjs/config';
-import { AdminLevel, LegalDocType, PostStatus, UserRole, AccountStatus } from '@prisma/client';
+import { LegalDocType, PostStatus, UserRole, AccountStatus } from '@prisma/client';
 import { generateRandomToken } from '../common/utils/crypto.util';
 
 @Controller('admin')
