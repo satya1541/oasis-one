@@ -68,9 +68,9 @@ export class LegalController {
     });
 
     return {
-      supportEmail: settingsMap.get('support_email') || 'support@oasis.community',
-      minAge: parseInt(settingsMap.get('min_age') || '18', 10),
-      coolingOffDays: parseInt(settingsMap.get('cooling_off_days') || '30', 10),
+      supportEmail: String(settingsMap.get('support_email') || 'support@oasis.community'),
+      minAge: parseInt(String(settingsMap.get('min_age') || '18'), 10),
+      coolingOffDays: parseInt(String(settingsMap.get('cooling_off_days') || '30'), 10),
       legalVersions: legalDocs.map((d) => ({
         type: d.type,
         version: d.version,
