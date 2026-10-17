@@ -49,28 +49,39 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       const origin = client.handshake.headers.origin;
       const allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:7200'];
       
-      if (origin && !allowedOrigins.some(a => origin.startsWith(a))) {
+      const isAllowedOrigin = !origin ||
+        allowedOrigins.some(a => origin.startsWith(a)) ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1');
+
+      if (!isAllowedOrigin) {
         this.logger.warn(`WS connection rejected: unauthorized origin ${origin}`);
         client.disconnect(true);
         return;
       }
 
-      // 2. Cookie extraction
+      // 2. Cookie or token extraction
+      let sessionToken: string | null = null;
       const rawCookie = client.handshake.headers.cookie;
-      if (!rawCookie) {
-        this.logger.debug('WS connection rejected: no cookie header');
+      if (rawCookie) {
+        const match = rawCookie.match(/(?:^|;\s*)oasis_sid=([^;]+)/);
+        if (match && match[1]) {
+          sessionToken = decodeURIComponent(match[1]);
+        }
+      }
+      if (!sessionToken && client.handshake.auth?.token) {
+        sessionToken = client.handshake.auth.token;
+      }
+      if (!sessionToken && typeof client.handshake.query?.token === 'string') {
+        sessionToken = client.handshake.query.token;
+      }
+
+      if (!sessionToken) {
+        this.logger.debug('WS connection rejected: session token missing');
         client.disconnect(true);
         return;
       }
 
-      const match = rawCookie.match(/(?:^|;\s*)oasis_sid=([^;]+)/);
-      if (!match || !match[1]) {
-        this.logger.debug('WS connection rejected: oasis_sid cookie missing');
-        client.disconnect(true);
-        return;
-      }
-
-      const sessionToken = decodeURIComponent(match[1]);
       const tokenHash = hashToken(sessionToken);
 
       const session = await this.prisma.session.findUnique({

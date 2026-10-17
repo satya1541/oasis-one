@@ -83,4 +83,23 @@ export class FilesController {
       throw new HttpException({ code: 'NOT_FOUND', message: 'File not found' }, HttpStatus.NOT_FOUND);
     }
   }
+
+  @Public()
+  @Get('files/attachment/:id')
+  async getAttachmentFile(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const file = await this.filesService.getFileById(id);
+    if (!file || file.status === 'deleted') {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'File not found' }, HttpStatus.NOT_FOUND);
+    }
+    const { buffer, contentType } = await this.storage.getObject(file.storageKey);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Content-Type', contentType);
+    if (!file.mimeType.startsWith('image/')) {
+      res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
+    }
+    return res.send(buffer);
+  }
 }

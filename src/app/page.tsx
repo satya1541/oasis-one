@@ -1,49 +1,64 @@
+"use client";
+
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { AstrolabeStar } from "@/components/brand/AstrolabeStar";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  Users,
   Compass,
   Rocket,
   Award,
+  Sparkles,
+  MapPin,
+  Lock,
+  Search,
+  Calendar,
+  MessageSquare,
+  Users,
 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
-      {/* ── Top Bar (Strictly Midnight Navy for Brand Lockup) ────────────────── */}
-      <header className="sticky top-0 z-50 w-full bg-[var(--brand-navy)]/95 backdrop-blur-md border-b border-[var(--brand-gold)]/20 px-6 lg:px-12 h-16 sm:h-[70px] flex items-center transition-all shadow-sm">
-        <div className="w-full max-w-[1200px] mx-auto flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] selection:bg-[#F3D3A2]/30 selection:text-[#1E1F33]">
+      {/* ── Top Bar (Apple-style Translucent Luxury Glass) ───────────────────────── */}
+      <header className="sticky top-0 z-50 w-full bg-[#1E1F33]/85 backdrop-blur-2xl border-b border-[#F3D3A2]/15 px-6 lg:px-12 h-16 sm:h-[72px] flex items-center transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.25)]">
+        <div className="w-full max-w-[1240px] mx-auto flex items-center justify-between">
           <BrandLockup variant="horizontal" priority />
 
-          <nav className="flex items-center gap-5 sm:gap-7">
+          <nav className="flex items-center gap-6 sm:gap-8">
             <Link
               href="#membership"
-              className="hidden md:inline-block text-xs font-medium tracking-wide text-[var(--brand-cream)]/75 hover:text-[var(--brand-gold)] transition-colors"
+              className="hidden md:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Who it's for
             </Link>
             <Link
               href="#how-it-works"
-              className="hidden md:inline-block text-xs font-medium tracking-wide text-[var(--brand-cream)]/75 hover:text-[var(--brand-gold)] transition-colors"
+              className="hidden md:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
-              How it works
+              Admission
+            </Link>
+            <Link
+              href="#sanctuary"
+              className="hidden lg:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
+            >
+              Experience
             </Link>
             <Link
               href="/login"
-              className="text-sm font-medium text-[var(--brand-cream)]/85 hover:text-[var(--brand-gold)] transition-colors"
+              className="text-xs sm:text-sm font-medium text-[var(--brand-cream)]/85 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Log in
             </Link>
             <Button
               variant="outline"
               size="sm"
-              className="border-[var(--brand-gold)]/40 text-[var(--brand-gold)] hover:bg-[var(--brand-gold)]/10 font-medium h-9 px-4"
+              className="border-[var(--brand-gold)]/40 text-[var(--brand-gold)] hover:bg-[var(--brand-gold)]/15 font-medium h-9 px-4.5 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
               asChild
             >
               <Link href="/join">Join OASIS</Link>
@@ -52,304 +67,428 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Hero Section (Full-width Midnight Navy with Astrolabe Compass) ────── */}
-      <section className="relative overflow-hidden bg-[var(--brand-navy)] text-[var(--brand-cream)] px-6 lg:px-12 pt-16 pb-24 border-b border-[var(--brand-gold)]/20">
-        {/* Subtle radial ambient glow */}
+      {/* ── Hero Section (Cinematic Midnight Navy with Specular Lighting) ────────── */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#151624] via-[#1E1F33] to-[#181928] text-[var(--brand-cream)] px-6 lg:px-12 pt-20 pb-28 border-b border-[var(--brand-gold)]/20">
+        {/* Apple-grade Atmospheric Ambient Mesh Glows */}
         <div
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#2C2E4A]/30 blur-3xl pointer-events-none"
+          className="absolute -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(243,211,162,0.08)_0%,transparent_70%)] blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute -bottom-32 right-10 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(134,96,31,0.12)_0%,transparent_70%)] blur-3xl pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
           {/* Hero Content (Left 7 Columns) */}
-          <div className="lg:col-span-7 flex flex-col space-y-6">
-            <div className="inline-flex items-center gap-2">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.2em] text-[var(--brand-gold)]">
+          <div className="lg:col-span-7 flex flex-col space-y-7">
+            {/* Super-title Pill */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[var(--brand-gold)]/25 backdrop-blur-md w-fit">
+              <span className="w-2 h-2 rounded-full bg-[#187952] animate-pulse" />
+              <span className="font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-gold)]">
                 ODISHA · STARTUP COMMUNITY
               </span>
-              <span className="h-1 w-1 rounded-full bg-[var(--brand-gold)]/60" />
-              <span className="text-xs text-[var(--brand-cream)]/70">
-                Invitation & Admin Approved
+              <span className="text-[11px] text-[var(--brand-cream)]/50 hidden sm:inline">
+                | Curated &amp; Admin Vetted
               </span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-[var(--brand-cream)] leading-[1.12]">
+            {/* Monumental Headline */}
+            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight text-[var(--brand-cream)] leading-[1.08]">
               One Community. <br />
-              <span className="font-normal text-[var(--brand-gold)]">
+              <span className="font-normal text-gold-gradient drop-shadow-[0_2px_12px_rgba(243,211,162,0.2)]">
                 Infinite Possibilities.
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-[var(--brand-cream)]/80 max-w-xl leading-relaxed">
-              A members-only home for Odisha’s aspiring entrepreneurs, startup
-              founders, and mentors. Find the right people, ask better
-              questions, and meet in person.
+            {/* Cinematic Subtitle */}
+            <p className="text-base sm:text-lg text-[var(--brand-cream)]/80 max-w-xl leading-relaxed font-sans font-normal">
+              A private, members-only digital home for Odisha’s 650+ aspiring entrepreneurs, startup founders, and verified mentors. Find your collaborators, ask critical questions, and build lasting companies together.
             </p>
 
             {/* CTAs */}
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <Button
+                variant="gold"
                 size="lg"
-                className="bg-[var(--brand-gold)] text-[var(--brand-navy)] font-semibold border-none hover:bg-[#E9C68C] gap-2 shadow-sm"
+                className="gap-2.5 rounded-full text-sm font-semibold tracking-wide px-7 shadow-[0_8px_24px_rgba(233,198,140,0.35)]"
                 asChild
               >
                 <Link href="/join">
-                  Join OASIS
-                  <ArrowRight className="w-4 h-4 ml-1" />
+                  Apply to Join
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
+
               <Button
                 variant="outline"
                 size="lg"
-                className="border-[var(--brand-gold)]/30 text-[var(--brand-cream)] hover:border-[var(--brand-gold)]"
+                className="rounded-full text-sm font-medium px-6 text-[var(--brand-cream)] border-white/20 hover:border-[var(--brand-gold)] hover:bg-white/5"
                 asChild
               >
-                <Link href="/login">Log in to portal</Link>
+                <Link href="/login">Member Portal Sign In</Link>
               </Button>
             </div>
 
-            {/* Micro-metric verification note */}
-            <div className="pt-6 border-t border-[var(--brand-gold)]/15 flex flex-wrap items-center gap-3 text-xs text-[var(--brand-cream)]/65">
-              <ShieldCheck className="w-4 h-4 text-[var(--brand-gold)] shrink-0" />
-              <span>
-                <strong>650+ verified members</strong> active in Bhubaneswar,
-                Cuttack, Rourkela, Sambalpur & Berhampur
-              </span>
+            {/* Verified Footprint Strip */}
+            <div className="pt-6 border-t border-[var(--brand-gold)]/15 flex flex-wrap items-center gap-y-3 gap-x-6 text-xs text-[var(--brand-cream)]/70 font-sans">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[var(--brand-gold)] shrink-0" />
+                <span className="font-medium text-[var(--brand-cream)]">
+                  650+ Vetted Members
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[var(--brand-cream)]/60">
+                <MapPin className="w-3.5 h-3.5 text-[var(--brand-gold)]/80" />
+                <span>Bhubaneswar · Cuttack · Rourkela · Sambalpur · Berhampur</span>
+              </div>
             </div>
           </div>
 
-          {/* Astrolabe Motif (Right 5 Columns) */}
+          {/* Astrolabe Motif (Right 5 Columns) with Apple-grade Radial Depth */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end relative">
-            <AstrolabeStar size={420} className="w-[320px] h-[320px] sm:w-[420px] sm:h-[420px]" />
+            <div className="relative">
+              {/* Outer Glow Halo */}
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(243,211,162,0.18)_0%,transparent_65%)] blur-2xl scale-125" />
+              <AstrolabeStar size={440} className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[440px] lg:h-[440px]" />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Quiet Trust Callout Strip ────────────────────────────────────────── */}
-      <div className="bg-[var(--surface-2)] border-b border-[var(--border)] py-4 px-6">
-        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[var(--muted)]">
-          <div className="flex items-center gap-2">
+      {/* ── Quiet Trust Strip (Warm Ivory Level 2 Surface) ─────────────────────── */}
+      <div className="bg-[var(--surface-2)]/80 border-b border-[var(--border)] py-4.5 px-6 backdrop-blur-md">
+        <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[var(--muted)]">
+          <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
             <span className="font-medium text-[var(--text)]">
-              Every member is reviewed by an admin before they join.
+              Admin review for every candidate before access is granted.
             </span>
           </div>
-          <div className="flex items-center gap-4 text-xs">
-            <span>Verified Founder Network</span>
+          <div className="flex items-center gap-4 text-xs font-mono tracking-wide text-[var(--muted)]">
+            <span>NO MARKETING FLUFF</span>
             <span>•</span>
-            <span>Zero Spam & Ad-Free</span>
+            <span>VERIFIED DIRECTORY</span>
             <span>•</span>
-            <span>Direct Guidance</span>
+            <span>CLOSED ROUNDTABLES</span>
           </div>
         </div>
       </div>
 
-      {/* ── Section: Who It's For (Horizontal Editorial Rows) ────────────────── */}
-      <section id="membership" className="py-20 px-6 lg:px-12 bg-[var(--bg)] scroll-mt-20">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="mb-12">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-              MEMBERSHIP
+      {/* ── Section: Interactive Sanctuary Preview (Apple.com-inspired Showcase) ─ */}
+      <section id="sanctuary" className="py-24 px-6 lg:px-12 bg-gradient-to-b from-[var(--bg)] to-[var(--surface-2)]/40 relative">
+        <div className="max-w-[1240px] mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="font-display text-xs uppercase tracking-[0.22em] text-[var(--accent)] font-semibold">
+              THE EXPERIENCE
             </span>
-            <h2 className="font-display text-3xl font-normal text-[var(--text)] mt-2">
-              Who it’s for
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-[var(--text)] tracking-tight">
+              A Quiet, Focused Workspace.
             </h2>
-            <p className="text-sm text-[var(--muted)] mt-1 max-w-lg">
-              OASIS is built around three interdependent stages of Odisha’s
-              growing startup ecosystem.
+            <p className="text-sm sm:text-base text-[var(--muted)] leading-relaxed">
+              Designed with the restraint of Linear and Stripe. No flashing banners, no cluttered feeds. Just the people and guidance you need to advance your enterprise.
             </p>
           </div>
 
-          {/* Three Simple Rows (Banned 3 identical card clichés; clean structural dividers) */}
-          <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
-            {/* Row 1 */}
-            <div className="py-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
-              <div className="md:col-span-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center border border-[var(--border)] text-[var(--accent)]">
-                  <Compass className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
-                    Aspiring entrepreneurs
-                  </h3>
-                  <Badge variant="aspiring" className="mt-1">
-                    Ideation & Validation
-                  </Badge>
-                </div>
+          {/* Floating Luxury Mockup Card */}
+          <div className="relative mx-auto max-w-5xl rounded-3xl p-3 sm:p-5 bg-gradient-to-b from-[#1E1F33]/90 to-[#12131F]/95 border border-[var(--brand-gold)]/25 shadow-[0_24px_60px_-15px_rgba(30,31,51,0.25)] backdrop-blur-xl">
+            {/* Top Bar of the Mockup */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+                <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                <span className="ml-3 text-[11px] font-mono text-white/40 tracking-wider">
+                  OASIS ONE PORTAL · DASHBOARD
+                </span>
               </div>
-              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed">
-                <p className="font-medium">Test your idea and find guidance.</p>
-                <p className="text-[var(--muted)] mt-1">
-                  Connect with experienced founders, join closed roundtables,
-                  and refine your problem statement before incorporating.
-                </p>
-              </div>
-              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right">
-                Bhubaneswar & Student Founders
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  REALTIME SECURE
+                </span>
               </div>
             </div>
 
-            {/* Row 2 */}
-            <div className="py-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
-              <div className="md:col-span-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--brand-navy)] flex items-center justify-center border border-[var(--brand-gold)]/20 text-[var(--brand-gold)]">
-                  <Rocket className="w-5 h-5" />
+            {/* Inner Dashboard Simulation Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 p-2 sm:p-4 text-white">
+              {/* Left Column (Search + Next Up) */}
+              <div className="md:col-span-7 space-y-4">
+                {/* Search Simulation */}
+                <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-white/50 text-sm">
+                    <Search className="w-4 h-4 text-[#F3D3A2]" />
+                    <span>Search mentors, founders, questions...</span>
+                  </div>
+                  <kbd className="px-2 py-0.5 text-[10px] font-mono bg-white/10 text-white/60 rounded border border-white/10">
+                    ⌘K
+                  </kbd>
                 </div>
-                <div>
-                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
-                    Founders & co-founders
-                  </h3>
-                  <Badge variant="founder" className="mt-1">
-                    Building & Scaling
-                  </Badge>
-                </div>
-              </div>
-              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed">
-                <p className="font-medium">Share what you need and find collaborators.</p>
-                <p className="text-[var(--muted)] mt-1">
-                  Ask targeted questions, hire key engineering or operations
-                  talent, navigate pilot customers, and sync with peer founders.
-                </p>
-              </div>
-              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right">
-                DeepTech, Agri, Climate, AI
-              </div>
-            </div>
 
-            {/* Row 3 */}
-            <div className="py-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
-              <div className="md:col-span-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center border border-[var(--accent)]/40 text-[var(--accent)]">
-                  <Award className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
-                    Mentors & advisors
-                  </h3>
-                  <Badge variant="verified-mentor" className="mt-1">
-                    Verified Advisory
-                  </Badge>
+                {/* Event Card Simulation */}
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#F3D3A2] font-semibold uppercase tracking-wider text-[11px]">
+                      UPCOMING ROUNDTABLE
+                    </span>
+                    <span className="text-white/40">This Saturday · 6:30 PM</span>
+                  </div>
+                  <h4 className="font-display text-lg text-white font-medium">
+                    Founders Demo Night — Bhubaneswar Tech Hub
+                  </h4>
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    Closed-door feedback session with 4 institutional investors and seed-stage operators.
+                  </p>
+                  <div className="pt-2 flex items-center justify-between text-xs border-t border-white/10">
+                    <span className="text-emerald-400 font-mono text-[11px]">42 of 60 Registered</span>
+                    <span className="text-[#F3D3A2] font-medium hover:underline">Reserve Seat →</span>
+                  </div>
                 </div>
               </div>
-              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed">
-                <p className="font-medium">Give back to the next generation of founders.</p>
-                <p className="text-[var(--muted)] mt-1">
-                  Controlled connection requests (max 10/day quota), verified
-                  credentials, and closed-door clinical sessions with serious builders.
-                </p>
-              </div>
-              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right">
-                Operators, Investors, CXOs
+
+              {/* Right Column (Mentors & Guidance Simulation) */}
+              <div className="md:col-span-5 space-y-4">
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-[var(--brand-gold)]/20 space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase font-mono tracking-wider text-[#F3D3A2]">
+                      VERIFIED ADVISOR
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#E9C68C] text-[#1E1F33] text-[10px] font-semibold">
+                      Verified
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-[#1E1F33] border border-[#F3D3A2] flex items-center justify-center font-display text-sm font-semibold text-[#F3D3A2]">
+                      DB
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Dr. Debashis Barik</h4>
+                      <p className="text-xs text-white/60">DeepTech &amp; AI Systems · Bhubaneswar</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/75 leading-relaxed">
+                    “Helped 14 Odisha startups architect enterprise pilot deployments.”
+                  </p>
+                  <div className="pt-2">
+                    <button className="w-full py-2 rounded-xl bg-white/10 border border-[#F3D3A2]/30 text-xs font-medium text-[#FCF6E3] hover:bg-white/15 transition-all">
+                      Request Guidance
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Section: How It Works ────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-20 px-6 lg:px-12 bg-[var(--surface-2)]/60 border-t border-[var(--border)] scroll-mt-20">
-        <div className="max-w-[1200px] mx-auto">
+      {/* ── Section: Who It's For (Apple-style Horizontal Editorial Rows) ──────── */}
+      <section id="membership" className="py-24 px-6 lg:px-12 bg-[var(--bg)] scroll-mt-20 border-t border-[var(--border)]">
+        <div className="max-w-[1240px] mx-auto">
           <div className="mb-14">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-              ADMISSION
+            <span className="font-display text-xs uppercase tracking-[0.22em] text-[var(--accent)] font-semibold">
+              MEMBERSHIP TIERS
             </span>
-            <h2 className="font-display text-3xl font-normal text-[var(--text)] mt-2">
-              How it works
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-[var(--text)] mt-2 tracking-tight">
+              Built for Every Phase of the Journey
             </h2>
-            <p className="text-sm text-[var(--muted)] mt-1">
-              Joining is by application only to protect community focus and trust.
+            <p className="text-sm sm:text-base text-[var(--muted)] mt-1.5 max-w-xl">
+              OASIS brings together three interdependent groups across Odisha’s startup ecosystem to accelerate growth with zero friction.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Three Editorial Rows */}
+          <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+            {/* Row 1: Aspiring Entrepreneurs */}
+            <div className="py-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline transition-colors duration-200 hover:bg-[var(--surface-2)]/30 px-3 rounded-xl">
+              <div className="md:col-span-4 flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--surface-2)] flex items-center justify-center border border-[var(--border)] text-[var(--accent)] shrink-0 shadow-xs">
+                  <Compass className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
+                    Aspiring Entrepreneurs
+                  </h3>
+                  <Badge variant="aspiring" className="mt-1.5">
+                    Ideation &amp; Validation
+                  </Badge>
+                </div>
+              </div>
+              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed space-y-1">
+                <p className="font-medium text-base text-[var(--text)]">
+                  Validate your problem statement before investing capital.
+                </p>
+                <p className="text-[var(--muted)]">
+                  Connect with serial founders, test customer hypotheses in closed roundtables, and find potential co-founders who complement your skill set.
+                </p>
+              </div>
+              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right font-mono">
+                Student &amp; Early Builders
+              </div>
+            </div>
+
+            {/* Row 2: Startup Founders */}
+            <div className="py-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline transition-colors duration-200 hover:bg-[var(--surface-2)]/30 px-3 rounded-xl">
+              <div className="md:col-span-4 flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--brand-navy)] flex items-center justify-center border border-[var(--brand-gold)]/30 text-[var(--brand-gold)] shrink-0 shadow-sm">
+                  <Rocket className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
+                    Founders &amp; Co-founders
+                  </h3>
+                  <Badge variant="founder" className="mt-1.5">
+                    Building &amp; Scaling
+                  </Badge>
+                </div>
+              </div>
+              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed space-y-1">
+                <p className="font-medium text-base text-[var(--text)]">
+                  Execute faster with direct, peer-level intelligence.
+                </p>
+                <p className="text-[var(--muted)]">
+                  Ask targeted questions, navigate government grant applications, hire key engineering talent, and secure enterprise pilot introductions in Odisha.
+                </p>
+              </div>
+              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right font-mono">
+                DeepTech · Agri · Climate · FinTech
+              </div>
+            </div>
+
+            {/* Row 3: Mentors & Advisors */}
+            <div className="py-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline transition-colors duration-200 hover:bg-[var(--surface-2)]/30 px-3 rounded-xl">
+              <div className="md:col-span-4 flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--surface-2)] flex items-center justify-center border border-[var(--accent)]/40 text-[var(--accent)] shrink-0 shadow-xs">
+                  <Award className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl font-medium text-[var(--text)]">
+                    Mentors &amp; Advisors
+                  </h3>
+                  <Badge variant="verified-mentor" className="mt-1.5">
+                    Verified Advisory
+                  </Badge>
+                </div>
+              </div>
+              <div className="md:col-span-5 text-sm text-[var(--text)] leading-relaxed space-y-1">
+                <p className="font-medium text-base text-[var(--text)]">
+                  Give back on your own terms with protected privacy.
+                </p>
+                <p className="text-[var(--muted)]">
+                  Controlled connection requests (strictly max 10/day quota), verified credentials, and clinical 1-on-1 sessions with founders who respect your time.
+                </p>
+              </div>
+              <div className="md:col-span-3 text-xs text-[var(--muted)] md:text-right font-mono">
+                Operators · CXOs · Investors
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section: How Admission Works (Cinematic 3-Stage Progression) ────────── */}
+      <section id="how-it-works" className="py-24 px-6 lg:px-12 bg-[var(--surface-2)]/50 border-t border-[var(--border)] scroll-mt-20">
+        <div className="max-w-[1240px] mx-auto">
+          <div className="mb-16">
+            <span className="font-display text-xs uppercase tracking-[0.22em] text-[var(--accent)] font-semibold">
+              ADMISSION PROTOCOL
+            </span>
+            <h2 className="font-display text-3xl sm:text-4xl font-normal text-[var(--text)] mt-2 tracking-tight">
+              Three Steps to Verified Membership
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--muted)] mt-1.5 max-w-lg">
+              Admission is exclusively by application to preserve high community integrity and mutual trust.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Step 1 */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-7 relative">
-              <span className="font-mono text-2xl font-light text-[var(--accent)] mb-3 block">
-                01
-              </span>
-              <h3 className="font-display text-lg font-medium text-[var(--text)] mb-2">
-                Apply online
-              </h3>
-              <p className="text-sm text-[var(--muted)] leading-relaxed">
-                Submit a short 3-minute form detailing what you are building or
-                how you plan to contribute.
-              </p>
+            <div className="card-luxury p-8 relative flex flex-col justify-between">
+              <div>
+                <span className="font-mono text-3xl font-light text-[var(--accent)] mb-4 block">
+                  01
+                </span>
+                <h3 className="font-display text-xl font-medium text-[var(--text)] mb-2.5">
+                  Submit Application
+                </h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">
+                  Complete our 3-minute application detailing your startup concept, current stage, and the support or insights you seek.
+                </p>
+              </div>
+              <div className="pt-6 mt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] font-mono">
+                Takes ~3 minutes
+              </div>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-7 relative">
-              <span className="font-mono text-2xl font-light text-[var(--accent)] mb-3 block">
-                02
-              </span>
-              <h3 className="font-display text-lg font-medium text-[var(--text)] mb-2">
-                Admin review
-              </h3>
-              <p className="text-sm text-[var(--muted)] leading-relaxed">
-                An admin personally reviews your profile and background within 48
-                hours to ensure high community alignment.
-              </p>
+            <div className="card-luxury p-8 relative flex flex-col justify-between">
+              <div>
+                <span className="font-mono text-3xl font-light text-[var(--accent)] mb-4 block">
+                  02
+                </span>
+                <h3 className="font-display text-xl font-medium text-[var(--text)] mb-2.5">
+                  Admin Verification
+                </h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">
+                  An administrator reviews your background and profile alignment. If needed, you can communicate directly via real-time dashboard messages.
+                </p>
+              </div>
+              <div className="pt-6 mt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] font-mono">
+                Reply within 48 hours
+              </div>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-7 relative">
-              <span className="font-mono text-2xl font-light text-[var(--accent)] mb-3 block">
-                03
-              </span>
-              <h3 className="font-display text-lg font-medium text-[var(--text)] mb-2">
-                Connect & participate
-              </h3>
-              <p className="text-sm text-[var(--muted)] leading-relaxed">
-                Access the verified directory, attend members-only events, and
-                exchange insights with fellow Odisha entrepreneurs.
-              </p>
+            <div className="card-luxury p-8 relative flex flex-col justify-between">
+              <div>
+                <span className="font-mono text-3xl font-light text-[var(--accent)] mb-4 block">
+                  03
+                </span>
+                <h3 className="font-display text-xl font-medium text-[var(--text)] mb-2.5">
+                  Sanctuary Unlocks
+                </h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">
+                  Upon approval, your entire portal unlocks automatically with real-time websocket sync. Connect with mentors and participate in closed roundtables.
+                </p>
+              </div>
+              <div className="pt-6 mt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] font-mono">
+                Full Ecosystem Access
+              </div>
             </div>
           </div>
 
-          <div className="mt-12 text-center">
-            <Button size="lg" asChild>
-              <Link href="/join">Start your application</Link>
+          <div className="mt-14 text-center">
+            <Button size="lg" variant="gold" className="rounded-full px-8 shadow-md" asChild>
+              <Link href="/join">Start Your Application</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* ── Footer (Midnight Navy) ───────────────────────────────────────────── */}
-      <footer className="mt-auto bg-[var(--brand-navy)] text-[var(--brand-cream)] border-t border-[var(--brand-gold)]/20 px-6 lg:px-12 py-12">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start space-y-1">
-            <BrandLockup variant="full" />
-            <p className="text-xs text-[var(--brand-cream)]/50 pt-2">
-              The exclusive portal for Odisha’s entrepreneurship ecosystem.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-[var(--brand-cream)]/80">
-            <Link
-              href="/privacy"
-              className="hover:text-[var(--brand-gold)] transition-colors"
-            >
-              Privacy Notice
-            </Link>
-            <Link
-              href="/guidelines"
-              className="hover:text-[var(--brand-gold)] transition-colors"
-            >
-              Community Guidelines
-            </Link>
-            <Link
-              href="/contact"
-              className="hover:text-[var(--brand-gold)] transition-colors"
-            >
-              Contact OASIS
-            </Link>
+      {/* ── Section: Final Call to Action (Apple Luxury Monolith) ──────────────── */}
+      <section className="py-24 px-6 lg:px-12 bg-gradient-to-b from-[#181928] to-[#12131F] text-[var(--brand-cream)] text-center relative overflow-hidden border-t border-[var(--brand-gold)]/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(243,211,162,0.08)_0%,transparent_70%)] pointer-events-none" />
+        <div className="max-w-3xl mx-auto relative z-10 space-y-6">
+          <span className="font-display text-xs uppercase tracking-[0.25em] text-[var(--brand-gold)] font-medium">
+            YOUR COMMUNITY IS WAITING
+          </span>
+          <h2 className="font-display text-3xl sm:text-5xl font-light text-[var(--brand-cream)] tracking-tight leading-tight">
+            Build the Future of Odisha Together.
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--brand-cream)]/75 max-w-xl mx-auto leading-relaxed">
+            Join 650+ founders, operators, and advisors creating enduring value across the state.
+          </p>
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+            <Button size="lg" variant="gold" className="rounded-full px-8 shadow-lg" asChild>
+              <Link href="/join">Apply to Join OASIS</Link>
+            </Button>
+            <Button size="lg" variant="outline" className="rounded-full px-7" asChild>
+              <Link href="/login">Member Portal Sign In</Link>
+            </Button>
           </div>
         </div>
+      </section>
 
-        <div className="max-w-[1200px] mx-auto mt-8 pt-6 border-t border-[var(--brand-gold)]/10 text-center md:text-left text-[11px] text-[var(--brand-cream)]/40 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 OASIS ONE. All rights reserved.</span>
-          <span>Bhubaneswar · Cuttack · Rourkela · Sambalpur · Berhampur</span>
-        </div>
-      </footer>
+      {/* ── Footer ──────────────────────────────────────────────────────────── */}
+      <SiteFooter />
     </div>
   );
 }

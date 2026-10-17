@@ -30,13 +30,28 @@ export class ApplicationsService {
       throw new HttpException({ code: 'NOT_FOUND', message: 'No application found' }, HttpStatus.NOT_FOUND);
     }
 
+    const latestMessage = await this.prisma.applicationMessage.findFirst({
+      where: {
+        applicationId: app.id,
+        isInternalNote: false,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
     return {
       id: app.id,
       referenceId: app.id,
       status: app.status,
       submittedAt: app.submittedAt,
       canReapplyAt: app.canReapplyAt,
-      decisionReason: app.status === 'rejected' ? app.decisionReason : undefined,
+      decisionReason: (app.status === 'rejected' || app.status === 'info_requested') ? app.decisionReason : undefined,
+      latestMessage: latestMessage ? {
+        id: latestMessage.id,
+        authorId: latestMessage.authorId,
+        authorType: latestMessage.authorType,
+        body: latestMessage.body,
+        createdAt: latestMessage.createdAt,
+      } : null,
       expedited: app.expedited,
       snapshot: app.submittedProfileSnapshot,
       accountStatus: app.user.accountStatus,
@@ -140,6 +155,18 @@ export class ApplicationsService {
         isInternalNote: false,
       },
     });
+
+    // If information was requested, applicant's response returns application to pending review
+    if (app.status === ApplicationStatus.info_requested) {
+      await this.prisma.application.update({
+        where: { id: app.id },
+        data: {
+          status: ApplicationStatus.pending,
+        },
+      });
+      this.realtime.emitToAdmins('admin.application.new', { applicationId: app.id });
+      this.realtime.debounceEmitAdminCounts();
+    }
 
     // Realtime notification
     this.realtime.emit(`application:${app.id}`, 'application.message', { applicationId: app.id });

@@ -245,8 +245,12 @@ export class AdminService {
 
   async getApplications(status?: string, page = 1, pageSize = 20) {
     const skip = (page - 1) * pageSize;
-    const where: any = {};
-    if (status) {
+    const where: any = {
+      user: {
+        id: { not: '' },
+      },
+    };
+    if (status && status !== 'all') {
       where.status = status as ApplicationStatus;
     }
 
@@ -285,21 +289,23 @@ export class AdminService {
       }),
     ]);
 
-    const items = applications.map((a) => ({
-      id: a.id,
-      referenceId: a.id,
-      userId: a.userId,
-      name: a.user.profile?.name || 'Applicant',
-      email: a.user.email,
-      role: a.user.primaryRole,
-      status: a.status,
-      expedited: a.expedited,
-      location: a.user.profile?.city ? `${a.user.profile.city}, ${a.user.profile.state || ''}` : 'Odisha',
-      claimedBy: a.claimant?.profile?.name || null,
-      claimedById: a.claimedBy,
-      claimedAt: a.claimedAt,
-      submittedAt: a.submittedAt,
-    }));
+    const items = applications
+      .filter((a) => !!a.user)
+      .map((a) => ({
+        id: a.id,
+        referenceId: a.id,
+        userId: a.userId,
+        name: a.user?.profile?.name || 'Applicant',
+        email: a.user?.email || '',
+        role: a.user?.primaryRole,
+        status: a.status,
+        expedited: a.expedited,
+        location: a.user?.profile?.city ? `${a.user.profile.city}, ${a.user.profile.state || ''}` : 'Odisha',
+        claimedBy: a.claimant?.profile?.name || null,
+        claimedById: a.claimedBy,
+        claimedAt: a.claimedAt,
+        submittedAt: a.submittedAt,
+      }));
 
     return { items, total, page, pageSize };
   }
@@ -333,7 +339,26 @@ export class AdminService {
       throw new HttpException({ code: 'NOT_FOUND', message: 'Application not found' }, HttpStatus.NOT_FOUND);
     }
 
-    return app;
+    const snapshot: any = app.submittedProfileSnapshot || {};
+    let evidenceFiles: any[] = [];
+    if (Array.isArray(snapshot.evidenceFileIds) && snapshot.evidenceFileIds.length > 0) {
+      evidenceFiles = await this.prisma.uploadedFile.findMany({
+        where: { id: { in: snapshot.evidenceFileIds } },
+        select: {
+          id: true,
+          filename: true,
+          mimeType: true,
+          sizeBytes: true,
+          purpose: true,
+          createdAt: true,
+        },
+      });
+    }
+
+    return {
+      ...app,
+      evidenceFiles,
+    };
   }
 
   async claimApplication(appId: string, adminId: string) {
@@ -423,7 +448,7 @@ export class AdminService {
     const now = new Date();
 
     if (dto.decision === 'approve') {
-      await this.prisma.$transaction([
+      const txOps: any[] = [
         this.prisma.application.update({
           where: { id: appId },
           data: {
@@ -443,12 +468,30 @@ export class AdminService {
             unlockAnimationPending: true, // triggers unlock screen animation once
           },
         }),
-      ]);
+      ];
+
+      if ((dto as any).grantMentorVerified) {
+        txOps.push(
+          this.prisma.profile.updateMany({
+            where: { userId: app.userId },
+            data: { mentorVerified: true },
+          }),
+        );
+      }
+
+      await this.prisma.$transaction(txOps);
 
       // Emit realtime approval signal
       this.realtime.emitToUser(app.userId, 'account.status_changed', {
         accountStatus: 'active',
         applicationStatus: 'approved',
+      });
+      this.realtime.emit(`application:${appId}`, 'account.status_changed', {
+        accountStatus: 'active',
+        applicationStatus: 'approved',
+      });
+      this.realtime.emit('members', 'member.joined', {
+        userId: app.userId,
       });
 
       // Send welcome email
@@ -490,27 +533,49 @@ export class AdminService {
         body: `Thank you for your interest in OASIS ONE. After review, we are unable to approve your application at this time.\n\nReason:\n${dto.reason || 'Criteria not met.'}\n\nYou will be eligible to reapply on ${canReapplyAt.toLocaleDateString()}.`,
       });
     } else if (dto.decision === 'request_info') {
-      await this.prisma.application.update({
-        where: { id: appId },
-        data: {
-          status: ApplicationStatus.info_requested,
-          reviewedBy: adminId,
-          reviewedAt: now,
-          decisionReason: dto.reason || 'Additional information requested',
-          claimedBy: null,
-          claimedAt: null,
-        },
-      });
+      const reasonText = dto.reason?.trim() || 'Additional information requested by Admissions Committee.';
+
+      await this.prisma.$transaction([
+        this.prisma.application.update({
+          where: { id: appId },
+          data: {
+            status: ApplicationStatus.info_requested,
+            reviewedBy: adminId,
+            reviewedAt: now,
+            decisionReason: reasonText,
+            claimedBy: null,
+            claimedAt: null,
+          },
+        }),
+        this.prisma.user.update({
+          where: { id: app.userId },
+          data: {
+            accountStatus: AccountStatus.pending_approval,
+          },
+        }),
+        this.prisma.applicationMessage.create({
+          data: {
+            applicationId: appId,
+            authorId: adminId,
+            authorType: AuthorType.admin,
+            body: reasonText,
+            isInternalNote: false,
+          },
+        }),
+      ]);
 
       this.realtime.emitToUser(app.userId, 'account.status_changed', {
+        accountStatus: 'pending_approval',
         applicationStatus: 'info_requested',
       });
+      this.realtime.emit(`application:${appId}`, 'application.message', { applicationId: appId });
+      this.realtime.emitToUser(app.userId, 'application.message', { applicationId: appId });
 
       this.mail.sendMail({
         to: app.user.email,
         subject: 'Action Required: More Information Needed for OASIS ONE Application',
         headline: 'Information Requested',
-        body: `Our reviewers need a little more context regarding your application:\n\n"${dto.reason}"\n\nPlease log into your application portal and respond in the thread.`,
+        body: `Our reviewers need a little more context regarding your application:\n\n"${reasonText}"\n\nPlease log into your application portal and respond in the thread.`,
         actionText: 'View Application Thread',
         actionUrl: `${this.frontendUrl}/dashboard`,
       });

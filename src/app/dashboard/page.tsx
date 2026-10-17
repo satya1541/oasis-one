@@ -22,8 +22,11 @@ import {
   MessageSquare,
   Clock,
   RotateCw,
+  Compass,
+  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { subscribeToAccountStatus } from "@/lib/socket";
 
 interface UserProfile {
   id: string;
@@ -123,7 +126,7 @@ function DashboardContent() {
         setLoading(true);
 
         // 1. Session check
-        const meRes = await fetch("/api/v1/auth/me");
+        const meRes = await fetch("/api/v1/auth/me", { cache: "no-store" });
         if (!meRes.ok) {
           if (meRes.status === 401) {
             router.push("/login");
@@ -134,6 +137,13 @@ function DashboardContent() {
         const currentUser: UserProfile = meJson.data;
 
         if (!isMounted) return;
+
+        // Strict segregation: Super Admins are restricted strictly to /admin console
+        if (currentUser?.adminLevel) {
+          router.replace("/admin");
+          return;
+        }
+
         setUser(currentUser);
 
         const displayName = currentUser.name || currentUser.email.split("@")[0] || "Member";
@@ -162,9 +172,32 @@ function DashboardContent() {
           setIsLocked(false);
         }
 
-        // Check unlock animation
-        if (currentUser.showUnlockAnimation) {
+        // Check unlock animation - ensure it plays ONLY ONCE per user
+        const unlockSeenStorageKey = `oasis_unlock_seen_${currentUser.id || currentUser.email}`;
+        const hasSeenUnlock =
+          typeof window !== "undefined" &&
+          (localStorage.getItem(unlockSeenStorageKey) === "true" ||
+            sessionStorage.getItem(unlockSeenStorageKey) === "true");
+
+        if (currentUser.showUnlockAnimation && !hasSeenUnlock) {
+          // Immediately mark as seen so refreshes or fast reloads never trigger it again
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(unlockSeenStorageKey, "true");
+              sessionStorage.setItem(unlockSeenStorageKey, "true");
+              const bc = new BroadcastChannel("oasis_unlock_channel");
+              bc.postMessage({ type: "UNLOCK_SEEN", userId: currentUser.id });
+              bc.close();
+            } catch (_) {}
+          }
           setIsUnlocking(true);
+          // Persist to server immediately so DB is updated
+          fetch("/api/v1/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
+          fetch("/api/v1/users/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
+        } else if (currentUser.showUnlockAnimation && hasSeenUnlock) {
+          // Silently clear lingering backend flag without showing modal
+          fetch("/api/v1/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
+          fetch("/api/v1/users/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
         }
 
         // 2. Fetch Active Announcement
@@ -247,8 +280,56 @@ function DashboardContent() {
 
     loadDashboardData();
 
+    // BroadcastChannel listener to sync across tabs
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("oasis_unlock_channel");
+      bc.onmessage = (event) => {
+        if (event.data?.type === "UNLOCK_SEEN") {
+          setIsUnlocking(false);
+        }
+      };
+    } catch (_) {}
+
+    // WebSocket approval listener
+    const handleApproval = (payload?: any) => {
+      console.log("[Dashboard] Realtime approval received via WebSocket:", payload);
+      setIsLocked(false);
+      const targetUserId = payload?.userId || payload?.id;
+      const seenKey = targetUserId ? `oasis_unlock_seen_${targetUserId}` : null;
+      const alreadySeen =
+        typeof window !== "undefined" &&
+        ((seenKey && localStorage.getItem(seenKey) === "true") ||
+          sessionStorage.getItem("oasis_unlock_seen_global") === "true");
+
+      if (!alreadySeen) {
+        if (typeof window !== "undefined" && seenKey) {
+          localStorage.setItem(seenKey, "true");
+          sessionStorage.setItem(seenKey, "true");
+        }
+        setIsUnlocking(true);
+        fetch("/api/v1/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
+        fetch("/api/v1/users/me/unlock-seen", { method: "POST", credentials: "include" }).catch(() => {});
+      }
+      loadDashboardData();
+    };
+
+    const unsubscribe = subscribeToAccountStatus((payload) => {
+      if (payload?.accountStatus === "active") {
+        handleApproval(payload);
+      } else if (payload?.accountStatus && payload.accountStatus !== "active") {
+        setIsLocked(true);
+      }
+    });
+
+    const windowHandler = (e: any) => handleApproval(e.detail);
+    window.addEventListener("oasis:account_unlocked", windowHandler);
+
     return () => {
       isMounted = false;
+      unsubscribe();
+      window.removeEventListener("oasis:account_unlocked", windowHandler);
+      if (bc) bc.close();
     };
   }, [router]);
 
@@ -256,8 +337,18 @@ function DashboardContent() {
     setIsUnlocking(false);
     setIsLocked(false);
     setHighlightGetStarted(true);
+    if (typeof window !== "undefined") {
+      const storageKey = user?.id ? `oasis_unlock_seen_${user.id}` : "oasis_unlock_seen";
+      localStorage.setItem(storageKey, "true");
+      sessionStorage.setItem(storageKey, "true");
+      sessionStorage.setItem("oasis_unlock_seen_global", "true");
+    }
     try {
-      await fetch("/api/v1/users/me/unlock-seen", { method: "POST" });
+      await Promise.any([
+        fetch("/api/v1/me/unlock-seen", { method: "POST", credentials: "include" }),
+        fetch("/api/v1/users/me/unlock-seen", { method: "POST", credentials: "include" }),
+        fetch("/api/v1/users/unlock-seen", { method: "POST", credentials: "include" }),
+      ]);
     } catch (e) {
       console.error("Error setting unlock-seen:", e);
     }
@@ -361,24 +452,35 @@ function DashboardContent() {
       {isLocked ? (
         <LockedDashboardView
           userName={userName}
-          onSimulateApproval={() => setIsUnlocking(true)}
+          onSimulateApproval={() => {
+            const unlockKey = user?.id ? `oasis_unlock_seen_${user.id}` : "oasis_unlock_seen";
+            const alreadySeen =
+              typeof window !== "undefined" &&
+              (localStorage.getItem(unlockKey) === "true" ||
+                sessionStorage.getItem(unlockKey) === "true");
+            if (!alreadySeen) {
+              setIsUnlocking(true);
+            } else {
+              setIsLocked(false);
+            }
+          }}
         />
       ) : (
-        <div className="space-y-8 pb-16">
-          <div className="space-y-4">
+        <div className="space-y-9 pb-16">
+          <div className="space-y-5">
             {/* Live Dismissible Announcement Bar */}
             {announcement && !announcementDismissed && (
-              <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text)] transition-all">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-[var(--brand-gold)] shrink-0" />
+              <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[var(--surface-2)]/90 border border-[var(--border)] text-xs text-[var(--text)] transition-all shadow-xs">
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 rounded-full bg-[var(--brand-gold)] shrink-0 shadow-[0_0_6px_rgba(243,211,162,0.8)]" />
                   <span>
-                    <strong>{announcement.title}</strong> — {announcement.body}
+                    <strong className="font-semibold">{announcement.title}</strong> — {announcement.body}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setAnnouncementDismissed(true)}
-                  className="text-[var(--muted)] hover:text-[var(--text)] p-1 transition-colors cursor-pointer"
+                  className="text-[var(--muted)] hover:text-[var(--text)] p-1 transition-colors cursor-pointer rounded-lg hover:bg-black/5"
                   aria-label="Dismiss announcement"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -386,41 +488,50 @@ function DashboardContent() {
               </div>
             )}
 
-            {/* Time-of-day Greeting */}
-            <div>
-              <h1 className="font-display text-3xl font-light text-[var(--text)] tracking-tight">
-                Good day, {userName}
-              </h1>
-              <p className="text-xs text-[var(--muted)] mt-1">
-                Odisha {userRole} Cohort • OASIS Connected Network
-              </p>
+            {/* Time-of-day Cinematic Greeting */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div>
+                <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+                  Good day, <span className="font-normal">{userName}</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-[var(--muted)] mt-1 font-sans">
+                  Odisha {userRole} Cohort • Connected &amp; Verified
+                </p>
+              </div>
+              <div className="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-[var(--muted)] bg-[var(--surface-2)]/70 px-3 py-1.5 rounded-full border border-[var(--border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>650+ Active Members</span>
+              </div>
             </div>
 
-            {/* Live Hero Search Field */}
+            {/* Live Hero Search Field with Specular Focus Halo */}
             <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="w-5 h-5 text-[var(--muted)] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-5 h-5 text-[var(--muted)] absolute left-4.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search people, startups, questions and events..."
-                className="w-full h-14 pl-12 pr-4 text-sm sm:text-base bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] shadow-[var(--shadow-1)] transition-all"
+                placeholder="Search mentors, fellow founders, questions and events..."
+                className="w-full h-14 pl-12 pr-4 text-sm sm:text-base bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/50 shadow-[0_2px_8px_rgba(30,31,51,0.04)] transition-all duration-200"
               />
             </form>
 
             {/* Live Achievement Card */}
             {achievement && (
-              <div className="p-4 rounded-xl bg-gradient-to-r from-[var(--surface-2)] to-[var(--surface)] border border-[var(--border)] flex items-center justify-between gap-4 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[var(--accent-fill)] text-[var(--brand-navy)] flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4" />
+              <div className="p-4.5 rounded-2xl bg-gradient-to-r from-[var(--surface-2)] via-[var(--surface)] to-[var(--surface-2)]/60 border border-[var(--border)] flex items-center justify-between gap-4 text-xs shadow-xs">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-[#F3D3A2] to-[#E9C68C] text-[var(--brand-navy)] flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles className="w-4.5 h-4.5" />
                   </div>
-                  <p className="text-[var(--text)]">
-                    <strong className="font-semibold">{achievement.author?.name || "Community Member"}</strong>: {achievement.title}. {achievement.description}
+                  <p className="text-[var(--text)] leading-relaxed">
+                    <strong className="font-semibold text-sm">
+                      {achievement.author?.name || "Community Member"}
+                    </strong>
+                    : {achievement.title}. {achievement.description}
                   </p>
                 </div>
-                <span className="text-[11px] text-[var(--muted)] whitespace-nowrap bg-[var(--surface)] px-2 py-0.5 rounded-md border border-[var(--border)]">
-                  Active Showcase
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--accent)] whitespace-nowrap bg-[var(--surface)] px-2.5 py-1 rounded-full border border-[var(--border)] font-semibold">
+                  Ecosystem Showcase
                 </span>
               </div>
             )}
@@ -429,110 +540,126 @@ function DashboardContent() {
           {/* ── Block 2: "Next Up" (Upcoming Events & My Tasks) ─────────────────── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Live Upcoming Events */}
-            <Card>
-              <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[var(--accent)]" />
-                  <CardTitle>Upcoming events</CardTitle>
+            <Card hoverEffect className="p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <Calendar className="w-4.5 h-4.5 text-[var(--accent)]" />
+                    <CardTitle className="text-base sm:text-lg">Upcoming Events</CardTitle>
+                  </div>
+                  <Link
+                    href="/events"
+                    className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1 group"
+                  >
+                    See all
+                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                  </Link>
                 </div>
-                <Link
-                  href="/events"
-                  className="text-xs font-medium text-[var(--accent)] hover:underline flex items-center gap-1"
-                >
-                  See all
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
 
-              <div className="space-y-3.5">
-                {events.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] py-4 text-center">
-                    No upcoming events scheduled right now. Check back soon.
-                  </p>
-                ) : (
-                  events.map((evt) => {
-                    const { month, day } = formatEventDate(evt.startAt);
-                    return (
-                      <div key={evt.id} className="flex items-center justify-between gap-3 text-xs">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex flex-col items-center justify-center text-center font-display border border-[var(--border)] shrink-0">
-                            <span className="text-[10px] text-[var(--muted)] uppercase font-semibold">{month}</span>
-                            <span className="text-xs font-bold text-[var(--text)]">{day}</span>
+                <div className="space-y-3.5">
+                  {events.length === 0 ? (
+                    <p className="text-xs text-[var(--muted)] py-6 text-center">
+                      No upcoming events scheduled right now. Check back soon.
+                    </p>
+                  ) : (
+                    events.map((evt) => {
+                      const { month, day } = formatEventDate(evt.startAt);
+                      return (
+                        <div
+                          key={evt.id}
+                          className="flex items-center justify-between gap-3 text-xs p-2 rounded-xl hover:bg-[var(--surface-2)]/60 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-11 h-11 rounded-xl bg-[var(--surface-2)] flex flex-col items-center justify-center text-center font-display border border-[var(--border)] shrink-0 shadow-2xs">
+                              <span className="text-[10px] text-[var(--muted)] uppercase font-semibold">
+                                {month}
+                              </span>
+                              <span className="text-sm font-bold text-[var(--text)] leading-none">
+                                {day}
+                              </span>
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-medium text-[var(--text)] text-sm truncate">
+                                {evt.title}
+                              </h4>
+                              <p className="text-[var(--muted)] text-[11px] truncate">
+                                {evt.venueOrLink || "Odisha Startup Corridor"}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-medium text-[var(--text)] text-sm">{evt.title}</h4>
-                            <p className="text-[var(--muted)] text-[11px]">{evt.venueOrLink || "Odisha Startup Corridor"}</p>
-                          </div>
+                          {evt.isRegistered ? (
+                            <Button size="sm" variant="secondary" disabled className="shrink-0">
+                              Registered
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              disabled={registeringEventId === evt.id}
+                              onClick={() => handleRegisterEvent(evt.id)}
+                              className="shrink-0"
+                            >
+                              {registeringEventId === evt.id ? "Registering..." : "Register"}
+                            </Button>
+                          )}
                         </div>
-                        {evt.isRegistered ? (
-                          <Button size="sm" variant="secondary" disabled>
-                            Registered
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            disabled={registeringEventId === evt.id}
-                            onClick={() => handleRegisterEvent(evt.id)}
-                          >
-                            {registeringEventId === evt.id ? "Registering..." : "Register"}
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </Card>
 
             {/* Live Tasks */}
-            <Card>
-              <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
-                <div className="flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-[var(--brand-navy)]" />
-                  <CardTitle>My tasks</CardTitle>
+            <Card hoverEffect className="p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <CheckSquare className="w-4.5 h-4.5 text-[var(--brand-navy)]" />
+                    <CardTitle className="text-base sm:text-lg">My Tasks</CardTitle>
+                  </div>
+                  <span className="text-xs font-mono font-medium text-[var(--muted)]">
+                    {tasks.filter((t) => t.status === "completed").length} of {tasks.length} done
+                  </span>
                 </div>
-                <span className="text-xs font-medium text-[var(--muted)]">
-                  {tasks.filter((t) => t.status === "completed").length} of {tasks.length} done
-                </span>
-              </div>
 
-              <div className="space-y-3">
-                {tasks.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] py-4 text-center">
-                    No active tasks. Add your first goal or milestone below.
-                  </p>
-                ) : (
-                  tasks.map((task) => (
-                    <div
-                      key={task.id}
-                      onClick={() => handleToggleTask(task.id, task.status)}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--surface-2)] transition-colors cursor-pointer group"
-                    >
+                <div className="space-y-2.5">
+                  {tasks.length === 0 ? (
+                    <p className="text-xs text-[var(--muted)] py-6 text-center">
+                      No active milestones. Add your first goal below.
+                    </p>
+                  ) : (
+                    tasks.map((task) => (
                       <div
-                        className={cn(
-                          "w-4 h-4 rounded-md border flex items-center justify-center transition-colors shrink-0",
-                          task.status === "completed"
-                            ? "bg-[var(--success)] border-[var(--success)] text-white"
-                            : "border-[var(--border-strong)] bg-white group-hover:border-[var(--accent)]"
-                        )}
+                        key={task.id}
+                        onClick={() => handleToggleTask(task.id, task.status)}
+                        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[var(--surface-2)] transition-colors cursor-pointer group"
                       >
-                        {task.status === "completed" && <Check className="w-3 h-3 stroke-[3]" />}
+                        <div
+                          className={cn(
+                            "w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all duration-150 shrink-0",
+                            task.status === "completed"
+                              ? "bg-[var(--success)] border-[var(--success)] text-white shadow-2xs"
+                              : "border-[var(--border-strong)] bg-white group-hover:border-[var(--accent)]"
+                          )}
+                        >
+                          {task.status === "completed" && <Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <span
+                          className={cn(
+                            "text-xs sm:text-sm text-[var(--text)] flex-1",
+                            task.status === "completed" && "line-through text-[var(--muted)]"
+                          )}
+                        >
+                          {task.title}
+                        </span>
                       </div>
-                      <span
-                        className={cn(
-                          "text-xs sm:text-sm text-[var(--text)] flex-1",
-                          task.status === "completed" && "line-through text-[var(--muted)]"
-                        )}
-                      >
-                        {task.title}
-                      </span>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
 
-              <div className="pt-4 mt-2 border-t border-[var(--border)]">
+              <div className="pt-4 mt-3 border-t border-[var(--border)]">
                 {showTaskInput ? (
                   <form onSubmit={handleCreateTask} className="flex gap-2">
                     <input
@@ -541,7 +668,7 @@ function DashboardContent() {
                       value={newTaskInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}
                       placeholder="Task or milestone title..."
-                      className="flex-1 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                      className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                     />
                     <Button size="sm" variant="primary" type="submit">
                       Save
@@ -559,7 +686,7 @@ function DashboardContent() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs text-[var(--muted)] hover:text-[var(--text)] w-full justify-start gap-2"
+                    className="text-xs text-[var(--muted)] hover:text-[var(--text)] w-full justify-start gap-2 rounded-xl"
                     onClick={() => setShowTaskInput(true)}
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -575,14 +702,14 @@ function DashboardContent() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h2 className="font-display text-xl font-medium text-[var(--text)]">For you</h2>
-                <div className="flex items-center rounded-xl bg-[var(--surface-2)] p-0.5 border border-[var(--border)] text-xs">
+                <div className="flex items-center rounded-xl bg-[var(--surface-2)] p-1 border border-[var(--border)] text-xs">
                   <button
                     type="button"
                     onClick={() => setForYouTab("mentors")}
                     className={cn(
-                      "px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
+                      "px-3.5 py-1.5 rounded-lg font-medium transition-all duration-150 cursor-pointer",
                       forYouTab === "mentors"
-                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs"
+                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs font-semibold"
                         : "text-[var(--muted)] hover:text-[var(--text)]"
                     )}
                   >
@@ -592,9 +719,9 @@ function DashboardContent() {
                     type="button"
                     onClick={() => setForYouTab("questions")}
                     className={cn(
-                      "px-3 py-1 rounded-lg font-medium transition-all cursor-pointer",
+                      "px-3.5 py-1.5 rounded-lg font-medium transition-all duration-150 cursor-pointer",
                       forYouTab === "questions"
-                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs"
+                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs font-semibold"
                         : "text-[var(--muted)] hover:text-[var(--text)]"
                     )}
                   >
@@ -605,17 +732,17 @@ function DashboardContent() {
 
               <Link
                 href={forYouTab === "mentors" ? "/people?tab=mentors" : "/community"}
-                className="text-xs font-medium text-[var(--accent)] hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1 group"
               >
                 Browse all {forYouTab}
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
 
             {forYouTab === "mentors" ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {mentors.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] col-span-3 py-6 text-center">
+                  <p className="text-xs text-[var(--muted)] col-span-3 py-8 text-center card-luxury">
                     No mentors currently available in this cohort.
                   </p>
                 ) : (
@@ -627,30 +754,31 @@ function DashboardContent() {
                       .slice(0, 2)
                       .toUpperCase();
                     return (
-                      <Card key={m.id} hoverEffect className="p-5 flex flex-col justify-between">
+                      <Card key={m.id} hoverEffect className="p-6 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-full bg-[var(--surface-2)] text-[var(--accent)] font-display font-medium flex items-center justify-center border-2 border-[var(--brand-gold)]">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="w-11 h-11 rounded-full bg-[var(--surface-2)] text-[var(--accent)] font-display font-semibold flex items-center justify-center border-2 border-[var(--brand-gold)] shadow-xs">
                               {initials}
                             </div>
                             <Badge variant="verified-mentor">Verified</Badge>
                           </div>
-                          <h3 className="font-display text-base font-medium text-[var(--text)]">
+                          <h3 className="font-display text-base font-semibold text-[var(--text)]">
                             {m.name}
                           </h3>
-                          <p className="text-xs text-[var(--muted)] mt-0.5">
+                          <p className="text-xs text-[var(--muted)] mt-0.5 font-medium">
                             {m.city || "Odisha"} • {m.headline || "Ecosystem Mentor"}
                           </p>
-                          <p className="text-xs text-[var(--text)] mt-3 leading-relaxed line-clamp-3">
+                          <p className="text-xs text-[var(--text)] mt-3.5 leading-relaxed line-clamp-3">
                             {m.bio || "Active mentor advising founders across the Odisha startup network."}
                           </p>
                         </div>
-                        <div className="pt-4 mt-4 border-t border-[var(--border)]">
+                        <div className="pt-4 mt-5 border-t border-[var(--border)]">
                           <Link
                             href={`/people/${m.id}`}
-                            className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                            className="text-xs font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1"
                           >
-                            Request guidance →
+                            Request guidance
+                            <ArrowUpRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </Card>
@@ -661,14 +789,14 @@ function DashboardContent() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {questions.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] col-span-3 py-6 text-center">
+                  <p className="text-xs text-[var(--muted)] col-span-3 py-8 text-center card-luxury">
                     No community discussions posted yet. Be the first to ask!
                   </p>
                 ) : (
                   questions.map((q) => (
-                    <Card key={q.id} hoverEffect className="p-5 flex flex-col justify-between">
+                    <Card key={q.id} hoverEffect className="p-6 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-2">
+                        <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-3">
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>{q.responseCount || 0} replies</span>
                           {q.isResolved && (
@@ -678,19 +806,20 @@ function DashboardContent() {
                             </>
                           )}
                         </div>
-                        <h3 className="font-display text-base font-medium text-[var(--text)] leading-snug line-clamp-2">
+                        <h3 className="font-display text-base font-semibold text-[var(--text)] leading-snug line-clamp-2">
                           {q.title}
                         </h3>
-                        <p className="text-xs text-[var(--muted)] mt-2">
+                        <p className="text-xs text-[var(--muted)] mt-2.5">
                           Asked by {q.author?.name || "Community Member"}
                         </p>
                       </div>
-                      <div className="pt-3 mt-3 border-t border-[var(--border)]">
+                      <div className="pt-3.5 mt-4 border-t border-[var(--border)]">
                         <Link
                           href={`/community/${q.id}`}
-                          className="text-xs text-[var(--accent)] font-medium hover:underline"
+                          className="text-xs text-[var(--accent)] font-semibold hover:underline inline-flex items-center gap-1"
                         >
-                          Read replies →
+                          Read replies
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
                       </div>
                     </Card>
@@ -700,52 +829,52 @@ function DashboardContent() {
             )}
           </div>
 
-          {/* ── Block 4: "Get Started" Card (First visit completion steps) ───────── */}
+          {/* ── Block 4: "Get Started" Card (Apple Monolith Checklist) ─────────── */}
           <Card
             className={cn(
-              "bg-[var(--surface-2)]/80 border-[var(--border)] p-6 transition-all duration-700",
+              "bg-gradient-to-r from-[var(--surface-2)]/90 via-[var(--surface)] to-[var(--surface-2)]/80 border-[var(--border)] p-7 transition-all duration-700 shadow-sm",
               highlightGetStarted && "ring-2 ring-[var(--brand-gold)] shadow-[var(--shadow-2)] bg-[var(--surface)]"
             )}
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
               <div>
                 <h3 className="font-display text-lg font-medium text-[var(--text)]">
-                  Getting started with OASIS ONE
+                  Getting Started with OASIS ONE
                 </h3>
-                <p className="text-xs text-[var(--muted)] mt-0.5">
-                  Complete these three steps to make the most of your membership.
+                <p className="text-xs text-[var(--muted)] mt-1">
+                  Complete these three quick milestones to unlock maximum community value.
                 </p>
               </div>
-              <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--surface)] px-2.5 py-1 rounded-full border border-[var(--border)]">
+              <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--surface)] px-3 py-1 rounded-full border border-[var(--border)] shadow-2xs">
                 Active Member
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs">
-                <div className="w-6 h-6 rounded-full bg-[var(--success)] text-white flex items-center justify-center shrink-0">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-[var(--success)] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <Check className="w-4 h-4 stroke-[3]" />
                 </div>
                 <Link href="/settings" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
-                  Profile & Visibility
+                  Profile &amp; Visibility
                 </Link>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs">
-                <div className="w-6 h-6 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[10px]">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
                   2
                 </div>
                 <Link href="/events" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
-                  Register for an event
+                  Register for an Event
                 </Link>
               </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-xs">
-                <div className="w-6 h-6 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[10px]">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
                   3
                 </div>
                 <Link href="/community" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
-                  Ask a community question
+                  Ask a Community Question
                 </Link>
               </div>
             </div>

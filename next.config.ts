@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination: "http://localhost:7500/api/:path*",
       },
+      {
+        source: "/socket.io/:path*",
+        destination: "http://localhost:7500/socket.io/:path*",
+      },
     ];
   },
 };

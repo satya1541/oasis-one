@@ -155,10 +155,10 @@ export default function CommunityPage() {
               type="button"
               onClick={() => setActiveFilter(chip)}
               className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer",
+                "px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer shadow-2xs",
                 activeFilter === chip
-                  ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] font-semibold"
-                  : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                  ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] font-semibold border border-[var(--brand-gold)]/40 shadow-xs"
+                  : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)] hover:border-[var(--accent)]/50 hover:text-[var(--text)]"
               )}
             >
               {chip}
@@ -168,21 +168,21 @@ export default function CommunityPage() {
 
         {/* Posts Feed */}
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-[var(--muted)] gap-2 text-xs">
+          <div className="flex items-center justify-center py-20 text-[var(--muted)] gap-3 text-xs">
             <RotateCw className="w-5 h-5 animate-spin text-[var(--accent)]" />
-            <span>Loading community threads...</span>
+            <span className="font-mono">Loading community threads...</span>
           </div>
         ) : posts.length === 0 ? (
-          <Card className="p-12 text-center text-xs text-[var(--muted)] border-dashed">
-            No posts found in this category. Be the first to start the discussion!
+          <Card className="p-14 text-center text-xs text-[var(--muted)] border-dashed card-luxury">
+            No discussions found in this sector. Start the first conversation!
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4.5">
             {posts.map((post) => (
               <Card
                 key={post.id}
                 hoverEffect
-                className="p-6 transition-all border-[var(--border)]"
+                className="p-6 transition-all"
               >
                 <div className="flex flex-col space-y-2.5">
                   <div className="flex items-center justify-between gap-3 text-xs text-[var(--muted)]">

@@ -5,7 +5,40 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, AlertCircle, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  AlertCircle,
+  Check,
+  Upload,
+  FileCheck2,
+  FileText,
+  ShieldCheck,
+  Globe,
+  Building,
+  UserCheck,
+  Info,
+  X,
+  RotateCw,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
+
+function Linkedin({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.76-1.75 1.76m1.39 9.74v-8.37H5.07v8.37h2.78Z" />
+    </svg>
+  );
+}
+
+function normalizeUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
 
 const ODISHA_CITIES = [
   "Bhubaneswar",
@@ -39,13 +72,20 @@ const FOUNDER_STAGES = [
   "Growth (scaling operations)",
 ];
 
-const SUPPORT_NEEDS = [
-  "Angel / Seed Funding",
-  "Technical Architecture",
-  "Enterprise Sales & Pilots",
-  "Co-founder / Early Hiring",
-  "Legal & IP Protection",
-  "Government Grants (Startup Odisha)",
+const FOUNDER_DOC_TYPES = [
+  "Certificate of Incorporation (Pvt Ltd)",
+  "LLP Incorporation Certificate",
+  "Partnership Deed",
+  "Udyam Registration Certificate (MSME)",
+  "DPIIT Recognition Certificate",
+  "Other Business Registration Proof",
+];
+
+const MENTOR_DOC_TYPES = [
+  "Experience / Employment Certificate",
+  "Professional Qualification / Certification",
+  "Company / Professional Website",
+  "Evidence of previous mentoring or startup leadership",
 ];
 
 const MENTOR_DOMAINS = [
@@ -66,22 +106,31 @@ function JoinDetailsForm() {
   // Common fields
   const [city, setCity] = useState("Bhubaneswar");
   const [description, setDescription] = useState("");
-  const [website, setWebsite] = useState("");
   const [linkedin, setLinkedin] = useState("");
+  const [website, setWebsite] = useState("");
   const [error, setError] = useState("");
 
-  // Founder fields
+  // Document upload states
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadedEvidence, setUploadedEvidence] = useState<{
+    fileId: string;
+    filename: string;
+    docType: string;
+  } | null>(null);
+
+  // Founder specific fields
   const [startupName, setStartupName] = useState("");
-  const [stage, setStage] = useState(FOUNDER_STAGES[1]);
   const [founderRole, setFounderRole] = useState("Founder / CEO");
+  const [stage, setStage] = useState(FOUNDER_STAGES[1]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>(["AgriTech"]);
-  const [selectedNeeds, setSelectedNeeds] = useState<string[]>(["Enterprise Sales & Pilots"]);
+  const [isRegistered, setIsRegistered] = useState<"registered" | "early_stage">("early_stage");
+  const [selectedDocType, setSelectedDocType] = useState(FOUNDER_DOC_TYPES[0]);
 
-  // Aspiring fields
+  // Aspiring specific fields
   const [ideaDomain, setIdeaDomain] = useState("AI & Automation");
-  const [primaryGoal, setPrimaryGoal] = useState("Testing an idea with early users");
+  const [govIdProvided, setGovIdProvided] = useState(false);
 
-  // Mentor fields
+  // Mentor specific fields
   const [currentCompany, setCurrentCompany] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [yearsExperience, setYearsExperience] = useState("8+ years");
@@ -89,6 +138,9 @@ function JoinDetailsForm() {
     "Product-Market Fit",
     "Go-to-Market & Sales",
   ]);
+  const [referenceName, setReferenceName] = useState("");
+  const [referenceContact, setReferenceContact] = useState("");
+  const [mentorDocType, setMentorDocType] = useState(MENTOR_DOC_TYPES[0]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -101,65 +153,86 @@ function JoinDetailsForm() {
           if (parsed.startupName) setStartupName(parsed.startupName);
           if (parsed.website) setWebsite(parsed.website);
           if (parsed.linkedin) setLinkedin(parsed.linkedin);
-        } catch {
-          // ignore
-        }
+          if (parsed.founderRole) setFounderRole(parsed.founderRole);
+          if (parsed.currentCompany) setCurrentCompany(parsed.currentCompany);
+          if (parsed.jobTitle) setJobTitle(parsed.jobTitle);
+          if (parsed.uploadedEvidence) setUploadedEvidence(parsed.uploadedEvidence);
+          if (parsed.isRegistered) setIsRegistered(parsed.isRegistered);
+        } catch {}
       }
     }
   }, []);
 
-  const toggleSector = (sector: string) => {
-    if (selectedSectors.includes(sector)) {
-      if (selectedSectors.length > 1) {
-        setSelectedSectors(selectedSectors.filter((s) => s !== sector));
-      }
-    } else {
-      setSelectedSectors([...selectedSectors, sector]);
-    }
-  };
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, category: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const toggleNeed = (need: string) => {
-    if (selectedNeeds.includes(need)) {
-      setSelectedNeeds(selectedNeeds.filter((n) => n !== need));
-    } else {
-      setSelectedNeeds([...selectedNeeds, need]);
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Document size must not exceed 10 MB.");
+      return;
     }
-  };
 
-  const toggleMentorDomain = (dom: string) => {
-    if (selectedMentorDomains.includes(dom)) {
-      if (selectedMentorDomains.length > 1) {
-        setSelectedMentorDomains(selectedMentorDomains.filter((d) => d !== dom));
+    try {
+      setUploadingDoc(true);
+      setError("");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("purpose", "verification_evidence");
+
+      const res = await fetch("/api/v1/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload document. Please ensure it is a PDF, PNG, or JPEG.");
       }
-    } else {
-      setSelectedMentorDomains([...selectedMentorDomains, dom]);
+
+      const json = await res.json();
+      setUploadedEvidence({
+        fileId: json.id,
+        filename: file.name,
+        docType: category,
+      });
+    } catch (err: any) {
+      setError(err.message || "File upload failed.");
+    } finally {
+      setUploadingDoc(false);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const finalLinkedin = linkedin.trim() ? normalizeUrl(linkedin) : "";
+    const finalWebsite = website.trim() ? normalizeUrl(website) : "";
+
     if (roleParam === "founder") {
       if (!startupName.trim()) {
-        setError("Please enter your startup name.");
+        setError("Please enter your startup or venture name.");
         return;
       }
       if (!description.trim() || description.length < 20) {
-        setError("Add a short description (at least 20 characters) so mentors know how to help.");
+        setError("Please provide a short description of your startup (at least 20 characters).");
+        return;
+      }
+      if (!finalWebsite && !finalLinkedin) {
+        setError("Please provide at least a startup website / demo link or your LinkedIn profile for committee verification.");
         return;
       }
     } else if (roleParam === "mentor") {
       if (!currentCompany.trim() || !jobTitle.trim()) {
-        setError("Please provide your current company and job title.");
+        setError("Please provide your current organization and job title.");
         return;
       }
-      if (!linkedin.trim() || !linkedin.includes("linkedin.com")) {
-        setError("A valid LinkedIn profile URL is required for mentor verification.");
+      if (!finalLinkedin || !finalLinkedin.toLowerCase().includes("linkedin.com")) {
+        setError("A valid LinkedIn profile URL is required for mentor vetting.");
         return;
       }
     } else {
+      // Aspiring
       if (!description.trim() || description.length < 20) {
-        setError("Please tell us what you're hoping to build or explore.");
+        setError("Please share a short description of your business idea, interests, or entrepreneurial goals (at least 20 characters).");
         return;
       }
     }
@@ -168,19 +241,23 @@ function JoinDetailsForm() {
       role: roleParam,
       city,
       description,
-      website,
-      linkedin,
+      website: finalWebsite,
+      linkedin: finalLinkedin,
       startupName,
       stage,
       founderRole,
       selectedSectors,
-      selectedNeeds,
+      isRegistered,
+      uploadedEvidence,
+      evidenceFileIds: uploadedEvidence ? [uploadedEvidence.fileId] : [],
       ideaDomain,
-      primaryGoal,
+      govIdProvided,
       currentCompany,
       jobTitle,
       yearsExperience,
       selectedMentorDomains,
+      referenceName,
+      referenceContact,
     };
 
     if (typeof window !== "undefined") {
@@ -194,46 +271,46 @@ function JoinDetailsForm() {
     <div className="w-full max-w-[680px] mx-auto">
       {/* Progress Indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between text-xs mb-2">
-          <span className="font-display uppercase tracking-[0.18em] text-[var(--muted)] font-medium">
+        <div className="flex items-center justify-between text-xs mb-2.5">
+          <span className="font-display uppercase tracking-[0.22em] text-[var(--accent)] font-semibold text-[11px]">
             Step 3 of 4
           </span>
-          <span className="text-[var(--muted)]">
+          <span className="text-xs text-[var(--muted)] font-medium">
             {roleParam === "founder"
-              ? "Startup profile"
+              ? "Startup credentials & proof"
               : roleParam === "mentor"
-              ? "Mentorship background"
-              : "Focus & interests"}
+              ? "Mentor credentials & experience"
+              : "Idea & background"}
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-2 h-1 w-full">
-          <div className="bg-[var(--brand-navy)] rounded-full h-full" />
-          <div className="bg-[var(--brand-navy)] rounded-full h-full" />
-          <div className="bg-[var(--brand-navy)] rounded-full h-full" />
-          <div className="bg-[var(--border)] rounded-full h-full" />
+        <div className="grid grid-cols-4 gap-2.5 h-1.5 w-full">
+          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+          <div className="bg-[var(--border)]/70 rounded-full h-full" />
         </div>
       </div>
 
       {/* Heading */}
-      <div className="mb-8">
+      <div className="mb-8 space-y-1.5">
         <h1 className="text-3xl font-display font-light text-[var(--text)] tracking-tight">
           {roleParam === "founder" && "Tell us about your startup."}
           {roleParam === "mentor" && "Tell us about your expertise."}
           {roleParam === "aspiring" && "Tell us what you want to build."}
         </h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">
+        <p className="text-sm text-[var(--muted)]">
           {roleParam === "founder" &&
-            "This information helps matching mentors and collaborators understand your focus."}
+            "Our committee verifies startup existence and founder affiliation. Registered documents or MVP demo links welcome."}
           {roleParam === "mentor" &&
-            "Our committee reviews mentor applications to maintain high trust and relevant advice."}
+            "To maintain high advisory trust across OASIS, we verify your professional track record and domain leadership."}
           {roleParam === "aspiring" &&
-            "Share your journey so far. You do not need a registered company to join."}
+            "Share your journey and interests. You do not need an incorporated company to be admitted as an aspiring entrepreneur."}
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-7 lg:p-9 shadow-[var(--shadow-1)]">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="card-luxury p-7 lg:p-9">
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {error && (
             <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-[var(--danger)] flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -241,14 +318,133 @@ function JoinDetailsForm() {
             </div>
           )}
 
-          {/* ── FOUNDER SPECIFIC FIELDS ── */}
+          {/* Location Selection with Google Places Autocomplete */}
+          <LocationAutocomplete
+            value={city}
+            onChange={(selectedLocation) => {
+              setCity(selectedLocation);
+              if (error) setError("");
+            }}
+            label="Base location in Odisha / Diaspora"
+            placeholder="Search full address, locality, or city (powered by Google)..."
+            required
+          />
+
+          {/* ══════════════════════════════════════════════════════════════════════ */}
+          {/* ROLE 1: ASPIRING ENTREPRENEUR */}
+          {/* ══════════════════════════════════════════════════════════════════════ */}
+          {roleParam === "aspiring" && (
+            <div className="space-y-5">
+              <div>
+                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                  Business idea, interests, or goals <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="Describe the problem you're exploring, the kind of business you wish to build, or what support you are seeking from the community..."
+                  className="w-full p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
+                />
+                <p className="text-[11px] text-[var(--muted)] mt-1.5">
+                  Minimum 20 characters. Helps us match you with peer founders and early guidance.
+                </p>
+              </div>
+
+              {/* LinkedIn Profile */}
+              <div>
+                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                  LinkedIn profile URL <span className="text-[10px] lowercase text-[var(--muted)]">(if available)</span>
+                </label>
+                <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all">
+                  <span className="inline-flex items-center px-3.5 text-xs text-[var(--muted)] border-r border-[var(--border)]">
+                    <Linkedin className="w-4 h-4 text-[#0077b5]" />
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="url"
+                    value={linkedin}
+                    onChange={(e) => {
+                      setLinkedin(e.target.value);
+                      if (error) setError("");
+                    }}
+                    onBlur={() => {
+                      if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin));
+                    }}
+                    placeholder="www.linkedin.com/in/username or full URL"
+                    className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Registration notice */}
+              <div className="p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs space-y-1">
+                <div className="flex items-center gap-2 text-[var(--text)] font-semibold">
+                  <Building className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Proof of business registration: Not required</span>
+                </div>
+                <p className="text-[11px] text-[var(--muted)]">
+                  As an aspiring entrepreneur, you are not expected to have incorporated an entity. Admissions are approved based on genuine profile intent and community eligibility.
+                </p>
+              </div>
+
+              {/* Optional Government ID note */}
+              <div className="p-4 rounded-xl border border-dashed border-[var(--border)] bg-black/[0.01] text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[var(--text)] font-medium">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Government ID Verification (Optional)</span>
+                  </div>
+                  <label className="flex items-center gap-2 text-[11px] text-[var(--muted)] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={govIdProvided}
+                      onChange={(e) => setGovIdProvided(e.target.checked)}
+                      className="rounded text-[var(--brand-navy)] focus:ring-0"
+                    />
+                    <span>I wish to provide ID</span>
+                  </label>
+                </div>
+                <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                  Government ID is usually not necessary just to join as an aspiring entrepreneur. If stronger identity verification is justified for your profile, you may optionally attach an ID document with informed consent.
+                </p>
+                {govIdProvided && (
+                  <div className="pt-2">
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={(e) => handleFileUpload(e, "Government ID")}
+                      className="text-xs text-[var(--muted)] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[var(--brand-navy)] file:text-[var(--brand-cream)] hover:file:opacity-90 cursor-pointer"
+                    />
+                    {uploadingDoc && (
+                      <div className="text-[11px] text-[var(--accent)] mt-1 flex items-center gap-1">
+                        <RotateCw className="w-3 h-3 animate-spin" /> Uploading securely...
+                      </div>
+                    )}
+                    {uploadedEvidence && (
+                      <div className="text-[11px] text-emerald-600 mt-1 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Attached: {uploadedEvidence.filename}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════════ */}
+          {/* ROLE 2: FOUNDER OR CO-FOUNDER */}
+          {/* ══════════════════════════════════════════════════════════════════════ */}
           {roleParam === "founder" && (
-            <>
-              {/* Startup Name & Founder Role */}
+            <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                    Startup Name
+                    Startup or company name <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -258,295 +454,430 @@ function JoinDetailsForm() {
                       setStartupName(e.target.value);
                       if (error) setError("");
                     }}
-                    placeholder="e.g. KrishiKalyan, MediTrack"
-                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
+                    placeholder="e.g. AgriSpire Labs"
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                    Your Role
+                    Your role in the company
                   </label>
                   <select
                     value={founderRole}
                     onChange={(e) => setFounderRole(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all cursor-pointer"
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all cursor-pointer"
                   >
                     <option value="Founder / CEO">Founder / CEO</option>
-                    <option value="Co-founder & CTO">Co-founder & CTO</option>
-                    <option value="Co-founder & COO">Co-founder & COO</option>
-                    <option value="Founding Team">Founding Team</option>
+                    <option value="Co-founder / CTO">Co-founder / CTO</option>
+                    <option value="Co-founder / COO">Co-founder / COO</option>
+                    <option value="Founding Team Member">Founding Team Member</option>
                   </select>
                 </div>
               </div>
 
-              {/* Sector Multi-select Chips */}
+              {/* Startup Website, Product Link or MVP Demo */}
               <div>
                 <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  Sector (pick all that apply)
+                  Startup website, product link, or MVP/demo URL <span className="text-rose-500">*</span>
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {FOUNDER_SECTORS.map((sec) => {
-                    const isSelected = selectedSectors.includes(sec);
-                    return (
-                      <button
-                        type="button"
-                        key={sec}
-                        onClick={() => toggleSector(sec)}
-                        className={`text-xs px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] border-[var(--brand-navy)] shadow-xs"
-                            : "bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:border-[var(--brand-navy)]/30"
-                        }`}
-                      >
-                        {sec}
-                      </button>
-                    );
-                  })}
+                <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all">
+                  <span className="inline-flex items-center px-3.5 text-xs text-[var(--muted)] border-r border-[var(--border)]">
+                    <Globe className="w-4 h-4 text-[var(--accent)]" />
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="url"
+                    value={website}
+                    onChange={(e) => {
+                      setWebsite(e.target.value);
+                      if (error) setError("");
+                    }}
+                    onBlur={() => {
+                      if (website.trim()) setWebsite(normalizeUrl(website));
+                    }}
+                    placeholder="yourstartup.in or https://..."
+                    className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                  />
                 </div>
+                <p className="text-[11px] text-[var(--muted)] mt-1.5">
+                  Useful for validating your startup existence. Can be a live website, demo video, Figma, or GitHub.
+                </p>
               </div>
 
-              {/* Stage Selection */}
+              {/* LinkedIn showing founder's role */}
               <div>
                 <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  Current Stage
+                  Founder LinkedIn profile URL <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {FOUNDER_STAGES.map((stg) => {
-                    const isSelected = stage === stg;
-                    return (
-                      <button
-                        type="button"
-                        key={stg}
-                        onClick={() => setStage(stg)}
-                        className={`text-left p-3 rounded-xl border text-xs transition-all cursor-pointer flex items-center justify-between ${
-                          isSelected
-                            ? "border-[var(--accent)] bg-[var(--accent)]/5 font-medium text-[var(--brand-navy)]"
-                            : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)]"
-                        }`}
-                      >
-                        <span>{stg}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />}
-                      </button>
-                    );
-                  })}
+                <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all">
+                  <span className="inline-flex items-center px-3.5 text-xs text-[var(--muted)] border-r border-[var(--border)]">
+                    <Linkedin className="w-4 h-4 text-[#0077b5]" />
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="url"
+                    value={linkedin}
+                    onChange={(e) => {
+                      setLinkedin(e.target.value);
+                      if (error) setError("");
+                    }}
+                    onBlur={() => {
+                      if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin));
+                    }}
+                    placeholder="www.linkedin.com/in/founder or full URL"
+                    className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                  />
                 </div>
+                <p className="text-[11px] text-[var(--muted)] mt-1.5">
+                  Verifies applicant connection to the venture.
+                </p>
               </div>
-            </>
+
+              {/* Startup Pitch / Description */}
+              <div>
+                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                  Short venture description &amp; progress <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="What customer problem are you solving? What is your current traction or milestone?"
+                  className="w-full p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
+                />
+              </div>
+
+              {/* Business Registration Evidence Section */}
+              <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text)] uppercase tracking-wider mb-2">
+                    Business Registration Status
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setIsRegistered("registered")}
+                      className={cn(
+                        "p-3 rounded-xl border text-left transition-all",
+                        isRegistered === "registered"
+                          ? "bg-white border-[var(--brand-navy)] ring-1 ring-[var(--brand-navy)] shadow-xs"
+                          : "bg-black/[0.02] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]"
+                      )}
+                    >
+                      <div className="font-semibold text-[var(--text)]">Incorporated / Registered</div>
+                      <div className="text-[10px] text-[var(--muted)] mt-0.5">Pvt Ltd, LLP, Partnership, MSME, DPIIT</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsRegistered("early_stage");
+                        setUploadedEvidence(null);
+                      }}
+                      className={cn(
+                        "p-3 rounded-xl border text-left transition-all",
+                        isRegistered === "early_stage"
+                          ? "bg-white border-[var(--brand-navy)] ring-1 ring-[var(--brand-navy)] shadow-xs"
+                          : "bg-black/[0.02] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]"
+                      )}
+                    >
+                      <div className="font-semibold text-[var(--text)]">Early Stage / Pre-incorporation</div>
+                      <div className="text-[10px] text-[var(--muted)] mt-0.5">Validated via MVP, website or demo</div>
+                    </button>
+                  </div>
+                </div>
+
+                {isRegistered === "registered" ? (
+                  <div className="space-y-3 pt-2 border-t border-[var(--border)]">
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                        Supporting Registration Document Type
+                      </label>
+                      <select
+                        value={selectedDocType}
+                        onChange={(e) => setSelectedDocType(e.target.value)}
+                        className="w-full h-11 px-3 rounded-xl bg-white border border-[var(--border)] text-xs text-[var(--text)] focus:outline-none cursor-pointer"
+                      >
+                        {FOUNDER_DOC_TYPES.map((dt) => (
+                          <option key={dt} value={dt}>
+                            {dt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                        Upload Certificate / Evidence (PDF, PNG, JPG ≤ 10MB)
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onChange={(e) => handleFileUpload(e, selectedDocType)}
+                        className="text-xs text-[var(--muted)] file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--brand-navy)] file:text-[var(--brand-cream)] hover:file:opacity-90 cursor-pointer"
+                      />
+                      {uploadingDoc && (
+                        <div className="text-xs text-[var(--accent)] mt-2 flex items-center gap-1.5">
+                          <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Uploading and scanning document...</span>
+                        </div>
+                      )}
+                      {uploadedEvidence && (
+                        <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="font-medium">{uploadedEvidence.filename}</span>
+                            <span className="text-[10px] font-mono text-emerald-600">({uploadedEvidence.docType})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setUploadedEvidence(null)}
+                            className="text-emerald-700 hover:text-emerald-900"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-[var(--muted)] leading-relaxed italic">
+                    ℹ️ <strong>Committee note:</strong> Not every legitimate early-stage founder will have a registered company yet. Your application will be evaluated based on your MVP, demo, and founder profile.
+                  </p>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* ── MENTOR SPECIFIC FIELDS ── */}
+          {/* ══════════════════════════════════════════════════════════════════════ */}
+          {/* ROLE 3: MENTOR OR ADVISOR */}
+          {/* ══════════════════════════════════════════════════════════════════════ */}
           {roleParam === "mentor" && (
-            <>
+            <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                    Current Organization
+                    Current or previous organization <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={currentCompany}
-                    onChange={(e) => setCurrentCompany(e.target.value)}
-                    placeholder="e.g. Infosys, TCS, AIIMS BBSR, Startup"
-                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
+                    onChange={(e) => {
+                      setCurrentCompany(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="e.g. Tata Consultancy Services"
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                    Title / Position
+                    Executive / Professional title <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={jobTitle}
-                    onChange={(e) => setJobTitle(e.target.value)}
-                    placeholder="e.g. VP Engineering, Angel Investor"
-                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
+                    onChange={(e) => {
+                      setJobTitle(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="e.g. VP of Engineering / Angel Investor"
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  Mentorship Areas
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {MENTOR_DOMAINS.map((dom) => {
-                    const isSelected = selectedMentorDomains.includes(dom);
-                    return (
-                      <button
-                        type="button"
-                        key={dom}
-                        onClick={() => toggleMentorDomain(dom)}
-                        className={`text-xs px-3.5 py-2 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] border-[var(--brand-navy)]"
-                            : "bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:border-[var(--brand-navy)]/30"
-                        }`}
-                      >
-                        {dom}
-                      </button>
-                    );
-                  })}
+              {/* Experience & LinkedIn */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                    Years of leadership / industry experience
+                  </label>
+                  <select
+                    value={yearsExperience}
+                    onChange={(e) => setYearsExperience(e.target.value)}
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all cursor-pointer"
+                  >
+                    <option value="5-8 years">5 – 8 years</option>
+                    <option value="8-12 years">8 – 12 years</option>
+                    <option value="12-15 years">12 – 15 years</option>
+                    <option value="15+ years">15+ years</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                    LinkedIn profile URL <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all">
+                    <span className="inline-flex items-center px-3.5 text-xs text-[var(--muted)] border-r border-[var(--border)]">
+                      <Linkedin className="w-4 h-4 text-[#0077b5]" />
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="url"
+                      required
+                      value={linkedin}
+                      onChange={(e) => {
+                        setLinkedin(e.target.value);
+                        if (error) setError("");
+                      }}
+                      onBlur={() => {
+                        if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin));
+                      }}
+                      placeholder="www.linkedin.com/in/mentor or full URL"
+                      className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Professional portfolio or company website */}
               <div>
                 <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  LinkedIn Profile (required for verification)
+                  Company website or professional portfolio URL
                 </label>
-                <input
-                  type="url"
-                  required
-                  value={linkedin}
-                  onChange={(e) => setLinkedin(e.target.value)}
-                  placeholder="https://linkedin.com/in/username"
-                  className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
+                <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all">
+                  <span className="inline-flex items-center px-3.5 text-xs text-[var(--muted)] border-r border-[var(--border)]">
+                    <Globe className="w-4 h-4 text-[var(--accent)]" />
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="url"
+                    value={website}
+                    onChange={(e) => {
+                      setWebsite(e.target.value);
+                      if (error) setError("");
+                    }}
+                    onBlur={() => {
+                      if (website.trim()) setWebsite(normalizeUrl(website));
+                    }}
+                    placeholder="company.com or personal site"
+                    className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Mentoring Bio */}
+              <div>
+                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+                  Advisory focus &amp; mentoring philosophy
+                </label>
+                <textarea
+                  rows={3}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Share the types of founders you mentor and what topics you can offer actionable guidance on..."
+                  className="w-full p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
                 />
               </div>
-            </>
-          )}
 
-          {/* ── ASPIRING SPECIFIC FIELDS ── */}
-          {roleParam === "aspiring" && (
-            <>
-              <div>
-                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  What domain interests you?
-                </label>
-                <input
-                  type="text"
-                  value={ideaDomain}
-                  onChange={(e) => setIdeaDomain(e.target.value)}
-                  placeholder="e.g. AgriTech logistics, Healthcare AI, Handloom D2C"
-                  className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
-                />
+              {/* Professional References */}
+              <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase text-[var(--text)]">
+                  <UserCheck className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Professional Reference (Recommended)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <input
+                    type="text"
+                    value={referenceName}
+                    onChange={(e) => setReferenceName(e.target.value)}
+                    placeholder="Reference Name & Title (e.g. Rajesh Jena, Director)"
+                    className="w-full h-11 px-3.5 rounded-xl bg-white border border-[var(--border)] text-xs text-[var(--text)] focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={referenceContact}
+                    onChange={(e) => setReferenceContact(e.target.value)}
+                    placeholder="Email or LinkedIn URL"
+                    className="w-full h-11 px-3.5 rounded-xl bg-white border border-[var(--border)] text-xs text-[var(--text)] focus:outline-none"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                  Your primary goal right now
-                </label>
-                <select
-                  value={primaryGoal}
-                  onChange={(e) => setPrimaryGoal(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all cursor-pointer"
-                >
-                  <option value="Testing an idea with early users">Testing an idea with early users</option>
-                  <option value="Finding a technical or business co-founder">Finding a technical or business co-founder</option>
-                  <option value="Learning startup mechanics and building an MVP">Learning startup mechanics and building an MVP</option>
-                  <option value="Connecting with mentors in Odisha">Connecting with mentors in Odisha</option>
-                </select>
-              </div>
-            </>
-          )}
+              {/* Supporting Evidence Upload (Optional) */}
+              <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase text-[var(--text)]">
+                    <FileText className="w-4 h-4 text-[var(--accent)]" />
+                    <span>Supporting Experience Evidence (Optional)</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-[var(--muted)]">Supports Verified Mentor badge</span>
+                </div>
+                <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                  Attach an experience certificate, professional certification, or advisory appointment letter to assist our committee in granting the Verified Mentor status.
+                </p>
 
-          {/* Description Textarea with JetBrains Mono 0/1000 Counter */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider">
-                {roleParam === "founder" && "What does your startup do?"}
-                {roleParam === "mentor" && "Brief bio / how you help founders"}
-                {roleParam === "aspiring" && "What are you exploring or hoping to build?"}
-              </label>
-              <span className="font-mono text-[11px] text-[var(--muted)]">
-                {description.length} / 1000
-              </span>
-            </div>
-            <textarea
-              rows={4}
-              maxLength={1000}
-              required
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder={
-                roleParam === "founder"
-                  ? "We are building an IoT soil sensor and mobile advisory platform for paddy farmers in coastal Odisha..."
-                  : roleParam === "mentor"
-                  ? "12+ years in SaaS product management. Passionate about helping Odisha founders with pricing models and enterprise pilot agreements..."
-                  : "I am a software engineer looking to build a logistics aggregation tool for small textile weavers in Sambalpur..."
-              }
-              className="w-full p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all resize-y"
-            />
-          </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <select
+                    value={mentorDocType}
+                    onChange={(e) => setMentorDocType(e.target.value)}
+                    className="h-11 px-3 rounded-xl bg-white border border-[var(--border)] text-xs text-[var(--text)] focus:outline-none cursor-pointer"
+                  >
+                    {MENTOR_DOC_TYPES.map((md) => (
+                      <option key={md} value={md}>
+                        {md}
+                      </option>
+                    ))}
+                  </select>
 
-          {/* City Selection */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                City / Location
-              </label>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all cursor-pointer"
-              >
-                {ODISHA_CITIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => handleFileUpload(e, mentorDocType)}
+                    className="text-xs text-[var(--muted)] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--brand-navy)] file:text-[var(--brand-cream)] hover:file:opacity-90 cursor-pointer"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                Website or Deck URL <span className="text-[var(--muted)]/60 font-normal">(optional)</span>
-              </label>
-              <input
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://yourstartup.in"
-                className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] transition-all"
-              />
-            </div>
-          </div>
+                {uploadingDoc && (
+                  <div className="text-xs text-[var(--accent)] flex items-center gap-1.5">
+                    <RotateCw className="w-3.5 h-3.5 animate-spin" /> Uploading document...
+                  </div>
+                )}
 
-          {/* Founder: Support Needed */}
-          {roleParam === "founder" && (
-            <div>
-              <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-                Support you need currently
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORT_NEEDS.map((need) => {
-                  const isSelected = selectedNeeds.includes(need);
-                  return (
+                {uploadedEvidence && (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="font-medium">{uploadedEvidence.filename}</span>
+                      <span className="text-[10px] font-mono text-emerald-600">({uploadedEvidence.docType})</span>
+                    </div>
                     <button
                       type="button"
-                      key={need}
-                      onClick={() => toggleNeed(need)}
-                      className={`text-xs px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
-                        isSelected
-                          ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] border-[var(--brand-navy)]"
-                          : "bg-[var(--surface-2)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--text)]"
-                      }`}
+                      onClick={() => setUploadedEvidence(null)}
+                      className="text-emerald-700 hover:text-emerald-900"
                     >
-                      {need}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  );
-                })}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Navigation Buttons */}
-          <div className="pt-4 flex items-center justify-between gap-4">
+          {/* Form Actions */}
+          <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between">
+            <Link href={`/join/account?role=${roleParam}`}>
+              <Button type="button" variant="ghost" className="gap-2 text-xs">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
+              </Button>
+            </Link>
             <Button
-              type="button"
-              variant="secondary"
-              onClick={() => router.push(`/join/account?role=${roleParam}`)}
-              className="gap-2"
+              type="submit"
+              disabled={uploadingDoc}
+              className="bg-[var(--brand-navy)] hover:bg-[var(--brand-navy)]/90 text-[var(--brand-cream)] font-medium text-xs px-6 h-11 rounded-xl shadow-xs"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <Button type="submit" size="lg" className="min-w-[160px]">
-              Continue
+              <span>Continue to review</span>
             </Button>
           </div>
         </form>
@@ -558,7 +889,6 @@ function JoinDetailsForm() {
 export default function JoinDetailsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
-      {/* ── Top Header ────────────────────────────────────────────────────────── */}
       <header className="w-full bg-[var(--brand-navy)] border-b border-[var(--brand-gold)]/20 px-6 lg:px-12 h-16 flex items-center">
         <div className="w-full max-w-[1200px] mx-auto flex items-center justify-between">
           <BrandLockup variant="horizontal" />
@@ -571,17 +901,11 @@ export default function JoinDetailsPage() {
         </div>
       </header>
 
-      {/* ── Main Wizard Canvas ────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:py-16">
-        <Suspense fallback={<div className="text-center text-sm text-[var(--muted)]">Loading details...</div>}>
+        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--muted)]">Loading step...</div>}>
           <JoinDetailsForm />
         </Suspense>
       </main>
-
-      {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer className="py-6 border-t border-[var(--border)]/40 text-center text-xs text-[var(--muted)]">
-        OASIS ONE · Odisha Startup Community · Admin-approved membership
-      </footer>
     </div>
   );
 }

@@ -14,6 +14,7 @@ function JoinAccountForm() {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -22,8 +23,10 @@ function JoinAccountForm() {
     if (typeof window !== "undefined") {
       const savedName = sessionStorage.getItem("oasis_reg_name");
       const savedEmail = sessionStorage.getItem("oasis_reg_email");
+      const savedPhone = sessionStorage.getItem("oasis_reg_phone");
       if (savedName) setFullName(savedName);
       if (savedEmail) setEmail(savedEmail);
+      if (savedPhone) setPhone(savedPhone);
     }
   }, []);
 
@@ -44,6 +47,11 @@ function JoinAccountForm() {
       setError("Please enter a valid email address.");
       return;
     }
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      setError("Please enter a valid 10-digit mobile number for security verification.");
+      return;
+    }
     if (!isPasswordValid) {
       setError("Please ensure your password meets all requirements.");
       return;
@@ -52,6 +60,7 @@ function JoinAccountForm() {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("oasis_reg_name", fullName.trim());
       sessionStorage.setItem("oasis_reg_email", email.trim());
+      sessionStorage.setItem("oasis_reg_phone", phone.trim());
       sessionStorage.setItem("oasis_reg_password", password);
     }
 
@@ -59,39 +68,39 @@ function JoinAccountForm() {
   };
 
   const handleGoogleSignUp = () => {
-    window.location.href = `/api/v1/auth/google?role=${encodeURIComponent(roleParam || "founder")}`;
+    window.location.href = `/api/v1/auth/google?mode=signup&role=${encodeURIComponent(roleParam || "founder")}`;
   };
 
   return (
     <div className="w-full max-w-[540px] mx-auto">
       {/* Progress Indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between text-xs mb-2">
-          <span className="font-display uppercase tracking-[0.18em] text-[var(--muted)] font-medium">
+        <div className="flex items-center justify-between text-xs mb-2.5">
+          <span className="font-display uppercase tracking-[0.22em] text-[var(--accent)] font-semibold text-[11px]">
             Step 2 of 4
           </span>
-          <span className="text-[var(--muted)]">Create your account</span>
+          <span className="text-xs text-[var(--muted)] font-medium">Account Details</span>
         </div>
-        <div className="grid grid-cols-4 gap-2 h-1 w-full">
-          <div className="bg-[var(--brand-navy)] rounded-full h-full" />
-          <div className="bg-[var(--brand-navy)] rounded-full h-full" />
-          <div className="bg-[var(--border)] rounded-full h-full" />
-          <div className="bg-[var(--border)] rounded-full h-full" />
+        <div className="grid grid-cols-4 gap-2.5 h-1.5 w-full">
+          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+          <div className="bg-[var(--border)]/70 rounded-full h-full" />
+          <div className="bg-[var(--border)]/70 rounded-full h-full" />
         </div>
       </div>
 
       {/* Heading */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 space-y-1.5">
         <h1 className="text-3xl lg:text-4xl font-display font-light text-[var(--text)] tracking-tight">
           Create your account
         </h1>
-        <p className="mt-2.5 text-sm text-[var(--muted)]">
+        <p className="text-sm text-[var(--muted)]">
           Join 650+ verified founders and mentors across Odisha.
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-7 lg:p-8 shadow-[var(--shadow-1)]">
+      <div className="card-luxury p-7 lg:p-8">
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
             <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-[var(--danger)]">
@@ -133,6 +142,32 @@ function JoinAccountForm() {
               placeholder="name@startup.in"
               className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
             />
+          </div>
+
+          {/* Mobile Number */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
+              Mobile number (SMS / OTP verification)
+            </label>
+            <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all overflow-hidden">
+              <span className="inline-flex items-center px-3.5 text-xs font-mono font-semibold text-[var(--muted)] border-r border-[var(--border)] bg-black/[0.02]">
+                +91
+              </span>
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="98765 43210"
+                className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+              />
+            </div>
+            <p className="text-[11px] text-[var(--muted)] mt-1.5">
+              Required for SMS authentication and platform trust verification.
+            </p>
           </div>
 
           {/* Password */}

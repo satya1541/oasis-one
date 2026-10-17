@@ -182,6 +182,7 @@ export class AuthService {
           primaryRole: dto.primaryRole,
           accountStatus: AccountStatus.pending_verification,
           emailVerified: false,
+          phone: dto.phone || null,
           timeZone: dto.timeZone || 'Asia/Kolkata',
         },
       });
@@ -196,6 +197,8 @@ export class AuthService {
           headline: dto.headline || null,
           bio: dto.bio || null,
           photoFileId: dto.photoFileId || null,
+          linkedinUrl: dto.linkedin || dto.roleData?.linkedin || null,
+          websiteUrl: dto.website || dto.roleData?.website || null,
           roleAttributes: dto.roleData || undefined,
           visibilitySettings: {
             email: 'private',
@@ -222,6 +225,7 @@ export class AuthService {
             bio: dto.bio,
             city: dto.city,
             state: dto.state,
+            phone: dto.phone || null,
             roleData: dto.roleData,
             evidenceFileIds: dto.evidenceFileIds || [],
           },
@@ -376,7 +380,7 @@ export class AuthService {
   // GOOGLE OAUTH FLOW (PKCE)
   // ----------------------------------------------------
 
-  getGoogleAuthUrl(invite?: string, next?: string) {
+  getGoogleAuthUrl(invite?: string, next?: string, mode: string = 'login', role?: string) {
     const state = generateRandomToken(16);
     const codeVerifier = generateRandomToken(32);
     const codeChallenge = crypto
@@ -384,19 +388,44 @@ export class AuthService {
       .update(codeVerifier)
       .digest('base64url');
 
+    const callbackUrl =
+      this.configService.get<string>('auth.google.callbackUrl') ||
+      'http://localhost:7200/api/v1/auth/google/callback';
+
     const authUrl = this.googleClient.generateAuthUrl({
       access_type: 'offline',
+      prompt: 'select_account',
       scope: ['openid', 'email', 'profile'],
-      state: JSON.stringify({ state, invite, next }),
+      state: JSON.stringify({ state, invite, next, verifier: codeVerifier, mode, role }),
       code_challenge: codeChallenge,
       code_challenge_method: 'S256' as any,
+      redirect_uri: callbackUrl,
     });
 
     return { authUrl, state, codeVerifier };
   }
 
-  async handleGoogleCallback(code: string, ipAddress?: string, userAgent?: string) {
-    const { tokens } = await this.googleClient.getToken(code);
+  async handleGoogleCallback(
+    code: string,
+    ipAddress?: string,
+    userAgent?: string,
+    codeVerifier?: string,
+    mode: string = 'login',
+    role?: string,
+  ) {
+    const callbackUrl =
+      this.configService.get<string>('auth.google.callbackUrl') ||
+      'http://localhost:7200/api/v1/auth/google/callback';
+
+    const tokenOptions: any = {
+      code,
+      redirect_uri: callbackUrl,
+    };
+    if (codeVerifier) {
+      tokenOptions.codeVerifier = codeVerifier;
+    }
+
+    const { tokens } = await this.googleClient.getToken(tokenOptions);
     if (!tokens.id_token) {
       throw new HttpException(
         { code: 'UNAUTHENTICATED', message: 'Google ID token missing from response' },
@@ -434,7 +463,7 @@ export class AuthService {
       );
     }
 
-    // 1. Check existing AuthIdentity
+    // 1. Check existing AuthIdentity (without eager relation inclusion to prevent Prisma crash if user was manually deleted from DB)
     const identity = await this.prisma.authIdentity.findUnique({
       where: {
         provider_providerUserId: {
@@ -442,15 +471,33 @@ export class AuthService {
           providerUserId: googleSub,
         },
       },
-      include: { user: true },
     });
 
-    let user = identity?.user;
+    let user: any = null;
+    if (identity) {
+      user = await this.prisma.user.findUnique({
+        where: { id: identity.userId },
+        include: { profile: true },
+      });
+      if (!user) {
+        // Self-heal: Orphaned AuthIdentity found (user was deleted manually from DB)
+        await this.prisma.authIdentity.deleteMany({
+          where: { provider: 'google', providerUserId: googleSub },
+        }).catch(() => {});
+      }
+    }
 
     // 2. If not found by identity, check user by verified email
     if (!user) {
-      const existingUser = await this.prisma.user.findUnique({ where: { email } });
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email },
+        include: { profile: true },
+      });
       if (existingUser) {
+        // Remove any stale identity first (idempotent)
+        await this.prisma.authIdentity.deleteMany({
+          where: { provider: 'google', providerUserId: googleSub },
+        }).catch(() => {});
         // Link identity to existing user
         await this.prisma.authIdentity.create({
           data: {
@@ -460,46 +507,101 @@ export class AuthService {
           },
         });
         user = existingUser;
-      } else {
-        // Create new User via Google
-        user = await this.prisma.$transaction(async (tx) => {
-          const newUser = await tx.user.create({
-            data: {
-              email,
-              emailVerified: true,
-              accountStatus: AccountStatus.pending_verification,
-            },
-          });
-
-          await tx.authIdentity.create({
-            data: {
-              userId: newUser.id,
-              provider: 'google',
-              providerUserId: googleSub,
-            },
-          });
-
-          await tx.profile.create({
-            data: {
-              userId: newUser.id,
-              name,
-              profilePhotoUrl: picture,
-              visibilitySettings: {
-                email: 'private',
-                phone: 'private',
-                name: 'members',
-                bio: 'members',
-              },
-            },
-          });
-
-          return newUser;
-        });
       }
+    }
+
+    // 3. User does not exist in the database
+    if (!user) {
+      if (mode === 'login') {
+        // User attempted login, but is NOT registered yet.
+        // Route to /join to complete role, documents, and submit for approval.
+        return {
+          notRegistered: true,
+          email,
+          name,
+          picture,
+        };
+      }
+
+      // If mode === 'signup' (initiated from /join/account):
+      user = await this.prisma.$transaction(async (tx) => {
+        // Ensure no stale identity exists before creating
+        await tx.authIdentity.deleteMany({
+          where: { provider: 'google', providerUserId: googleSub },
+        }).catch(() => {});
+
+        const newUser = await tx.user.create({
+          data: {
+            email,
+            emailVerified: true,
+            accountStatus: AccountStatus.pending_verification,
+            primaryRole: (role as any) || null,
+          },
+        });
+
+        await tx.authIdentity.create({
+          data: {
+            userId: newUser.id,
+            provider: 'google',
+            providerUserId: googleSub,
+          },
+        });
+
+        const profile = await tx.profile.create({
+          data: {
+            userId: newUser.id,
+            name,
+            profilePhotoUrl: picture,
+            visibilitySettings: {
+              email: 'private',
+              phone: 'private',
+              name: 'members',
+              bio: 'members',
+            },
+          },
+        });
+
+        return { ...newUser, profile };
+      });
+    }
+
+    if (!user) {
+      throw new HttpException(
+        { code: 'INTERNAL_ERROR', message: 'Failed to authenticate user' },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // Check account status restrictions
+    if (user.accountStatus === AccountStatus.blacklisted) {
+      throw new HttpException(
+        { code: 'FORBIDDEN', message: 'Account has been permanently blacklisted' },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (user.accountStatus === AccountStatus.revoked) {
+      throw new HttpException(
+        { code: 'FORBIDDEN', message: 'Membership has been revoked' },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const isMfaAdmin = !!user.adminLevel;
     const { rawToken } = await this.createSession(user.id, ipAddress, userAgent, !isMfaAdmin);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    await this.auditService.log({
+      actorId: user.id,
+      action: 'auth.google_login',
+      targetType: 'user',
+      targetId: user.id,
+      ipAddress,
+      metadata: { email, mode },
+    });
 
     return { user, rawToken, requiresMfa: isMfaAdmin };
   }
@@ -540,6 +642,7 @@ export class AuthService {
         where: { id: userId },
         data: {
           primaryRole: dto.primaryRole,
+          phone: (dto as any).phone || undefined,
           accountStatus: AccountStatus.pending_approval,
           timeZone: dto.timeZone || 'Asia/Kolkata',
         },
@@ -552,6 +655,8 @@ export class AuthService {
           state: dto.state,
           headline: dto.headline,
           bio: dto.bio,
+          linkedinUrl: (dto as any).linkedin || dto.roleData?.linkedin || undefined,
+          websiteUrl: (dto as any).website || dto.roleData?.website || undefined,
           roleAttributes: dto.roleData,
         },
         create: {
@@ -561,6 +666,8 @@ export class AuthService {
           state: dto.state,
           headline: dto.headline,
           bio: dto.bio,
+          linkedinUrl: (dto as any).linkedin || dto.roleData?.linkedin || undefined,
+          websiteUrl: (dto as any).website || dto.roleData?.website || undefined,
           roleAttributes: dto.roleData,
         },
       });
@@ -574,7 +681,9 @@ export class AuthService {
             bio: dto.bio,
             city: dto.city,
             state: dto.state,
+            phone: (dto as any).phone,
             roleData: dto.roleData,
+            evidenceFileIds: (dto as any).evidenceFileIds || [],
           },
           status: ApplicationStatus.pending,
         },

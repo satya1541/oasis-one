@@ -161,55 +161,61 @@ export default function SettingsPage() {
 
   return (
     <MemberShell>
-      <div className="space-y-6 max-w-4xl pb-16">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+      <div className="space-y-8 max-w-4xl mx-auto pb-20">
+        {/* Editorial Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
           <div>
-            <h1 className="font-display text-3xl font-light text-[var(--text)] tracking-tight">
-              Settings & Privacy
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
+              <Shield className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#86601F] dark:text-[#F3D3A2] font-semibold">
+                Member Governance
+              </span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+              Settings &amp; Privacy
             </h1>
-            <p className="text-xs text-[var(--muted)] mt-1">
-              Manage your personal data visibility, contact sharing preferences, and account security.
+            <p className="text-xs sm:text-sm text-[var(--muted)] mt-1.5 font-sans leading-relaxed">
+              Manage personal data visibility, mutual connection rules, and founder profile details.
             </p>
           </div>
 
           {savedSuccess && (
-            <div className="flex items-center gap-2 text-xs text-[var(--success)] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3.5 py-1.5 rounded-full">
-              <Check className="w-4 h-4" />
-              <span>Settings updated successfully</span>
+            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl animate-fade-in">
+              <Check className="w-4 h-4 text-emerald-500" />
+              <span className="font-medium font-sans">Settings saved successfully</span>
             </div>
           )}
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center gap-2 border-b border-[var(--border)] pb-2">
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#EFE8D8]/60 dark:bg-[#181928]/80 border border-[#D9CDAE]/50 dark:border-[#2C2E4A] w-fit">
           <button
             type="button"
             onClick={() => setActiveTab("privacy")}
-            className={`px-4 py-2 text-xs font-medium rounded-xl transition-colors cursor-pointer ${
+            className={`px-4 py-2 text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer ${
               activeTab === "privacy"
-                ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] font-semibold"
+                ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] font-semibold shadow-xs"
                 : "text-[var(--muted)] hover:text-[var(--text)]"
             }`}
           >
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              Privacy Controls (DPDP)
+              <span>Privacy Controls (DPDP)</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("profile")}
-            className={`px-4 py-2 text-xs font-medium rounded-xl transition-colors cursor-pointer ${
+            className={`px-4 py-2 text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer ${
               activeTab === "profile"
-                ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] font-semibold"
+                ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] font-semibold shadow-xs"
                 : "text-[var(--muted)] hover:text-[var(--text)]"
             }`}
           >
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Profile Details
+              <span>Profile Details</span>
             </span>
           </button>
         </div>
@@ -217,89 +223,98 @@ export default function SettingsPage() {
         {/* Tab 1: Privacy Controls */}
         {activeTab === "privacy" && (
           <div className="space-y-6">
-            <div className="p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs space-y-1">
-              <p className="font-semibold text-[var(--text)]">
-                Privacy by Default Guarantee (PRD §3.5 & India DPDP Act)
-              </p>
-              <p className="text-[var(--muted)] leading-relaxed">
-                Your direct contact details (email and phone) are strictly hidden by default. They are only revealed to members when you explicitly choose to share them or when you accept an invitation to connect.
+            <div className="p-6 rounded-3xl bg-linear-to-b from-[#86601F]/5 to-transparent border border-[#86601F]/20 dark:border-[#F3D3A2]/20 space-y-2 backdrop-blur-xs">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+                <h3 className="font-display font-medium text-sm text-[var(--text)]">
+                  Privacy-by-Default Architecture (DPDP Act Compliance)
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--muted)] leading-relaxed font-sans max-w-2xl">
+                Your direct communication coordinates (email and direct phone) remain strictly masked by default. Other founders and verified mentors can only view your direct contact info if you explicitly allow directory display or accept mutual connection requests.
               </p>
             </div>
 
-            <div className="space-y-4">
-              {/* Email Privacy */}
-              <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3">
-                <div className="flex items-center justify-between">
+            <div className="space-y-5">
+              {/* Email Privacy Card */}
+              <div className="p-6 rounded-3xl border border-[#EAE1CF] dark:border-[#2C2E4A]/90 bg-[var(--surface)] shadow-xs space-y-4">
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-medium text-xs text-[var(--text)]">Email Address Visibility</h3>
-                    <p className="text-[11px] font-mono text-[var(--muted)] mt-0.5">{email || "Your account email"}</p>
+                    <h3 className="font-display font-medium text-base text-[var(--text)]">Email Address Visibility</h3>
+                    <p className="text-xs font-mono text-[var(--muted)] mt-0.5">{email || "Account email address"}</p>
                   </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase bg-[#86601F]/10 text-[#86601F] dark:text-[#F3D3A2] border border-[#86601F]/20 font-semibold">
+                    Encrypted
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
-                  <label className="flex items-center gap-2 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] cursor-pointer hover:border-[#86601F]/40 transition-colors">
                     <input
                       type="checkbox"
                       checked={visibilityEmail}
                       onChange={(e) => setVisibilityEmail(e.target.checked)}
-                      className="rounded border-[var(--border)] text-[var(--accent)]"
+                      className="rounded-md border-[#D9CDAE] text-[#86601F] focus:ring-0 cursor-pointer w-4 h-4"
                     />
-                    <span className="text-[var(--text)]">Visible in Member Directory</span>
+                    <span className="text-[var(--text)] font-sans">Visible in Member Directory</span>
                   </label>
 
-                  <label className="flex items-center gap-2 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] cursor-pointer hover:border-[#86601F]/40 transition-colors">
                     <input
                       type="checkbox"
                       checked={shareEmailOnConnect}
                       onChange={(e) => setShareEmailOnConnect(e.target.checked)}
-                      className="rounded border-[var(--border)] text-[var(--accent)]"
+                      className="rounded-md border-[#D9CDAE] text-[#86601F] focus:ring-0 cursor-pointer w-4 h-4"
                     />
-                    <span className="text-[var(--text)]">Auto-share upon mutual connection</span>
+                    <span className="text-[var(--text)] font-sans">Auto-share upon mutual connection</span>
                   </label>
                 </div>
               </div>
 
-              {/* Phone Privacy */}
-              <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3">
-                <div className="flex items-center justify-between">
+              {/* Phone Privacy Card */}
+              <div className="p-6 rounded-3xl border border-[#EAE1CF] dark:border-[#2C2E4A]/90 bg-[var(--surface)] shadow-xs space-y-4">
+                <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-medium text-xs text-[var(--text)]">Phone Number Visibility</h3>
-                    <p className="text-[11px] font-mono text-[var(--muted)] mt-0.5">{phone || "Not configured"}</p>
+                    <h3 className="font-display font-medium text-base text-[var(--text)]">Direct Phone Number Visibility</h3>
+                    <p className="text-xs font-mono text-[var(--muted)] mt-0.5">{phone || "No phone number configured"}</p>
                   </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase bg-[#86601F]/10 text-[#86601F] dark:text-[#F3D3A2] border border-[#86601F]/20 font-semibold">
+                    Restricted
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
-                  <label className="flex items-center gap-2 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] cursor-pointer hover:border-[#86601F]/40 transition-colors">
                     <input
                       type="checkbox"
                       checked={visibilityPhone}
                       onChange={(e) => setVisibilityPhone(e.target.checked)}
-                      className="rounded border-[var(--border)] text-[var(--accent)]"
+                      className="rounded-md border-[#D9CDAE] text-[#86601F] focus:ring-0 cursor-pointer w-4 h-4"
                     />
-                    <span className="text-[var(--text)]">Visible in Member Directory</span>
+                    <span className="text-[var(--text)] font-sans">Visible in Member Directory</span>
                   </label>
 
-                  <label className="flex items-center gap-2 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] cursor-pointer hover:border-[#86601F]/40 transition-colors">
                     <input
                       type="checkbox"
                       checked={sharePhoneOnConnect}
                       onChange={(e) => setSharePhoneOnConnect(e.target.checked)}
-                      className="rounded border-[var(--border)] text-[var(--accent)]"
+                      className="rounded-md border-[#D9CDAE] text-[#86601F] focus:ring-0 cursor-pointer w-4 h-4"
                     />
-                    <span className="text-[var(--text)]">Auto-share upon mutual connection</span>
+                    <span className="text-[var(--text)] font-sans">Auto-share upon mutual connection</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button
                 onClick={handleSavePrivacy}
                 disabled={saving}
-                className="gap-2 cursor-pointer"
+                className="gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
               >
                 <Save className="w-4 h-4" />
-                <span>{saving ? "Saving..." : "Save Privacy Preferences"}</span>
+                <span>{saving ? "Saving Preferences..." : "Save Privacy Preferences"}</span>
               </Button>
             </div>
           </div>
@@ -307,85 +322,85 @@ export default function SettingsPage() {
 
         {/* Tab 2: Profile Details */}
         {activeTab === "profile" && (
-          <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
-            <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
+          <form onSubmit={handleSaveProfile} className="space-y-6 text-xs">
+            <div className="p-7 rounded-3xl border border-[#EAE1CF] dark:border-[#2C2E4A]/90 bg-[var(--surface)] shadow-xs space-y-5">
               <div>
-                <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                  Full Name (Verified)
+                <label className="font-mono text-[11px] uppercase tracking-wider text-[var(--muted)] block mb-1.5 font-semibold">
+                  Full Name (Verified Identity)
                 </label>
                 <input
                   type="text"
                   disabled
                   value={name}
-                  className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--muted)] cursor-not-allowed"
+                  className="w-full h-11 px-4 bg-[var(--surface-2)]/60 border border-[#D9CDAE]/60 dark:border-[#2C2E4A] rounded-2xl text-[var(--muted)] cursor-not-allowed font-sans text-xs sm:text-sm"
                 />
-                <p className="text-[10px] text-[var(--muted)] mt-1">
-                  Name change requires admin audit approval per community verification policy.
+                <p className="text-[11px] text-[var(--muted)] mt-1.5 font-sans">
+                  Identity modifications require Admissions Committee re-audit to preserve network trust.
                 </p>
               </div>
 
               <div>
-                <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                  Headline / Professional Title
+                <label className="font-mono text-[11px] uppercase tracking-wider text-[var(--muted)] block mb-1.5 font-semibold">
+                  Headline / Venture Designation
                 </label>
                 <input
                   type="text"
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                   placeholder="e.g. Founder @ SolarIoT | CleanTech & IoT Hardware"
-                  className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                  className="w-full h-11 px-4 bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] rounded-2xl text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans text-xs sm:text-sm"
                 />
               </div>
 
               <div>
-                <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                  Bio & Mission
+                <label className="font-mono text-[11px] uppercase tracking-wider text-[var(--muted)] block mb-1.5 font-semibold">
+                  Founder Bio &amp; Focus Area
                 </label>
                 <textarea
-                  rows={3}
+                  rows={4}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Share your background, current venture focus, or mentorship interests..."
-                  className="w-full p-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                  placeholder="Share your current venture focus, milestone trajectory, and mentor/founder collaboration interests..."
+                  className="w-full p-4 bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] rounded-2xl text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans text-xs sm:text-sm leading-relaxed"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                    City / Regional Hub
+                  <label className="font-mono text-[11px] uppercase tracking-wider text-[var(--muted)] block mb-1.5 font-semibold">
+                    Odisha Regional Hub
                   </label>
                   <input
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="e.g. Bhubaneswar, Cuttack, Rourkela"
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-11 px-4 bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] rounded-2xl text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans text-xs sm:text-sm"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                    LinkedIn URL
+                  <label className="font-mono text-[11px] uppercase tracking-wider text-[var(--muted)] block mb-1.5 font-semibold">
+                    LinkedIn Profile URL
                   </label>
                   <input
                     type="text"
                     value={linkedin}
                     onChange={(e) => setLinkedin(e.target.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-11 px-4 bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] rounded-2xl text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans text-xs sm:text-sm"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button
                 type="submit"
                 disabled={saving}
-                className="gap-2 cursor-pointer"
+                className="gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
               >
                 <Save className="w-4 h-4" />
-                <span>{saving ? "Saving Changes..." : "Save Profile"}</span>
+                <span>{saving ? "Saving Changes..." : "Save Profile Details"}</span>
               </Button>
             </div>
           </form>

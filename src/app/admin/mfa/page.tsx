@@ -93,12 +93,20 @@ export default function AdminMfaPage() {
       {/* ── Top Header ──────────────────────────────────────────────────────── */}
       <header className="w-full bg-[#1A1B2B] border-b border-white/10 px-6 lg:px-12 h-16 flex items-center justify-between">
         <BrandLockup variant="horizontal" href="/admin" />
-        <Link
-          href="/dashboard"
-          className="text-xs font-mono text-[#F3D3A2]/80 hover:text-[#F3D3A2] transition-colors"
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await fetch("/api/v1/auth/logout", { method: "POST" });
+            } catch {}
+            if (typeof window !== "undefined") {
+              window.location.href = "/login";
+            }
+          }}
+          className="text-xs font-mono text-[#F3D3A2]/80 hover:text-[#F3D3A2] transition-colors cursor-pointer"
         >
-          Exit to Member Portal →
-        </Link>
+          Sign Out →
+        </button>
       </header>
 
       {/* ── Main Canvas ──────────────────────────────────────────────────────── */}

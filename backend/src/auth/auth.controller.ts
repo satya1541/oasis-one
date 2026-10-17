@@ -76,6 +76,8 @@ export class AuthController {
   googleAuth(
     @Query('invite') invite: string | undefined,
     @Query('next') next: string | undefined,
+    @Query('mode') mode: string | undefined,
+    @Query('role') role: string | undefined,
     @Res() res: Response,
   ) {
     // Validate next is a relative path (prevent open redirect)
@@ -84,10 +86,11 @@ export class AuthController {
       validatedNext = next;
     }
 
-    const { authUrl, state, codeVerifier } = this.authService.getGoogleAuthUrl(invite, validatedNext);
+    const authMode = mode === 'signup' ? 'signup' : 'login';
+    const { authUrl, state, codeVerifier } = this.authService.getGoogleAuthUrl(invite, validatedNext, authMode, role);
 
-    // Save PKCE verifier and state in temporary HttpOnly cookie (valid for 10 min)
-    res.cookie('oasis_pkce', JSON.stringify({ state, codeVerifier, next: validatedNext }), {
+    // Save PKCE verifier, state, mode and role in temporary HttpOnly cookie (valid for 10 min)
+    res.cookie('oasis_pkce', JSON.stringify({ state, codeVerifier, next: validatedNext, mode: authMode, role }), {
       httpOnly: true,
       secure: this.isProd,
       sameSite: 'lax',
@@ -110,14 +113,46 @@ export class AuthController {
       return res.redirect(`${this.frontendUrl}/login?error=google_failed`);
     }
 
-    const pkceCookie = req.cookies?.['oasis_pkce'];
+    let codeVerifier: string | undefined;
     let nextPath = '/auth/callback';
+    let mode = 'login';
+    let role: string | undefined;
 
+    // 1. Extract from state if returned by Google
+    if (returnedState) {
+      try {
+        const parsedState = JSON.parse(returnedState);
+        if (parsedState.verifier) {
+          codeVerifier = parsedState.verifier;
+        }
+        if (parsedState.next) {
+          nextPath = `/auth/callback?next=${encodeURIComponent(parsedState.next)}`;
+        }
+        if (parsedState.mode) {
+          mode = parsedState.mode;
+        }
+        if (parsedState.role) {
+          role = parsedState.role;
+        }
+      } catch {}
+    }
+
+    // 2. Extract from cookie fallback
+    const pkceCookie = req.cookies?.['oasis_pkce'];
     if (pkceCookie) {
       try {
         const parsed = JSON.parse(pkceCookie);
-        if (parsed.next) {
+        if (!codeVerifier && parsed.codeVerifier) {
+          codeVerifier = parsed.codeVerifier;
+        }
+        if (parsed.next && nextPath === '/auth/callback') {
           nextPath = `/auth/callback?next=${encodeURIComponent(parsed.next)}`;
+        }
+        if (mode === 'login' && parsed.mode) {
+          mode = parsed.mode;
+        }
+        if (!role && parsed.role) {
+          role = parsed.role;
         }
       } catch {}
       res.clearCookie('oasis_pkce', { path: '/' });
@@ -127,7 +162,27 @@ export class AuthController {
       const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
       const userAgent = req.headers['user-agent'];
 
-      const { user, rawToken } = await this.authService.handleGoogleCallback(code, clientIp, userAgent);
+      const result: any = await this.authService.handleGoogleCallback(
+        code,
+        clientIp,
+        userAgent,
+        codeVerifier,
+        mode,
+        role,
+      );
+
+      // If user attempted login with Google but is not yet registered in the database,
+      // route them to /join so they can select their role, provide details, and submit for approval.
+      if (result.notRegistered) {
+        const queryParams = new URLSearchParams({
+          notice: 'not_registered',
+          email: result.email || '',
+          name: result.name || '',
+        });
+        return res.redirect(`${this.frontendUrl}/join?${queryParams.toString()}`);
+      }
+
+      const { user, rawToken } = result;
       this.setSessionCookie(res, rawToken);
 
       return res.redirect(`${this.frontendUrl}${nextPath}`);

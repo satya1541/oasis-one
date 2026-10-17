@@ -90,11 +90,35 @@ body {
   font-family: var(--font-inter), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Subtle grain and aesthetic utilities */
+::selection {
+  background: rgba(243, 211, 162, 0.35);
+  color: #1E1F33;
+}
+
+/* ── Apple-Grade Smooth Custom Scrollbars ── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(151, 142, 119, 0.35);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 96, 31, 0.6);
+}
+
+/* ── Cinematic Motion & Keyframes ── */
 .astrolabe-rotate {
   animation: astrolabe-spin 60s linear infinite;
+  transform-origin: center center;
 }
 
 @keyframes astrolabe-spin {
@@ -106,8 +130,107 @@ body {
   }
 }
 
+.astrolabe-counter-rotate {
+  animation: astrolabe-spin-reverse 90s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes astrolabe-spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes subtle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .astrolabe-rotate {
+  .astrolabe-rotate,
+  .astrolabe-counter-rotate,
+  .animate-subtle-float,
+  .animate-pulse-glow {
     animation: none;
   }
 }
+
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-wiggle {
+  animation: wiggle 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Apple-Grade Luxury Glass & Specular Accents ── */
+.glass-panel-navy {
+  background: rgba(30, 31, 51, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(243, 211, 162, 0.18);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(217, 205, 174, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(30, 31, 51, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.card-luxury {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 4px rgba(30, 31, 51, 0.03), 0 12px 32px -8px rgba(30, 31, 51, 0.07);
+}
+
+.card-luxury:hover {
+  transform: translateY(-2px);
+  border-color: rgba(134, 96, 31, 0.35);
+  box-shadow: 0 4px 12px rgba(30, 31, 51, 0.05), 0 20px 48px -12px rgba(30, 31, 51, 0.12);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FCF6E3 0%, #F3D3A2 50%, #C9A96E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-navy-gradient {
+  background: linear-gradient(135deg, #1E1F33 0%, #30314A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

@@ -869,6 +869,53 @@ export class AdminController {
     return { ok: true, adminId: user.id };
   }
 
+  @UseGuards(AdminGuard, AdminLevelGuard)
+  @RequireAdminLevel(AdminLevel.super_admin)
+  @Patch('admins/:id')
+  async updateAdmin(
+    @Param('id') id: string,
+    @CurrentUser('id') currentAdminId: string,
+    @Body() body: { adminLevel?: AdminLevel | null; accountStatus?: AccountStatus },
+    @Req() req: Request,
+  ) {
+    if (id === currentAdminId && body.adminLevel === null) {
+      throw new HttpException({ code: 'CONFLICT', message: 'You cannot revoke your own super admin access' }, HttpStatus.CONFLICT);
+    }
+    const updateData: any = {};
+    if (body.adminLevel !== undefined) {
+      updateData.adminLevel = body.adminLevel;
+    }
+    if (body.accountStatus !== undefined) {
+      updateData.accountStatus = body.accountStatus;
+    }
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        adminLevel: true,
+        accountStatus: true,
+        lastLoginAt: true,
+        profile: { select: { name: true } },
+      },
+    });
+
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
+    await this.prisma.auditLog.create({
+      data: {
+        actorId: currentAdminId,
+        action: 'admin_user_updated',
+        targetType: 'user',
+        targetId: id,
+        metadata: { changes: body, targetEmail: updated.email },
+        ipAddress: clientIp,
+      },
+    });
+
+    return updated;
+  }
+
   // 17. Audit Logs Query & CSV Export (Super Admin)
   @UseGuards(AdminGuard, AdminLevelGuard)
   @RequireAdminLevel(AdminLevel.super_admin)

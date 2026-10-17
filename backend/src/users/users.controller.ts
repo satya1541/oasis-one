@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MemberGuard } from '../common/guards/member.guard';
 
-@Controller('me')
+@Controller(['me', 'users/me', 'users'])
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

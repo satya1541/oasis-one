@@ -108,6 +108,10 @@ export class FilesService {
     });
   }
 
+  async getFileById(id: string): Promise<UploadedFile | null> {
+    return this.prisma.uploadedFile.findUnique({ where: { id } });
+  }
+
   /**
    * Generates a signed access token for downloading/viewing a file.
    */

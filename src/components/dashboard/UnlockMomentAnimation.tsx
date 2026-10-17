@@ -14,24 +14,31 @@ export function UnlockMomentAnimation({
   onComplete,
 }: UnlockMomentAnimationProps) {
   const [frame, setFrame] = useState<1 | 2 | 3 | 4>(1);
+  const [dismissed, setDismissed] = useState(false);
+
+  const handleDismiss = () => {
+    if (dismissed) return;
+    setDismissed(true);
+    onComplete();
+  };
 
   // Esc key or click to skip immediately
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onComplete();
+        handleDismiss();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onComplete]);
+  }, [dismissed]);
 
   // Frame sequence
   useEffect(() => {
     const t1 = setTimeout(() => setFrame(2), 700);
     const t2 = setTimeout(() => setFrame(3), 1400);
     const t3 = setTimeout(() => setFrame(4), 2100);
-    const t4 = setTimeout(() => onComplete(), 3600);
+    const t4 = setTimeout(() => handleDismiss(), 3800);
 
     return () => {
       clearTimeout(t1);
@@ -39,11 +46,11 @@ export function UnlockMomentAnimation({
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, [onComplete]);
+  }, [dismissed]);
 
   return (
     <div
-      onClick={onComplete}
+      onClick={handleDismiss}
       className="fixed inset-0 z-50 bg-[var(--brand-navy)]/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-[var(--brand-cream)] cursor-pointer select-none"
     >
       {/* Top Sweep Hairline */}
@@ -54,9 +61,9 @@ export function UnlockMomentAnimation({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          onComplete();
+          handleDismiss();
         }}
-        className="absolute top-6 right-6 text-xs text-[var(--brand-cream)]/60 hover:text-[var(--brand-cream)] px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 transition-colors"
+        className="absolute top-6 right-6 text-xs text-[var(--brand-cream)]/70 hover:text-[var(--brand-cream)] px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-colors shadow-sm"
       >
         <span>Skip</span>
         <X className="w-3.5 h-3.5" />
@@ -118,7 +125,7 @@ export function UnlockMomentAnimation({
         )}
 
         {frame === 4 && (
-          <div className="space-y-3 animate-in fade-in zoom-in-95 duration-500">
+          <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--brand-gold)] text-[var(--brand-navy)] text-xs font-semibold">
               <Check className="w-3.5 h-3.5 stroke-[3]" />
               <span>Membership Active</span>
@@ -131,6 +138,18 @@ export function UnlockMomentAnimation({
             <p className="text-xs text-[var(--brand-cream)]/75 max-w-sm mx-auto">
               Click anywhere to explore your dashboard and get started.
             </p>
+            <div className="pt-2 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDismiss();
+                }}
+                className="px-6 py-2.5 rounded-full bg-[var(--brand-gold)] text-[var(--brand-navy)] font-semibold text-xs hover:opacity-95 active:scale-95 transition-all shadow-lg shadow-[var(--brand-gold)]/20"
+              >
+                Go to Dashboard &rarr;
+              </button>
+            </div>
           </div>
         )}
 

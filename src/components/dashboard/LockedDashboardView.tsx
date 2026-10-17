@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   RotateCw,
 } from "lucide-react";
+import { subscribeToAccountStatus, subscribeToApplicationMessages } from "@/lib/socket";
 
 interface LockedDashboardViewProps {
   userName: string;
@@ -26,12 +27,13 @@ interface LockedDashboardViewProps {
 
 export function LockedDashboardView({
   userName,
+  onSimulateApproval,
 }: LockedDashboardViewProps) {
   const [copiedRef, setCopiedRef] = useState(false);
-  const [lockedModalOpen, setLockedModalOpen] = useState(true);
   const [userEmail, setUserEmail] = useState("");
   const [referenceId, setReferenceId] = useState("");
   const [appStatus, setAppStatus] = useState("pending");
+  const [decisionReason, setDecisionReason] = useState("");
 
   const [messages, setMessages] = useState<any[]>([]);
   const [replyText, setReplyText] = useState("");
@@ -51,6 +53,9 @@ export function LockedDashboardView({
           if (isMounted && app) {
             setReferenceId(app.id || app.referenceNumber || "");
             setAppStatus(app.status || "pending");
+            if (app.decisionReason) {
+              setDecisionReason(app.decisionReason);
+            }
           }
         }
 
@@ -74,10 +79,27 @@ export function LockedDashboardView({
       }
     }
     loadApplication();
+
+    const unsubscribeStatus = subscribeToAccountStatus((payload) => {
+      console.log("[LockedDashboardView] Realtime status received:", payload);
+      if (payload?.accountStatus === "active") {
+        onSimulateApproval?.();
+      } else if (payload?.applicationStatus === "info_requested") {
+        setAppStatus("info_requested");
+        loadApplication();
+      }
+    });
+
+    const unsubscribeMessages = subscribeToApplicationMessages(() => {
+      loadApplication();
+    });
+
     return () => {
       isMounted = false;
+      unsubscribeStatus();
+      unsubscribeMessages();
     };
-  }, []);
+  }, [onSimulateApproval]);
 
   const handleCopyRef = () => {
     if (referenceId) {
@@ -102,6 +124,7 @@ export function LockedDashboardView({
         const json = await res.json();
         setMessages((prev) => [...prev, json.data]);
         setReplyText("");
+        setAppStatus("pending");
       }
     } catch (err) {
       console.error("Failed to send message:", err);
@@ -133,72 +156,92 @@ export function LockedDashboardView({
     }
   };
 
+  const isInfoRequested = appStatus === "info_requested";
+
   return (
-    <div className="space-y-8 pb-16">
-      {/* Account Locked Notice Modal */}
+    <div className="space-y-8 pb-20 max-w-4xl mx-auto">
+      {/* Account Locked Notice Modal - persistently locked until approved */}
       <AccountLockedModal
-        isOpen={lockedModalOpen}
-        onClose={() => setLockedModalOpen(false)}
+        isOpen={true}
         email={userEmail || "your registered email"}
+        onApproved={onSimulateApproval}
+        initialAppStatus={appStatus}
+        initialDecisionReason={decisionReason}
       />
 
       {/* ── Email Verification Banner ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
-        <div className="flex items-center gap-2.5">
-          <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-          <span>
-            Please verify your email address so review can proceed. We sent a verification link to your inbox.
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-900 dark:text-amber-200 gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span className="font-sans leading-relaxed">
+            Please verify your email address to expedite committee vetting. A verification link was dispatched to your inbox.
           </span>
         </div>
         <button
           type="button"
           onClick={handleResendEmail}
           disabled={resendCooldown}
-          className="text-xs font-semibold text-amber-800 hover:underline disabled:opacity-50 shrink-0 ml-3 cursor-pointer"
+          className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline disabled:opacity-50 shrink-0 cursor-pointer text-left sm:text-right"
         >
           {resendCooldown ? "Link sent (wait 60s)" : "Resend email"}
         </button>
       </div>
 
-      {/* ── Screen 7a: Application Status Card (Live) ────────────────────────── */}
-      <Card className="p-6 border-[var(--brand-gold)]/40 bg-[var(--surface)] shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
+      {/* ── Application Status Card (Live) ────────────────────────── */}
+      <div className="p-7 sm:p-8 rounded-3xl border border-[#D4AF37]/30 dark:border-[#F3D3A2]/25 bg-[var(--surface)] shadow-md space-y-6 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80 pb-6">
           <div>
-            <div className="text-[10px] uppercase font-mono font-semibold tracking-wider text-[var(--accent)]">
-              Application Under Review
-            </div>
-            <h2 className="font-display text-2xl font-light text-[var(--text)] tracking-tight mt-0.5">
-              Welcome, {userName}
+            {isInfoRequested ? (
+              <div className="text-[11px] uppercase font-mono font-bold tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2 animate-pulse mb-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                <span>Action Required • Information Requested</span>
+              </div>
+            ) : (
+              <div className="text-[11px] uppercase font-mono font-semibold tracking-widest text-[#86601F] dark:text-[#F3D3A2] mb-1">
+                Admissions Vetting In Progress
+              </div>
+            )}
+            <h2 className="font-display text-2xl sm:text-3xl font-light text-[var(--text)] tracking-tight">
+              Welcome to OASIS, {userName}
             </h2>
-            <p className="text-xs text-[var(--muted)] mt-1">
-              With the OASIS admissions committee for vetting. We usually reply within 2 business days.
-            </p>
+            {isInfoRequested ? (
+              <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300 mt-1 font-sans">
+                The Admissions Committee requested additional verification details. Reply in the dialogue below.
+              </p>
+            ) : (
+              <p className="text-xs sm:text-sm text-[var(--muted)] mt-1 font-sans">
+                Under confidential review by the OASIS membership council. We typically resolve applications in 48 hours.
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setLockedModalOpen(true)}
-              className="text-xs font-medium text-[var(--accent)] hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--border)] transition-colors cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Review Notice</span>
-            </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {isInfoRequested ? (
+              <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none animate-pulse">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                <span>Action Required</span>
+              </div>
+            ) : (
+              <div className="text-xs font-medium text-[#86601F] dark:text-[#F3D3A2] bg-[#86601F]/10 border border-[#86601F]/20 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Pre-Vetting Mode</span>
+              </div>
+            )}
 
             {referenceId && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] font-mono text-xs">
-                <span className="text-[var(--muted)]">Ref:</span>
-                <span className="font-bold text-[var(--text)] truncate max-w-[120px]">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] font-mono text-xs shadow-2xs">
+                <span className="text-[var(--muted)]">Docket:</span>
+                <span className="font-semibold text-[var(--text)] truncate max-w-[120px]">
                   {referenceId.slice(0, 8)}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyRef}
-                  className="text-[var(--muted)] hover:text-[var(--text)] ml-1 cursor-pointer"
+                  className="text-[var(--muted)] hover:text-[#86601F] ml-1 cursor-pointer transition-colors"
                   title="Copy reference ID"
                 >
                   {copiedRef ? (
-                    <Check className="w-3.5 h-3.5 text-[var(--success)]" />
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
@@ -208,33 +251,58 @@ export function LockedDashboardView({
           </div>
         </div>
 
+        {/* Action Required Banner for Info Request */}
+        {isInfoRequested && (
+          <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs space-y-2.5">
+            <div className="flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-300 font-mono uppercase tracking-wider text-[11px]">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Admissions Committee Inquiry Note:</span>
+            </div>
+            <div className="p-4 bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] rounded-2xl font-medium text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap font-sans">
+              {decisionReason || messages.find((m) => m.authorType === "admin")?.body || "Please share proof of business incorporation, Pitch Deck, or active founder LinkedIn link."}
+            </div>
+            <p className="text-[11px] text-[var(--muted)] font-mono">
+              Provide your documents or explanation in the Admissions Channel below.
+            </p>
+          </div>
+        )}
+
         {/* Messaging Box with Admins */}
         <div className="space-y-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)] flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[var(--accent)]" />
-            Admissions Committee Channel
+          <div className="text-xs font-mono uppercase tracking-wider text-[var(--muted)] flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+            <span>Admissions Council Dialogue</span>
           </div>
 
-          <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
             {messages.length === 0 ? (
-              <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/40 text-xs text-[var(--muted)] text-center">
-                Your application has been received and queued for committee review. Any information requests or notes from reviewers will appear here.
+              <div className="p-6 rounded-2xl border border-dashed border-[#D9CDAE]/80 dark:border-[#2C2E4A] bg-[var(--surface-2)]/30 text-xs text-[var(--muted)] text-center font-sans leading-relaxed">
+                Your dossier has entered the evaluation pool. Any inquiries, verification notices, or decisions from admissions will stream here in real-time.
               </div>
             ) : (
-              messages.map((m) => (
-                <div
-                  key={m.id}
-                  className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-xs text-[var(--text)] space-y-1"
-                >
-                  <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
-                    <span className="font-semibold text-[var(--text)]">
-                      {m.author?.profile?.name || (m.authorType === "admin" ? "Admissions Committee" : "You")}
-                    </span>
-                    <span>{new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+              messages.map((m) => {
+                const isAdmin = m.authorType === "admin";
+                return (
+                  <div
+                    key={m.id}
+                    className={`p-4 rounded-2xl border text-xs space-y-1.5 font-sans ${
+                      isAdmin
+                        ? "bg-[#1E1F33] text-[#FBF7EE] border-[#F3D3A2]/30 shadow-xs"
+                        : "bg-[var(--surface-2)] text-[var(--text)] border-[#D9CDAE]/60 dark:border-[#2C2E4A]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[11px] opacity-75 font-mono">
+                      <span className={isAdmin ? "text-[#F3D3A2] font-semibold" : "font-semibold"}>
+                        {m.author?.profile?.name || (isAdmin ? "Admissions Council" : "You")}
+                      </span>
+                      <span>
+                        {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <p className="leading-relaxed whitespace-pre-wrap">{m.body}</p>
                   </div>
-                  <p className="leading-relaxed">{m.body}</p>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -243,48 +311,58 @@ export function LockedDashboardView({
               type="text"
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Reply or share updated links with the reviewer..."
-              className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+              placeholder="Reply to the reviewer with links or clarifications..."
+              className="flex-1 text-xs px-4 py-3 rounded-2xl border border-[#D9CDAE]/70 dark:border-[#2C2E4A] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans"
             />
-            <Button size="sm" type="submit" disabled={submittingReply || !replyText.trim()}>
+            <Button
+              size="sm"
+              type="submit"
+              disabled={submittingReply || !replyText.trim()}
+              className="rounded-2xl px-5 cursor-pointer"
+            >
               <Send className="w-3.5 h-3.5" />
             </Button>
           </form>
         </div>
 
         {/* Withdrawal Link */}
-        <div className="pt-4 border-t border-[var(--border)] flex justify-between items-center text-xs text-[var(--muted)]">
-          <span>Need help? Contact <a href="mailto:support@oasis.community" className="text-[var(--accent)] hover:underline">support@oasis.community</a></span>
+        <div className="pt-4 border-t border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--muted)] font-mono text-[11px]">
+          <span>Assistance: <a href="mailto:support@oasis.community" className="text-[#86601F] dark:text-[#F3D3A2] hover:underline">support@oasis.community</a></span>
           {!withdrawn && (
             <button
               type="button"
               onClick={() => setWithdrawModalOpen(true)}
-              className="text-rose-600 hover:underline cursor-pointer"
+              className="text-rose-500 hover:text-rose-600 hover:underline cursor-pointer text-left sm:text-right"
             >
-              Withdraw application
+              Withdraw Application
             </button>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Withdraw Modal */}
       {withdrawModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 space-y-4 text-xs">
-            <h3 className="font-display text-base font-medium text-[var(--text)]">
+          <div className="w-full max-w-md bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A] rounded-3xl p-6 sm:p-7 space-y-4 text-xs shadow-2xl animate-fade-in">
+            <h3 className="font-display text-lg font-medium text-[var(--text)]">
               Withdraw Application
             </h3>
-            <p className="text-[var(--muted)]">
-              Are you sure you wish to withdraw your application? You will need to start a new application if you wish to apply again.
+            <p className="text-[var(--muted)] leading-relaxed font-sans">
+              Are you certain you wish to withdraw your application? Your docket records will be purged from the review queue and you will need to re-apply if you reconsider.
             </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setWithdrawModalOpen(false)}>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setWithdrawModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 size="sm"
-                className="bg-rose-600 hover:bg-rose-500 text-white"
+                className="bg-rose-600 hover:bg-rose-500 text-white rounded-xl"
                 onClick={handleWithdraw}
               >
                 Confirm Withdrawal

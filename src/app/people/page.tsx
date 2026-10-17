@@ -142,14 +142,14 @@ export default function PeoplePage() {
           </div>
 
           {/* Tab Selector */}
-          <div className="flex items-center rounded-xl bg-[var(--surface-2)] p-1 border border-[var(--border)] text-xs">
+          <div className="flex items-center rounded-2xl bg-[var(--surface-2)] p-1.5 border border-[var(--border)] text-xs shadow-xs">
             <button
               type="button"
               onClick={() => setActiveTab("mentors")}
               className={cn(
-                "px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
                 activeTab === "mentors"
-                  ? "bg-[var(--surface)] text-[var(--text)] shadow-xs"
+                  ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
               )}
             >
@@ -159,9 +159,9 @@ export default function PeoplePage() {
               type="button"
               onClick={() => setActiveTab("directory")}
               className={cn(
-                "px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
                 activeTab === "directory"
-                  ? "bg-[var(--surface)] text-[var(--text)] shadow-xs"
+                  ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
               )}
             >
@@ -171,9 +171,9 @@ export default function PeoplePage() {
               type="button"
               onClick={() => setActiveTab("connections")}
               className={cn(
-                "px-3.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer",
+                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
                 activeTab === "connections"
-                  ? "bg-[var(--surface)] text-[var(--text)] shadow-xs"
+                  ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
               )}
             >

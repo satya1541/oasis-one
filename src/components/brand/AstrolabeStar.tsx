@@ -55,11 +55,21 @@ export function AstrolabeStar({ className, size = 480 }: AstrolabeStarProps) {
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
+      {/* Ambient Celestial Glow Halo */}
+      <div 
+        className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(243,211,162,0.14)_0%,rgba(233,198,140,0.06)_40%,transparent_70%)] animate-pulse-glow"
+        aria-hidden="true"
+      />
+      <div 
+        className="absolute w-3/4 h-3/4 rounded-full bg-[radial-gradient(circle_at_center,rgba(134,96,31,0.18)_0%,transparent_70%)] blur-2xl"
+        aria-hidden="true"
+      />
+
       <svg
         viewBox="0 0 500 500"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full astrolabe-rotate opacity-75"
+        className="w-full h-full astrolabe-rotate opacity-85 relative z-10 drop-shadow-[0_0_12px_rgba(243,211,162,0.2)]"
       >
         {/* Outer concentric rings */}
         <circle

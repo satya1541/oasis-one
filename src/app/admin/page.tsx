@@ -77,156 +77,177 @@ export default function AdminOverviewPage() {
   }, []);
 
   return (
-    <div className="max-w-[1000px] mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="max-w-[1040px] mx-auto space-y-8 pb-16">
+      {/* Editorial Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-medium text-[var(--text)]">
-            Admin Overview
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[11px] font-mono uppercase tracking-widest text-[#86601F] dark:text-[#F3D3A2] font-semibold">
+              Live Governance Telemetry
+            </span>
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+            Governance Console
           </h1>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            Live operational telemetry for OASIS membership committee and governance.
+          <p className="mt-1 text-xs sm:text-sm text-[var(--muted)] font-sans">
+            Real-time applicant triage, audit logs, and member verification oversight.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadData} disabled={loading} className="gap-2">
-          <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Refresh</span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={loadData}
+          disabled={loading}
+          className="gap-2 rounded-2xl text-xs px-4 py-2 cursor-pointer"
+        >
+          <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#86601F] dark:text-[#F3D3A2]" : ""}`} />
+          <span>Synchronize</span>
         </Button>
       </div>
 
       {/* ── Four KPI Metric Cards (Connected to Live Database) ───────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
-            <span>Members</span>
-            <Users className="w-3.5 h-3.5 text-[var(--brand-navy)]" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
+            <span className="uppercase tracking-wider text-[11px]">Active Members</span>
+            <Users className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
           </div>
-          <div className="text-3xl font-display font-light text-[var(--text)]">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[var(--text)] tracking-tight">
             {stats.activeMembers}
           </div>
-          <div className="mt-1 text-[11px] text-[var(--muted)] font-medium">Active accounts</div>
+          <div className="mt-2 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+            Pre-vetted ecosystem
+          </div>
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
-            <span>Pending Review</span>
-            <FileCheck2 className="w-3.5 h-3.5 text-[var(--accent)]" />
+        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
+            <span className="uppercase tracking-wider text-[11px]">Triage Queue</span>
+            <FileCheck2 className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
           </div>
-          <div className="text-3xl font-display font-light text-[var(--brand-navy)]">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[#86601F] dark:text-[#F3D3A2] tracking-tight">
             {stats.pendingApplications}
           </div>
-          <div className="mt-1 text-[11px] text-[var(--warning)] font-medium">
-            {stats.pendingApplications > 0 ? "Awaiting decision" : "Queue clear"}
+          <div className="mt-2 text-[11px] font-mono text-amber-600 dark:text-amber-400">
+            {stats.pendingApplications > 0 ? "Pending committee decision" : "Review queue clear"}
           </div>
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
-            <span>Upcoming events</span>
-            <Calendar className="w-3.5 h-3.5 text-[var(--info)]" />
+        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
+            <span className="uppercase tracking-wider text-[11px]">Conclaves</span>
+            <Calendar className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
           </div>
-          <div className="text-3xl font-display font-light text-[var(--text)]">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[var(--text)] tracking-tight">
             {stats.upcomingEvents}
           </div>
-          <div className="mt-1 text-[11px] text-[var(--muted)]">Scheduled</div>
+          <div className="mt-2 text-[11px] font-mono text-[var(--muted)]">
+            Scheduled across Odisha
+          </div>
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
-            <span>Reports</span>
-            <AlertTriangle className="w-3.5 h-3.5 text-[var(--danger)]" />
+        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
+            <span className="uppercase tracking-wider text-[11px]">Reported Flags</span>
+            <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
-          <div className="text-3xl font-display font-light text-[var(--danger)]">
+          <div className="text-3xl sm:text-4xl font-display font-light text-rose-600 dark:text-rose-400 tracking-tight">
             {stats.openReports}
           </div>
-          <div className="mt-1 text-[11px] text-[var(--muted)]">
-            {stats.openReports > 0 ? "Requires review" : "Zero open flags"}
+          <div className="mt-2 text-[11px] font-mono text-rose-600/80 dark:text-rose-400/80">
+            {stats.openReports > 0 ? "Requires committee audit" : "Zero open disputes"}
           </div>
         </div>
       </div>
 
       {/* ── Needs Your Attention Section ───────────────────────────────────────── */}
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 lg:p-7 shadow-[var(--shadow-1)] space-y-4">
-        <h2 className="text-xs font-display uppercase tracking-wider text-[var(--brand-navy)] font-semibold">
-          Needs Your Attention
-        </h2>
+      <div className="bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 backdrop-blur-md">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-[#86601F] dark:text-[#F3D3A2] font-semibold">
+            Priority Action Stream
+          </h2>
+          <span className="text-[11px] font-mono text-[var(--muted)]">
+            Auto-sorted by SLA
+          </span>
+        </div>
 
-        <div className="divide-y divide-[var(--border)]/70">
+        <div className="divide-y divide-[#EAE1CF]/70 dark:divide-[#2C2E4A]/80">
           {/* Row 1: Applications */}
-          <div className="py-4 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center shrink-0 text-[var(--brand-navy)]">
-                <FileCheck2 className="w-4 h-4" />
+          <div className="py-5 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 flex items-center justify-center shrink-0 text-[#86601F] dark:text-[#F3D3A2] shadow-2xs">
+                <FileCheck2 className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {stats.pendingApplications > 0
-                    ? `${stats.pendingApplications} application${stats.pendingApplications > 1 ? "s" : ""} waiting for committee decision`
-                    : "No applications pending review"}
+                    ? `${stats.pendingApplications} applicant dossier${stats.pendingApplications > 1 ? "s" : ""} awaiting committee vetting`
+                    : "Review pool up to date"}
                 </p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
                   {oldestApp
                     ? `Earliest submission by ${oldestApp.name} on ${oldestApp.date}`
-                    : "The applicant review pipeline is completely up to date."}
+                    : "No pending founder verification submissions in the triage queue."}
                 </p>
               </div>
             </div>
             <Link href="/admin/applications">
-              <Button size="sm" className="gap-1.5 w-full sm:w-auto">
-                <span>Review queue</span>
-                <ArrowRight className="w-3 h-3" />
+              <Button size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
+                <span>Open Queue</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </div>
 
           {/* Row 2: Reports */}
-          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 flex items-center justify-center shrink-0 text-[var(--danger)]">
-                <AlertTriangle className="w-4 h-4" />
+          <div className="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-500 shadow-2xs">
+                <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {stats.openReports > 0
-                    ? `${stats.openReports} community post${stats.openReports > 1 ? "s" : ""} reported for review`
-                    : "Zero content reports pending"}
+                    ? `${stats.openReports} discussion post${stats.openReports > 1 ? "s" : ""} flagged for moderation`
+                    : "Zero content violations reported"}
                 </p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
                   {stats.openReports > 0
-                    ? "Review flagged messages or potential guidelines infractions."
-                    : "All community discussions comply with standard guidelines."}
+                    ? "Audit flagged posts and determine community compliance action."
+                    : "All active discussions adhere to Odisha startup community guidelines."}
                 </p>
               </div>
             </div>
             <Link href="/admin/reports">
-              <Button variant="secondary" size="sm" className="gap-1.5 w-full sm:w-auto">
-                <span>Review reports</span>
+              <Button variant="secondary" size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
+                <span>Audit Flags</span>
               </Button>
             </Link>
           </div>
 
           {/* Row 3: Achievements */}
-          <div className="py-4 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 flex items-center justify-center shrink-0 text-[var(--brand-gold)]">
-                <Award className="w-4 h-4" />
+          <div className="py-5 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400 shadow-2xs">
+                <Award className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-[var(--text)]">
                   {stats.pendingAchievements > 0
-                    ? `${stats.pendingAchievements} member achievement${stats.pendingAchievements > 1 ? "s" : ""} pending review`
-                    : "Zero member achievements pending review"}
+                    ? `${stats.pendingAchievements} venture milestone${stats.pendingAchievements > 1 ? "s" : ""} pending publication`
+                    : "No pending member celebrations"}
                 </p>
-                <p className="text-xs text-[var(--muted)]">
+                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
                   {stats.pendingAchievements > 0
-                    ? "Approve milestone submissions for the 24-hour member dashboard carousel."
-                    : "No pending member celebrations awaiting approval."}
+                    ? "Review and authorize milestone celebrations for the community banner."
+                    : "Milestone announcements are fully published across member dashboards."}
                 </p>
               </div>
             </div>
             <Link href="/admin/achievements">
-              <Button variant="secondary" size="sm" className="gap-1.5 w-full sm:w-auto">
-                <span>Approve achievements</span>
+              <Button variant="secondary" size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
+                <span>Authorize Milestones</span>
               </Button>
             </Link>
           </div>
