@@ -47,10 +47,16 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     try {
       // 1. Origin verification
       const origin = client.handshake.headers.origin;
-      const allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:7200'];
+      const allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || [
+        'https://oasisodisha.in',
+        'https://www.oasisodisha.in',
+        'http://localhost:7200',
+        'http://localhost:3000',
+      ];
       
       const isAllowedOrigin = !origin ||
         allowedOrigins.some(a => origin.startsWith(a)) ||
+        origin.includes('oasisodisha.in') ||
         origin.includes('localhost') ||
         origin.includes('127.0.0.1');
 

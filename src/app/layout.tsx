@@ -31,7 +31,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://oasis-one.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://oasisodisha.in"),
   title: "OASIS ONE — One Community. Infinite Possibilities.",
   description:
     "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. Find the right people, ask better questions, meet in person. 650+ verified members.",

@@ -26,8 +26,8 @@ export class MailService {
   ) {
     const transport = this.configService.get<string>('mail.transport') || 'console';
     this.isConsole = transport === 'console';
-    this.from = this.configService.get<string>('mail.from') || 'OASIS ONE <no-reply@oasis.community>';
-    this.logoUrl = this.configService.get<string>('mail.logoUrl') || 'http://localhost:7200/brand/oasis-logo-email.png';
+    this.from = this.configService.get<string>('mail.from') || 'OASIS ONE <no-reply@oasisodisha.in>';
+    this.logoUrl = this.configService.get<string>('mail.logoUrl') || 'https://oasisodisha.in/brand/oasis-logo-email.png';
 
     if (!this.isConsole) {
       this.transporter = nodemailer.createTransport({

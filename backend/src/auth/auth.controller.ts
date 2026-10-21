@@ -32,7 +32,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {
     this.isProd = this.configService.get<string>('nodeEnv') === 'production';
-    this.frontendUrl = this.configService.get<string>('frontendUrl') || 'http://localhost:7200';
+    this.frontendUrl = this.configService.get<string>('frontendUrl') || 'https://oasisodisha.in';
   }
 
   private setSessionCookie(res: Response, token: string) {
@@ -64,11 +64,13 @@ export class AuthController {
     let csrfToken = req.cookies?.['oasis_csrf'];
     if (!csrfToken) {
       csrfToken = generateRandomToken(24);
+      const domain = process.env.COOKIE_DOMAIN || undefined;
       res.cookie('oasis_csrf', csrfToken, {
         httpOnly: false, // Accessible to frontend JS for double-submit header
         secure: this.isProd,
         sameSite: 'lax',
         path: '/',
+        domain,
         maxAge: 24 * 60 * 60 * 1000,
       });
     }
@@ -94,12 +96,14 @@ export class AuthController {
     const { authUrl, state, codeVerifier } = this.authService.getGoogleAuthUrl(invite, validatedNext, authMode, role);
 
     // Save PKCE verifier, state, mode and role in temporary HttpOnly cookie (valid for 10 min)
+    const domain = process.env.COOKIE_DOMAIN || undefined;
     res.cookie('oasis_pkce', JSON.stringify({ state, codeVerifier, next: validatedNext, mode: authMode, role }), {
       httpOnly: true,
       secure: this.isProd,
       sameSite: 'lax',
       maxAge: 10 * 60 * 1000,
       path: '/',
+      domain,
     });
 
     return res.redirect(302, authUrl);
@@ -159,7 +163,8 @@ export class AuthController {
           role = parsed.role;
         }
       } catch {}
-      res.clearCookie('oasis_pkce', { path: '/' });
+      const domain = process.env.COOKIE_DOMAIN || undefined;
+      res.clearCookie('oasis_pkce', { path: '/', domain });
     }
 
     try {

@@ -13,7 +13,12 @@ export class CsrfGuard implements CanActivate {
   private readonly allowedOrigins: string[];
 
   constructor(private readonly configService: ConfigService) {
-    this.allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || ['http://localhost:7200'];
+    this.allowedOrigins = this.configService.get<string[]>('wsAllowedOrigins') || [
+      'https://oasisodisha.in',
+      'https://www.oasisodisha.in',
+      'http://localhost:7200',
+      'http://localhost:3000',
+    ];
   }
 
   canActivate(context: ExecutionContext): boolean {
@@ -36,13 +41,17 @@ export class CsrfGuard implements CanActivate {
     const requestSource = origin || (referer ? new URL(referer).origin : null);
 
     if (requestSource) {
-      const isOriginAllowed = this.allowedOrigins.some((allowed) => {
-        try {
-          return new URL(allowed).origin === requestSource;
-        } catch {
-          return allowed === requestSource;
-        }
-      });
+      const isOriginAllowed =
+        this.allowedOrigins.some((allowed) => {
+          try {
+            return new URL(allowed).origin === requestSource;
+          } catch {
+            return allowed === requestSource;
+          }
+        }) ||
+        requestSource.includes('oasisodisha.in') ||
+        requestSource.includes('localhost') ||
+        requestSource.includes('127.0.0.1');
 
       if (!isOriginAllowed) {
         throw new HttpException(

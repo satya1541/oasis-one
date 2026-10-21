@@ -42,7 +42,7 @@ export class AdminService {
       this.config.get<string>('auth.fieldEncryptionKey') ||
       '2db43747f3af14adaeaec4751f89e14f7861a862f41e520a71c7e796ef450789';
     this.setupToken = this.config.get<string>('auth.adminSetupToken') || 'setup-token';
-    this.frontendUrl = this.config.get<string>('frontendUrl') || 'http://localhost:7200';
+    this.frontendUrl = this.config.get<string>('frontendUrl') || 'https://oasisodisha.in';
   }
 
   // ----------------------------------------------------

@@ -11,7 +11,11 @@ export function getSocket(): Socket {
   }
 
   if (!socketInstance) {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:7500/ws";
+    const defaultWsUrl =
+      typeof window !== "undefined" && window.location.hostname.includes("oasisodisha.in")
+        ? "https://back.oasisodisha.in/ws"
+        : "http://127.0.0.1:7500/ws";
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || defaultWsUrl;
     
     socketInstance = io(wsUrl, {
       path: "/socket.io",

@@ -2,8 +2,13 @@ export const configuration = () => ({
   port: parseInt(process.env.PORT || '7500', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL,
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:7200',
-  wsAllowedOrigins: (process.env.WS_ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:7200').split(',').map(s => s.trim()),
+  frontendUrl: process.env.FRONTEND_URL || 'https://oasisodisha.in',
+  cookieDomain: process.env.COOKIE_DOMAIN || undefined,
+  wsAllowedOrigins: (
+    process.env.WS_ALLOWED_ORIGINS ||
+    process.env.FRONTEND_URL ||
+    'https://oasisodisha.in,https://www.oasisodisha.in,http://localhost:7200,http://localhost:3000'
+  ).split(',').map(s => s.trim()),
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   
   auth: {
@@ -13,7 +18,7 @@ export const configuration = () => ({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:7200/api/v1/auth/google/callback',
+      callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'https://back.oasisodisha.in/api/v1/auth/google/callback',
     },
   },
 
@@ -23,10 +28,10 @@ export const configuration = () => ({
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
-    from: process.env.MAIL_FROM || 'OASIS ONE <no-reply@oasis.community>',
-    logoUrl: process.env.EMAIL_LOGO_URL || 'http://localhost:7200/brand/oasis-logo-email.png',
-    grievanceEmail: process.env.GRIEVANCE_EMAIL || 'grievance@oasis.community',
-    oversightEmail: process.env.OVERSIGHT_EMAIL || 'oversight@oasis.community',
+    from: process.env.MAIL_FROM || 'OASIS ONE <no-reply@oasisodisha.in>',
+    logoUrl: process.env.EMAIL_LOGO_URL || 'https://oasisodisha.in/brand/oasis-logo-email.png',
+    grievanceEmail: process.env.GRIEVANCE_EMAIL || 'grievance@oasisodisha.in',
+    oversightEmail: process.env.OVERSIGHT_EMAIL || 'oversight@oasisodisha.in',
   },
 
   storage: {

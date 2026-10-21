@@ -16,8 +16,14 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') || 7500;
   const isProd = configService.get<string>('nodeEnv') === 'production';
-  const frontendUrl = configService.get<string>('frontendUrl') || 'http://localhost:7200';
-  const allowedOrigins = configService.get<string[]>('wsAllowedOrigins') || [frontendUrl];
+  const frontendUrl = configService.get<string>('frontendUrl') || 'https://oasisodisha.in';
+  const allowedOrigins = configService.get<string[]>('wsAllowedOrigins') || [
+    frontendUrl,
+    'https://oasisodisha.in',
+    'https://www.oasisodisha.in',
+    'http://localhost:7200',
+    'http://localhost:3000',
+  ];
   const trustProxy = configService.get<number>('trustProxy') || 1;
 
   // Set trust proxy for reverse proxies & real IP detection
@@ -39,7 +45,14 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.some((ao) => origin.startsWith(ao)) ||
+        origin.includes('oasisodisha.in') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
         callback(null, true);
       } else {
         callback(null, false);
