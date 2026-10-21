@@ -432,9 +432,11 @@ function DashboardContent() {
   if (loading) {
     return (
       <MemberShell>
-        <div className="flex flex-col items-center justify-center min-h-[50vh] text-[var(--muted)] space-y-3">
-          <RotateCw className="w-6 h-6 animate-spin text-[var(--accent)]" />
-          <p className="text-xs font-mono">Connecting to OASIS ONE Network...</p>
+        <div className="flex flex-col items-center justify-center min-h-[45vh] text-[#ECF1EF]/60 space-y-4 select-none">
+          <div className="w-12 h-12 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)]">
+            <RotateCw className="w-5 h-5 animate-spin text-[#88DECC]" />
+          </div>
+          <p className="text-xs font-mono text-[#ECF1EF]/60">Connecting to OASIS ONE Network...</p>
         </div>
       </MemberShell>
     );
@@ -470,17 +472,17 @@ function DashboardContent() {
           <div className="space-y-5">
             {/* Live Dismissible Announcement Bar */}
             {announcement && !announcementDismissed && (
-              <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[var(--surface-2)]/90 border border-[var(--border)] text-xs text-[var(--text)] transition-all shadow-xs">
+              <div className="flex items-center justify-between px-4 py-3 rounded-2xl join-glass-panel border border-[#88DECC]/30 text-xs text-[#F5FAF6] transition-all shadow-md">
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full bg-[var(--brand-gold)] shrink-0 shadow-[0_0_6px_rgba(243,211,162,0.8)]" />
+                  <span className="w-2 h-2 rounded-full bg-[#88DECC] shrink-0 shadow-[0_0_8px_rgba(136,222,204,0.8)] animate-pulse" />
                   <span>
-                    <strong className="font-semibold">{announcement.title}</strong> — {announcement.body}
+                    <strong className="font-semibold text-[#F5FAF6]">{announcement.title}</strong> — <span className="text-[#ECF1EF]/80">{announcement.body}</span>
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setAnnouncementDismissed(true)}
-                  className="text-[var(--muted)] hover:text-[var(--text)] p-1 transition-colors cursor-pointer rounded-lg hover:bg-black/5"
+                  className="text-[#ECF1EF]/60 hover:text-white p-1 transition-colors cursor-pointer rounded-lg hover:bg-white/10"
                   aria-label="Dismiss announcement"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -491,46 +493,47 @@ function DashboardContent() {
             {/* Time-of-day Cinematic Greeting */}
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
               <div>
-                <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
-                  Good day, <span className="font-normal">{userName}</span>
+                <h1 className="font-display text-3xl sm:text-4xl font-light text-[#F5FAF6] tracking-tight">
+                  Good day, <span className="font-normal text-white">{userName}</span>
                 </h1>
-                <p className="text-xs sm:text-sm text-[var(--muted)] mt-1 font-sans">
+                <p className="text-xs sm:text-sm text-[#ECF1EF]/60 mt-1 font-sans">
                   Odisha {userRole} Cohort • Connected &amp; Verified
                 </p>
               </div>
-              <div className="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-[var(--muted)] bg-[var(--surface-2)]/70 px-3 py-1.5 rounded-full border border-[var(--border)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="hidden sm:inline-flex items-center gap-2 text-xs font-mono text-[#88DECC] bg-[#88DECC]/10 px-3.5 py-1.5 rounded-full border border-[#88DECC]/25 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#88DECC] animate-pulse" />
                 <span>650+ Active Members</span>
               </div>
             </div>
 
             {/* Live Hero Search Field with Specular Focus Halo */}
             <form onSubmit={handleSearchSubmit} className="relative">
-              <Search className="w-5 h-5 text-[var(--muted)] absolute left-4.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-5 h-5 text-[#ECF1EF]/40 absolute left-4.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search mentors, fellow founders, questions and events..."
-                className="w-full h-14 pl-12 pr-4 text-sm sm:text-base bg-[var(--surface)] border border-[var(--border-strong)] rounded-2xl text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/50 shadow-[0_2px_8px_rgba(30,31,51,0.04)] transition-all duration-200"
+                className="w-full h-13 pl-12 pr-4 text-xs sm:text-sm bg-white/[0.04] border border-white/10 rounded-2xl text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:border-[#88DECC]/60 focus:ring-2 focus:ring-[#88DECC]/20 shadow-[0_4px_20px_rgba(0,0,0,0.35)] transition-all duration-200"
               />
             </form>
 
             {/* Live Achievement Card */}
             {achievement && (
-              <div className="p-4.5 rounded-2xl bg-gradient-to-r from-[var(--surface-2)] via-[var(--surface)] to-[var(--surface-2)]/60 border border-[var(--border)] flex items-center justify-between gap-4 text-xs shadow-xs">
+              <div className="p-4 sm:p-4.5 rounded-2xl join-glass-panel border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 text-xs shadow-md relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-b from-[#F3D3A2] to-[#E9C68C] text-[var(--brand-navy)] flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-9 h-9 rounded-xl bg-[#122B2A] text-[#88DECC] border border-[#88DECC]/30 flex items-center justify-center shrink-0 shadow-xs">
                     <Sparkles className="w-4.5 h-4.5" />
                   </div>
-                  <p className="text-[var(--text)] leading-relaxed">
-                    <strong className="font-semibold text-sm">
+                  <p className="text-[#ECF1EF]/90 leading-relaxed">
+                    <strong className="font-semibold text-sm text-[#F5FAF6]">
                       {achievement.author?.name || "Community Member"}
                     </strong>
                     : {achievement.title}. {achievement.description}
                   </p>
                 </div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--accent)] whitespace-nowrap bg-[var(--surface)] px-2.5 py-1 rounded-full border border-[var(--border)] font-semibold">
+                <span className="self-start sm:self-auto text-[10px] font-mono uppercase tracking-wider text-[#88DECC] whitespace-nowrap bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/10 font-semibold">
                   Ecosystem Showcase
                 </span>
               </div>
@@ -540,16 +543,17 @@ function DashboardContent() {
           {/* ── Block 2: "Next Up" (Upcoming Events & My Tasks) ─────────────────── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Live Upcoming Events */}
-            <Card hoverEffect className="p-6 flex flex-col justify-between">
+            <div className="join-glass-panel rounded-2xl sm:rounded-3xl border border-white/10 p-6 flex flex-col justify-between shadow-[0_12px_36px_rgba(0,0,0,0.45)] relative overflow-hidden text-[#F5FAF6]">
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
               <div>
-                <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                   <div className="flex items-center gap-2.5">
-                    <Calendar className="w-4.5 h-4.5 text-[var(--accent)]" />
-                    <CardTitle className="text-base sm:text-lg">Upcoming Events</CardTitle>
+                    <Calendar className="w-4.5 h-4.5 text-[#88DECC]" />
+                    <h3 className="font-display text-base sm:text-lg font-medium text-[#F5FAF6]">Upcoming Events</h3>
                   </div>
                   <Link
                     href="/events"
-                    className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1 group"
+                    className="text-xs font-semibold text-[#88DECC] hover:underline flex items-center gap-1 group"
                   >
                     See all
                     <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
@@ -558,7 +562,7 @@ function DashboardContent() {
 
                 <div className="space-y-3.5">
                   {events.length === 0 ? (
-                    <p className="text-xs text-[var(--muted)] py-6 text-center">
+                    <p className="text-xs text-[#ECF1EF]/50 py-6 text-center">
                       No upcoming events scheduled right now. Check back soon.
                     </p>
                   ) : (
@@ -567,40 +571,39 @@ function DashboardContent() {
                       return (
                         <div
                           key={evt.id}
-                          className="flex items-center justify-between gap-3 text-xs p-2 rounded-xl hover:bg-[var(--surface-2)]/60 transition-colors"
+                          className="flex items-center justify-between gap-3 text-xs p-2.5 rounded-xl hover:bg-white/[0.03] transition-colors border border-transparent hover:border-white/5"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-11 h-11 rounded-xl bg-[var(--surface-2)] flex flex-col items-center justify-center text-center font-display border border-[var(--border)] shrink-0 shadow-2xs">
-                              <span className="text-[10px] text-[var(--muted)] uppercase font-semibold">
+                            <div className="w-11 h-11 rounded-xl bg-white/[0.04] flex flex-col items-center justify-center text-center font-display border border-white/10 shrink-0 shadow-xs">
+                              <span className="text-[10px] text-[#88DECC] uppercase font-mono font-semibold">
                                 {month}
                               </span>
-                              <span className="text-sm font-bold text-[var(--text)] leading-none">
+                              <span className="text-sm font-bold text-[#F5FAF6] leading-none">
                                 {day}
                               </span>
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-medium text-[var(--text)] text-sm truncate">
+                              <h4 className="font-medium text-[#F5FAF6] text-sm truncate">
                                 {evt.title}
                               </h4>
-                              <p className="text-[var(--muted)] text-[11px] truncate">
+                              <p className="text-[#ECF1EF]/60 text-[11px] truncate">
                                 {evt.venueOrLink || "Odisha Startup Corridor"}
                               </p>
                             </div>
                           </div>
                           {evt.isRegistered ? (
-                            <Button size="sm" variant="secondary" disabled className="shrink-0">
+                            <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[#88DECC] text-xs font-mono font-medium shrink-0">
                               Registered
-                            </Button>
+                            </span>
                           ) : (
-                            <Button
-                              size="sm"
-                              variant="primary"
+                            <button
+                              type="button"
                               disabled={registeringEventId === evt.id}
                               onClick={() => handleRegisterEvent(evt.id)}
-                              className="shrink-0"
+                              className="px-4 py-1.5 rounded-full bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white hover:shadow-[0_0_15px_rgba(136,222,204,0.35)] transition-all cursor-pointer shrink-0 disabled:opacity-50"
                             >
                               {registeringEventId === evt.id ? "Registering..." : "Register"}
-                            </Button>
+                            </button>
                           )}
                         </div>
                       );
@@ -608,24 +611,25 @@ function DashboardContent() {
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Live Tasks */}
-            <Card hoverEffect className="p-6 flex flex-col justify-between">
+            <div className="join-glass-panel rounded-2xl sm:rounded-3xl border border-white/10 p-6 flex flex-col justify-between shadow-[0_12px_36px_rgba(0,0,0,0.45)] relative overflow-hidden text-[#F5FAF6]">
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
               <div>
-                <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                   <div className="flex items-center gap-2.5">
-                    <CheckSquare className="w-4.5 h-4.5 text-[var(--brand-navy)]" />
-                    <CardTitle className="text-base sm:text-lg">My Tasks</CardTitle>
+                    <CheckSquare className="w-4.5 h-4.5 text-[#88DECC]" />
+                    <h3 className="font-display text-base sm:text-lg font-medium text-[#F5FAF6]">My Tasks</h3>
                   </div>
-                  <span className="text-xs font-mono font-medium text-[var(--muted)]">
+                  <span className="text-xs font-mono font-medium text-[#ECF1EF]/60">
                     {tasks.filter((t) => t.status === "completed").length} of {tasks.length} done
                   </span>
                 </div>
 
                 <div className="space-y-2.5">
                   {tasks.length === 0 ? (
-                    <p className="text-xs text-[var(--muted)] py-6 text-center">
+                    <p className="text-xs text-[#ECF1EF]/50 py-6 text-center">
                       No active milestones. Add your first goal below.
                     </p>
                   ) : (
@@ -633,22 +637,22 @@ function DashboardContent() {
                       <div
                         key={task.id}
                         onClick={() => handleToggleTask(task.id, task.status)}
-                        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[var(--surface-2)] transition-colors cursor-pointer group"
+                        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group border border-transparent hover:border-white/5"
                       >
                         <div
                           className={cn(
                             "w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all duration-150 shrink-0",
                             task.status === "completed"
-                              ? "bg-[var(--success)] border-[var(--success)] text-white shadow-2xs"
-                              : "border-[var(--border-strong)] bg-white group-hover:border-[var(--accent)]"
+                              ? "bg-[#88DECC] border-[#88DECC] text-[#03080B]"
+                              : "border-white/20 bg-white/[0.04] group-hover:border-[#88DECC]"
                           )}
                         >
                           {task.status === "completed" && <Check className="w-3 h-3 stroke-[3]" />}
                         </div>
                         <span
                           className={cn(
-                            "text-xs sm:text-sm text-[var(--text)] flex-1",
-                            task.status === "completed" && "line-through text-[var(--muted)]"
+                            "text-xs sm:text-sm text-[#F5FAF6] flex-1",
+                            task.status === "completed" && "line-through text-[#ECF1EF]/40"
                           )}
                         >
                           {task.title}
@@ -659,7 +663,7 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <div className="pt-4 mt-3 border-t border-[var(--border)]">
+              <div className="pt-4 mt-3 border-t border-white/10">
                 {showTaskInput ? (
                   <form onSubmit={handleCreateTask} className="flex gap-2">
                     <input
@@ -668,49 +672,50 @@ function DashboardContent() {
                       value={newTaskInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}
                       placeholder="Task or milestone title..."
-                      className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                      className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-white/10 bg-white/[0.04] text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:ring-1 focus:ring-[#88DECC]"
                     />
-                    <Button size="sm" variant="primary" type="submit">
+                    <button
+                      type="submit"
+                      className="px-3.5 py-1.5 rounded-xl bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white transition-all cursor-pointer"
+                    >
                       Save
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
+                    </button>
+                    <button
                       type="button"
                       onClick={() => setShowTaskInput(false)}
+                      className="px-3 py-1.5 rounded-xl text-xs text-[#ECF1EF]/60 hover:text-white transition-colors cursor-pointer"
                     >
                       Cancel
-                    </Button>
+                    </button>
                   </form>
                 ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-[var(--muted)] hover:text-[var(--text)] w-full justify-start gap-2 rounded-xl"
+                  <button
+                    type="button"
+                    className="text-xs text-[#88DECC] hover:text-white flex items-center gap-1.5 font-medium transition-colors cursor-pointer py-1"
                     onClick={() => setShowTaskInput(true)}
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    Add task
-                  </Button>
+                    <span>Add task</span>
+                  </button>
                 )}
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* ── Block 3: "For You" (Mentors | Questions Switch) ───── */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <h2 className="font-display text-xl font-medium text-[var(--text)]">For you</h2>
-                <div className="flex items-center rounded-xl bg-[var(--surface-2)] p-1 border border-[var(--border)] text-xs">
+                <h2 className="font-display text-lg sm:text-xl font-medium text-[#F5FAF6]">For you</h2>
+                <div className="flex items-center rounded-xl bg-white/[0.04] p-1 border border-white/10 text-xs">
                   <button
                     type="button"
                     onClick={() => setForYouTab("mentors")}
                     className={cn(
-                      "px-3.5 py-1.5 rounded-lg font-medium transition-all duration-150 cursor-pointer",
+                      "px-3.5 py-1.5 min-h-[34px] rounded-lg font-medium transition-all duration-150 cursor-pointer",
                       forYouTab === "mentors"
-                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs font-semibold"
-                        : "text-[var(--muted)] hover:text-[var(--text)]"
+                        ? "bg-[#EEF1EA] text-[#03080B] shadow-xs font-semibold"
+                        : "text-[#ECF1EF]/60 hover:text-white"
                     )}
                   >
                     Mentors
@@ -719,10 +724,10 @@ function DashboardContent() {
                     type="button"
                     onClick={() => setForYouTab("questions")}
                     className={cn(
-                      "px-3.5 py-1.5 rounded-lg font-medium transition-all duration-150 cursor-pointer",
+                      "px-3.5 py-1.5 min-h-[34px] rounded-lg font-medium transition-all duration-150 cursor-pointer",
                       forYouTab === "questions"
-                        ? "bg-[var(--surface)] text-[var(--text)] shadow-xs font-semibold"
-                        : "text-[var(--muted)] hover:text-[var(--text)]"
+                        ? "bg-[#EEF1EA] text-[#03080B] shadow-xs font-semibold"
+                        : "text-[#ECF1EF]/60 hover:text-white"
                     )}
                   >
                     Questions
@@ -732,7 +737,7 @@ function DashboardContent() {
 
               <Link
                 href={forYouTab === "mentors" ? "/people?tab=mentors" : "/community"}
-                className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1 group"
+                className="text-xs font-semibold text-[#88DECC] hover:underline flex items-center gap-1 group self-start xs:self-auto"
               >
                 Browse all {forYouTab}
                 <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
@@ -740,11 +745,11 @@ function DashboardContent() {
             </div>
 
             {forYouTab === "mentors" ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {mentors.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] col-span-3 py-8 text-center card-luxury">
+                  <div className="col-span-full py-10 text-center join-glass-panel rounded-2xl border border-white/10 text-xs text-[#ECF1EF]/50">
                     No mentors currently available in this cohort.
-                  </p>
+                  </div>
                 ) : (
                   mentors.map((m) => {
                     const initials = m.name
@@ -754,131 +759,136 @@ function DashboardContent() {
                       .slice(0, 2)
                       .toUpperCase();
                     return (
-                      <Card key={m.id} hoverEffect className="p-6 flex flex-col justify-between">
+                      <div key={m.id} className="join-glass-panel rounded-2xl border border-white/10 hover:border-white/20 p-5 flex flex-col justify-between text-[#F5FAF6] relative overflow-hidden transition-all duration-200">
+                        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/25 to-transparent" />
                         <div>
                           <div className="flex items-center justify-between mb-4">
-                            <div className="w-11 h-11 rounded-full bg-[var(--surface-2)] text-[var(--accent)] font-display font-semibold flex items-center justify-center border-2 border-[var(--brand-gold)] shadow-xs">
+                            <div className="w-11 h-11 rounded-full bg-[#122B2A] text-[#88DECC] font-display font-semibold flex items-center justify-center border border-[#88DECC]/40 shadow-xs">
                               {initials}
                             </div>
-                            <Badge variant="verified-mentor">Verified</Badge>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-[#88DECC]/10 text-[#88DECC] border border-[#88DECC]/30 uppercase">
+                              Verified Mentor
+                            </span>
                           </div>
-                          <h3 className="font-display text-base font-semibold text-[var(--text)]">
+                          <h3 className="font-display text-base font-semibold text-[#F5FAF6]">
                             {m.name}
                           </h3>
-                          <p className="text-xs text-[var(--muted)] mt-0.5 font-medium">
+                          <p className="text-xs text-[#ECF1EF]/60 mt-0.5 font-medium">
                             {m.city || "Odisha"} • {m.headline || "Ecosystem Mentor"}
                           </p>
-                          <p className="text-xs text-[var(--text)] mt-3.5 leading-relaxed line-clamp-3">
+                          <p className="text-xs text-[#ECF1EF]/75 mt-3.5 leading-relaxed line-clamp-3">
                             {m.bio || "Active mentor advising founders across the Odisha startup network."}
                           </p>
                         </div>
-                        <div className="pt-4 mt-5 border-t border-[var(--border)]">
+                        <div className="pt-4 mt-5 border-t border-white/10">
                           <Link
                             href={`/people/${m.id}`}
-                            className="text-xs font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+                            className="text-xs font-semibold text-[#88DECC] hover:underline inline-flex items-center gap-1"
                           >
                             Request guidance
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </Link>
                         </div>
-                      </Card>
+                      </div>
                     );
                   })
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {questions.length === 0 ? (
-                  <p className="text-xs text-[var(--muted)] col-span-3 py-8 text-center card-luxury">
+                  <div className="col-span-full py-10 text-center join-glass-panel rounded-2xl border border-white/10 text-xs text-[#ECF1EF]/50">
                     No community discussions posted yet. Be the first to ask!
-                  </p>
+                  </div>
                 ) : (
                   questions.map((q) => (
-                    <Card key={q.id} hoverEffect className="p-6 flex flex-col justify-between">
+                    <div key={q.id} className="join-glass-panel rounded-2xl border border-white/10 hover:border-white/20 p-5 flex flex-col justify-between text-[#F5FAF6] relative overflow-hidden transition-all duration-200">
+                      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/25 to-transparent" />
                       <div>
-                        <div className="flex items-center gap-2 text-xs text-[var(--muted)] mb-3">
-                          <MessageSquare className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-2 text-xs text-[#ECF1EF]/60 mb-3 font-mono">
+                          <MessageSquare className="w-3.5 h-3.5 text-[#88DECC]" />
                           <span>{q.responseCount || 0} replies</span>
                           {q.isResolved && (
                             <>
                               <span>•</span>
-                              <Badge variant="success">Resolved</Badge>
+                              <span className="text-emerald-400 font-semibold">Resolved</span>
                             </>
                           )}
                         </div>
-                        <h3 className="font-display text-base font-semibold text-[var(--text)] leading-snug line-clamp-2">
+                        <h3 className="font-display text-base font-semibold text-[#F5FAF6] leading-snug line-clamp-2">
                           {q.title}
                         </h3>
-                        <p className="text-xs text-[var(--muted)] mt-2.5">
+                        <p className="text-xs text-[#ECF1EF]/60 mt-2.5">
                           Asked by {q.author?.name || "Community Member"}
                         </p>
                       </div>
-                      <div className="pt-3.5 mt-4 border-t border-[var(--border)]">
+                      <div className="pt-3.5 mt-4 border-t border-white/10">
                         <Link
                           href={`/community/${q.id}`}
-                          className="text-xs text-[var(--accent)] font-semibold hover:underline inline-flex items-center gap-1"
+                          className="text-xs text-[#88DECC] font-semibold hover:underline inline-flex items-center gap-1"
                         >
                           Read replies
                           <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
                       </div>
-                    </Card>
+                    </div>
                   ))
                 )}
               </div>
             )}
           </div>
 
-          {/* ── Block 4: "Get Started" Card (Apple Monolith Checklist) ─────────── */}
-          <Card
+          {/* ── Block 4: "Get Started" Card ─────────── */}
+          <div
             className={cn(
-              "bg-gradient-to-r from-[var(--surface-2)]/90 via-[var(--surface)] to-[var(--surface-2)]/80 border-[var(--border)] p-7 transition-all duration-700 shadow-sm",
-              highlightGetStarted && "ring-2 ring-[var(--brand-gold)] shadow-[var(--shadow-2)] bg-[var(--surface)]"
+              "join-glass-panel rounded-2xl sm:rounded-3xl border border-white/10 p-6 sm:p-7 relative overflow-hidden text-[#F5FAF6] shadow-[0_12px_36px_rgba(0,0,0,0.45)] transition-all duration-700",
+              highlightGetStarted && "border-[#88DECC]/60 shadow-[0_0_30px_rgba(136,222,204,0.2)]"
             )}
           >
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
               <div>
-                <h3 className="font-display text-lg font-medium text-[var(--text)]">
+                <h3 className="font-display text-lg font-medium text-[#F5FAF6]">
                   Getting Started with OASIS ONE
                 </h3>
-                <p className="text-xs text-[var(--muted)] mt-1">
+                <p className="text-xs text-[#ECF1EF]/60 mt-1">
                   Complete these three quick milestones to unlock maximum community value.
                 </p>
               </div>
-              <span className="text-xs font-semibold text-[var(--accent)] bg-[var(--surface)] px-3 py-1 rounded-full border border-[var(--border)] shadow-2xs">
+              <span className="text-xs font-semibold text-[#88DECC] bg-white/[0.04] px-3 py-1 rounded-full border border-white/10">
                 Active Member
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
-                <div className="w-7 h-7 rounded-full bg-[var(--success)] text-white flex items-center justify-center shrink-0 shadow-2xs">
+              <Link href="/settings" className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-xs hover:border-[#88DECC]/40 hover:bg-white/[0.05] transition-all">
+                <div className="w-7 h-7 rounded-full bg-[#88DECC] text-[#03080B] flex items-center justify-center shrink-0 shadow-xs">
                   <Check className="w-4 h-4 stroke-[3]" />
                 </div>
-                <Link href="/settings" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
+                <span className="font-medium text-[#F5FAF6] hover:text-[#88DECC]">
                   Profile &amp; Visibility
-                </Link>
-              </div>
+                </span>
+              </Link>
 
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
-                <div className="w-7 h-7 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
+              <Link href="/events" className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-xs hover:border-[#88DECC]/40 hover:bg-white/[0.05] transition-all">
+                <div className="w-7 h-7 rounded-full bg-white/[0.06] border border-white/10 text-[#88DECC] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
                   2
                 </div>
-                <Link href="/events" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
+                <span className="font-medium text-[#F5FAF6] hover:text-[#88DECC]">
                   Register for an Event
-                </Link>
-              </div>
+                </span>
+              </Link>
 
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs shadow-2xs hover:border-[var(--accent)]/40 transition-colors">
-                <div className="w-7 h-7 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--muted)] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
+              <Link href="/community" className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-xs hover:border-[#88DECC]/40 hover:bg-white/[0.05] transition-all">
+                <div className="w-7 h-7 rounded-full bg-white/[0.06] border border-white/10 text-[#88DECC] flex items-center justify-center shrink-0 font-mono text-[11px] font-semibold">
                   3
                 </div>
-                <Link href="/community" className="font-medium text-[var(--text)] hover:text-[var(--accent)]">
+                <span className="font-medium text-[#F5FAF6] hover:text-[#88DECC]">
                   Ask a Community Question
-                </Link>
-              </div>
+                </span>
+              </Link>
             </div>
-          </Card>
+          </div>
         </div>
       )}
     </MemberShell>
@@ -887,7 +897,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[var(--bg)]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg" />}>
       <DashboardContent />
     </Suspense>
   );

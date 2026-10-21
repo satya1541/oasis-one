@@ -82,35 +82,38 @@ export default function AdminReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+    <div className="space-y-6 pb-16">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
         <div>
-          <h1 className="text-2xl font-display font-medium text-[var(--text)]">
-            Content Safety & Moderation Reports
+          <h1 className="text-2xl sm:text-3xl font-light font-display text-[#F5FAF6] tracking-tight">
+            Content Safety &amp; Moderation Reports
           </h1>
-          <p className="text-xs text-[var(--muted)] mt-1">
+          <p className="text-xs sm:text-sm text-[#ECF1EF]/70 font-sans mt-1">
             Review community-flagged posts and comments violating anti-spam or safety guidelines.
           </p>
         </div>
       </div>
 
       {notice && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-[var(--success)] flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
           <span>{notice}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center p-16 text-xs text-[var(--muted)] gap-2">
-          <RotateCw className="w-4 h-4 animate-spin text-[var(--accent)]" />
+        <div className="flex items-center justify-center p-16 text-xs text-[#ECF1EF]/60 gap-2">
+          <RotateCw className="w-4 h-4 animate-spin text-[#88DECC]" />
           <span>Loading content moderation queue...</span>
         </div>
       ) : reports.length === 0 ? (
-        <div className="p-16 text-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
-          <ShieldAlert className="w-8 h-8 text-[var(--muted)] mx-auto opacity-40" />
-          <h3 className="font-display text-sm font-medium text-[var(--text)]">Queue Clear</h3>
-          <p className="text-xs text-[var(--muted)] max-w-sm mx-auto">
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-16 text-center border border-white/10 relative overflow-hidden space-y-3 shadow-lg">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
+          <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#88DECC] mx-auto shadow-sm">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <h3 className="font-display text-base font-light text-[#F5FAF6]">Queue Clear</h3>
+          <p className="text-xs text-[#ECF1EF]/60 max-w-sm mx-auto font-sans leading-relaxed">
             Zero content reports pending review. The community feed is healthy and compliant.
           </p>
         </div>
@@ -119,49 +122,49 @@ export default function AdminReportsPage() {
           {reports.map((rep) => (
             <div
               key={rep.id}
-              className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-strong)] transition-all space-y-4"
+              className="join-glass-panel rounded-2xl p-6 border border-white/10 hover:border-rose-500/30 transition-all relative overflow-hidden space-y-4 shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
             >
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-[var(--text)]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-medium text-sm text-[#F5FAF6]">
                       Report against {rep.targetType}
                     </span>
-                    <Badge variant="warning">
+                    <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 font-semibold">
                       {rep.reasonCategory}
-                    </Badge>
+                    </span>
                   </div>
-                  <div className="text-xs text-[var(--muted)] font-mono">
-                    Flagged by {rep.reporter.profile?.name || rep.reporter.email} • {new Date(rep.createdAt).toLocaleDateString()}
+                  <div className="text-xs text-[#ECF1EF]/60 font-mono">
+                    Flagged by {rep.reporter.profile?.name || rep.reporter.email} &bull; {new Date(rep.createdAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
+                  <button
+                    type="button"
                     disabled={processingId === rep.id}
                     onClick={() => handleResolve(rep.id, "dismissed")}
-                    className="text-xs"
+                    className="px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[#ECF1EF]/70 hover:text-[#F5FAF6] text-xs font-medium transition-all cursor-pointer disabled:opacity-50"
                   >
                     Dismiss Report
-                  </Button>
-                  <Button
-                    size="sm"
+                  </button>
+                  <button
+                    type="button"
                     disabled={processingId === rep.id}
                     onClick={() => handleResolve(rep.id, "resolved")}
-                    className="text-xs gap-1"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Take Action & Resolve
-                  </Button>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Take Action &amp; Resolve</span>
+                  </button>
                 </div>
               </div>
 
               {rep.reasonDetail && (
-                <div className="p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs space-y-1">
-                  <div className="font-medium text-[var(--text)]">Reporter Note:</div>
-                  <p className="text-[var(--muted)] leading-relaxed">{rep.reasonDetail}</p>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 text-xs space-y-1">
+                  <div className="font-mono uppercase text-[10px] text-[#ECF1EF]/60">Reporter Note:</div>
+                  <p className="text-[#ECF1EF]/80 leading-relaxed font-sans">{rep.reasonDetail}</p>
                 </div>
               )}
             </div>

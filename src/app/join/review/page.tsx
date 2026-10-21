@@ -3,18 +3,14 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BrandLockup } from "@/components/brand/BrandLockup";
-import { Button } from "@/components/ui/Button";
 import {
   ArrowLeft,
-  CheckCircle2,
   ShieldCheck,
   Edit2,
   AlertCircle,
   Phone,
   Globe,
   FileCheck2,
-  Building,
   UserCheck,
 } from "lucide-react";
 
@@ -217,354 +213,315 @@ function JoinReviewForm() {
       // Per PRD & Frontend Prompt: user lands on the dashboard where locked state is shown
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to submit application. Please check your information and try again.");
+      setError(err?.message || "Failed to submit application. Please check your information and try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full max-w-[680px] mx-auto">
-      {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between text-xs mb-2.5">
-          <span className="font-display uppercase tracking-[0.22em] text-[var(--accent)] font-semibold text-[11px]">
-            Step 4 of 4
+    <div className="w-full max-w-[780px] max-h-[calc(100dvh-80px)] flex flex-col mx-auto relative z-10 animate-fade-in-up my-auto join-glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-4.5 border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.85)] overflow-hidden">
+      {/* ── Card Header (shrink-0) ── */}
+      <div className="shrink-0 pb-1.5 mb-1.5 border-b border-white/10 space-y-1">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-[10px] sm:text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[#88DECC] font-mono">
+            Step 4 of 4 &middot; Review &amp; Consent
           </span>
-          <span className="text-xs text-[var(--muted)] font-medium">Review &amp; Consent</span>
+          <span className="text-[10px] sm:text-[10.5px] text-[#ECF1EF]/60 font-normal">Final Verification</span>
         </div>
-        <div className="grid grid-cols-4 gap-2.5 h-1.5 w-full">
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
+        <div className="grid grid-cols-4 gap-1.5 h-1 w-full">
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+        </div>
+        <div>
+          <h1 className="join-hero-headline text-lg sm:text-xl font-light text-[#F5FAF6] tracking-tight">
+            Review your application
+          </h1>
+          <p className="join-hero-subhead text-[11px] sm:text-xs text-[#ECF1EF]/70">
+            Every submission is reviewed by the OASIS membership committee against role-specific vetting criteria.
+          </p>
         </div>
       </div>
 
-      {/* Heading */}
-      <div className="mb-8 space-y-1.5">
-        <h1 className="text-3xl font-display font-light text-[var(--text)] tracking-tight">
-          Review your application
-        </h1>
-        <p className="text-sm text-[var(--muted)]">
-          Every submission is reviewed by the OASIS membership committee against role-specific vetting criteria.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
         {error && (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-[var(--danger)] flex items-start gap-2.5 shadow-xs">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="p-2 mb-2 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-200 flex items-start gap-2 shrink-0">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Summary Card */}
-        <div className="card-luxury overflow-hidden divide-y divide-[var(--border)]/70">
-          {/* Section: Profile & Identity */}
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-display uppercase tracking-wider text-[var(--muted)] font-medium">
-                Applicant &amp; Security Credentials
-              </span>
-              <Link
-                href={`/join/account?role=${data.role}`}
-                className="inline-flex items-center gap-1 text-xs text-[var(--accent)] hover:underline"
-              >
-                <Edit2 className="w-3 h-3" /> Edit
-              </Link>
-            </div>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <dt className="text-[var(--muted)]">Full name</dt>
-                <dd className="font-medium text-[var(--text)] text-sm mt-0.5">{data.name}</dd>
+        {/* Scrollable Summary & Consents */}
+        <div className="flex-1 min-h-0 overflow-y-auto auth-scrollbar pr-1.5 space-y-2.5">
+          {/* Summary Card */}
+          <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden divide-y divide-white/[0.08]">
+            {/* Section: Profile & Identity */}
+            <div className="p-3.5 sm:p-4">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#88DECC] font-semibold">
+                  Applicant &amp; Security Credentials
+                </span>
+                <Link
+                  href={`/join/account?role=${data.role}`}
+                  className="inline-flex items-center gap-1 text-[11px] text-[#88DECC] hover:underline"
+                >
+                  <Edit2 className="w-3 h-3" /> Edit
+                </Link>
               </div>
-              <div>
-                <dt className="text-[var(--muted)]">Email address</dt>
-                <dd className="font-medium text-[var(--text)] text-sm mt-0.5">{data.email}</dd>
-              </div>
-              <div>
-                <dt className="text-[var(--muted)]">Mobile number</dt>
-                <dd className="font-medium text-[var(--text)] text-sm mt-0.5 flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[var(--accent)]" />
-                  <span>+91 {data.phone || "Not provided"}</span>
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[var(--muted)]">Location</dt>
-                <dd className="font-medium text-[var(--text)] text-sm mt-0.5">{data.city}</dd>
-              </div>
-            </dl>
-          </div>
-
-          {/* Section: Role Specific Details */}
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-display uppercase tracking-wider text-[var(--muted)] font-medium">
-                {data.role === "founder"
-                  ? "Startup & Verification Details"
-                  : data.role === "mentor"
-                  ? "Mentorship & Experience Credentials"
-                  : "Idea & Background Exploration"}
-              </span>
-              <Link
-                href={`/join/details?role=${data.role}`}
-                className="inline-flex items-center gap-1 text-xs text-[var(--accent)] hover:underline"
-              >
-                <Edit2 className="w-3 h-3" /> Edit
-              </Link>
+              <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div>
+                  <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Full name</dt>
+                  <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 truncate">{data.name}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Email address</dt>
+                  <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 truncate">{data.email}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Mobile</dt>
+                  <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-[#88DECC]" />
+                    <span>+91 {data.phone || "—"}</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Location</dt>
+                  <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 truncate">{data.city}</dd>
+                </div>
+              </dl>
             </div>
 
-            <dl className="space-y-4 text-xs">
-              {/* FOUNDER */}
-              {data.role === "founder" && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <dt className="text-[var(--muted)]">Startup name</dt>
-                      <dd className="font-medium text-[var(--text)] text-sm mt-0.5">
-                        {data.startupName} ({data.founderRole})
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-[var(--muted)]">Development stage</dt>
-                      <dd className="font-medium text-[var(--text)] text-sm mt-0.5">
-                        {data.stage}
-                      </dd>
-                    </div>
-                  </div>
+            {/* Section: Role Specific Details */}
+            <div className="p-3.5 sm:p-4">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#88DECC] font-semibold">
+                  {data.role === "founder"
+                    ? "Startup & Verification Details"
+                    : data.role === "mentor"
+                    ? "Mentorship & Experience Credentials"
+                    : "Idea & Background Exploration"}
+                </span>
+                <Link
+                  href={`/join/details?role=${data.role}`}
+                  className="inline-flex items-center gap-1 text-[11px] text-[#88DECC] hover:underline"
+                >
+                  <Edit2 className="w-3 h-3" /> Edit
+                </Link>
+              </div>
 
-                  {data.sectors && data.sectors.length > 0 && (
-                    <div>
-                      <dt className="text-[var(--muted)] mb-1">Focus sectors</dt>
-                      <dd className="flex flex-wrap gap-1.5">
-                        {data.sectors.map((sec) => (
-                          <span
-                            key={sec}
-                            className="px-2 py-0.5 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-[11px] text-[var(--text)]"
-                          >
-                            {sec}
-                          </span>
-                        ))}
-                      </dd>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {data.website && (
+              <dl className="space-y-2.5 text-xs">
+                {/* FOUNDER */}
+                {data.role === "founder" && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
-                        <dt className="text-[var(--muted)]">Website / MVP Link</dt>
-                        <dd className="font-medium text-[var(--accent)] text-xs mt-0.5 flex items-center gap-1.5 truncate">
-                          <Globe className="w-3.5 h-3.5 shrink-0" />
-                          <a href={data.website.startsWith("http") ? data.website : `https://${data.website}`} target="_blank" rel="noreferrer" className="underline truncate">
-                            {data.website}
-                          </a>
+                        <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Startup name</dt>
+                        <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5">
+                          {data.startupName} ({data.founderRole})
                         </dd>
                       </div>
-                    )}
-                    {data.linkedin && (
                       <div>
-                        <dt className="text-[var(--muted)]">Founder LinkedIn</dt>
-                        <dd className="font-medium text-[var(--text)] text-xs mt-0.5 flex items-center gap-1.5 truncate">
-                          <Linkedin className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-                          <span className="truncate">{data.linkedin}</span>
+                        <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Development stage</dt>
+                        <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5">
+                          {data.stage}
                         </dd>
                       </div>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* Uploaded Evidence */}
-                  <div>
-                    <dt className="text-[var(--muted)]">Business Registration</dt>
-                    <dd className="mt-1">
-                      {data.uploadedEvidence ? (
-                        <div className="inline-flex items-center gap-2 p-2 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
-                          <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Attached: {data.uploadedEvidence.filename} ({data.uploadedEvidence.docType})</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {data.website && (
+                        <div>
+                          <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Website / MVP</dt>
+                          <dd className="font-medium text-[#88DECC] text-xs mt-0.5 flex items-center gap-1 truncate">
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span className="truncate">{data.website}</span>
+                          </dd>
                         </div>
-                      ) : (
-                        <span className="text-[11px] text-[var(--muted)] italic">
-                          Early Stage / Pre-incorporation (Validated via MVP / Demo)
-                        </span>
                       )}
-                    </dd>
-                  </div>
-                </>
-              )}
+                      {data.linkedin && (
+                        <div>
+                          <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Founder LinkedIn</dt>
+                          <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 flex items-center gap-1 truncate">
+                            <Linkedin className="w-3 h-3 text-[#88DECC] shrink-0" />
+                            <span className="truncate">{data.linkedin}</span>
+                          </dd>
+                        </div>
+                      )}
+                    </div>
 
-              {/* MENTOR */}
-              {data.role === "mentor" && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <dt className="text-[var(--muted)]">Organization &amp; Title</dt>
-                      <dd className="font-medium text-[var(--text)] text-sm mt-0.5">
-                        {data.jobTitle} at {data.currentCompany}
+                      <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Business Registration</dt>
+                      <dd className="mt-0.5">
+                        {data.uploadedEvidence ? (
+                          <div className="inline-flex items-center gap-1.5 p-1.5 px-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px]">
+                            <FileCheck2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>Attached: {data.uploadedEvidence.filename}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-[#ECF1EF]/50 italic">
+                            Early Stage / Pre-incorporation (Validated via MVP/Demo)
+                          </span>
+                        )}
                       </dd>
                     </div>
-                    <div>
-                      <dt className="text-[var(--muted)]">Leadership Experience</dt>
-                      <dd className="font-medium text-[var(--text)] text-sm mt-0.5">
-                        {data.yearsExperience || "8+ years"}
-                      </dd>
-                    </div>
-                  </div>
+                  </>
+                )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {data.linkedin && (
+                {/* MENTOR */}
+                {data.role === "mentor" && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>
-                        <dt className="text-[var(--muted)]">LinkedIn Profile</dt>
-                        <dd className="font-medium text-[var(--text)] text-xs mt-0.5 flex items-center gap-1.5 truncate">
-                          <Linkedin className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-                          <span className="truncate">{data.linkedin}</span>
+                        <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Organization &amp; Title</dt>
+                        <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5">
+                          {data.jobTitle} at {data.currentCompany}
                         </dd>
                       </div>
-                    )}
-                    {data.website && (
                       <div>
-                        <dt className="text-[var(--muted)]">Portfolio / Website</dt>
-                        <dd className="font-medium text-[var(--accent)] text-xs mt-0.5 flex items-center gap-1.5 truncate">
-                          <Globe className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{data.website}</span>
+                        <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Leadership Experience</dt>
+                        <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5">
+                          {data.yearsExperience || "8+ years"}
                         </dd>
                       </div>
-                    )}
-                  </div>
-
-                  {data.referenceName && (
-                    <div>
-                      <dt className="text-[var(--muted)]">Professional Reference</dt>
-                      <dd className="font-medium text-[var(--text)] text-xs mt-0.5 flex items-center gap-1.5">
-                        <UserCheck className="w-3.5 h-3.5 text-[var(--accent)]" />
-                        <span>{data.referenceName} ({data.referenceContact})</span>
-                      </dd>
                     </div>
-                  )}
 
-                  {data.uploadedEvidence && (
-                    <div>
-                      <dt className="text-[var(--muted)]">Supporting Experience Certificate</dt>
-                      <dd className="mt-1">
-                        <div className="inline-flex items-center gap-2 p-2 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
-                          <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Attached: {data.uploadedEvidence.filename} ({data.uploadedEvidence.docType})</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {data.linkedin && (
+                        <div>
+                          <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">LinkedIn Profile</dt>
+                          <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5 flex items-center gap-1 truncate">
+                            <Linkedin className="w-3 h-3 text-[#88DECC] shrink-0" />
+                            <span className="truncate">{data.linkedin}</span>
+                          </dd>
                         </div>
-                      </dd>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* ASPIRING */}
-              {data.role === "aspiring" && (
-                <>
-                  {data.linkedin && (
-                    <div>
-                      <dt className="text-[var(--muted)]">LinkedIn Profile</dt>
-                      <dd className="font-medium text-[var(--accent)] text-xs mt-0.5 flex items-center gap-1.5 truncate max-w-full">
-                        <Linkedin className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-                        <a
-                          href={data.linkedin.startsWith("http") ? data.linkedin : `https://${data.linkedin}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="underline truncate block max-w-full"
-                        >
-                          {data.linkedin}
-                        </a>
-                      </dd>
-                    </div>
-                  )}
-                  {data.uploadedEvidence && (
-                    <div>
-                      <dt className="text-[var(--muted)]">Government ID (Optional)</dt>
-                      <dd className="mt-1">
-                        <div className="inline-flex items-center gap-2 p-2 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
-                          <FileCheck2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Attached: {data.uploadedEvidence.filename}</span>
+                      )}
+                      {data.uploadedEvidence && (
+                        <div>
+                          <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Experience Certificate</dt>
+                          <dd className="font-medium text-emerald-300 text-xs mt-0.5 flex items-center gap-1 truncate">
+                            <FileCheck2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span className="truncate">{data.uploadedEvidence.filename}</span>
+                          </dd>
                         </div>
-                      </dd>
+                      )}
                     </div>
-                  )}
-                </>
-              )}
+                  </>
+                )}
 
-              {/* Bio / Description */}
-              <div>
-                <dt className="text-[var(--muted)]">Description &amp; Goals</dt>
-                <dd className="mt-1 text-xs text-[var(--text)] leading-relaxed bg-[var(--surface-2)] p-3.5 rounded-xl border border-[var(--border)]/60 whitespace-pre-wrap break-words [overflow-wrap:anywhere] max-w-full overflow-hidden">
-                  {data.description || "No description provided."}
-                </dd>
-              </div>
-            </dl>
+                {/* ASPIRING */}
+                {data.role === "aspiring" && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Interest Domain</dt>
+                        <dd className="font-medium text-[#F5FAF6] text-xs mt-0.5">
+                          {data.ideaDomain || "General Entrepreneurship"}
+                        </dd>
+                      </div>
+                      {data.linkedin && (
+                        <div>
+                          <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">LinkedIn Profile</dt>
+                          <dd className="font-medium text-[#88DECC] text-xs mt-0.5 flex items-center gap-1 truncate">
+                            <Linkedin className="w-3 h-3 text-[#88DECC] shrink-0" />
+                            <span className="truncate">{data.linkedin}</span>
+                          </dd>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Bio / Description */}
+                <div>
+                  <dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Description &amp; Objectives</dt>
+                  <dd className="mt-1 text-xs text-[#F5FAF6] leading-relaxed bg-black/40 p-2.5 rounded-xl border border-white/10 whitespace-pre-wrap break-words max-w-full overflow-hidden">
+                    {data.description || "No description provided."}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          {/* Consents & Agreements */}
+          <div className={`space-y-2 bg-white/[0.02] border rounded-xl p-3 transition-all ${
+            error && !ageConfirmed ? "border-red-500/50 ring-1 ring-red-500/20" : "border-white/10"
+          }`}>
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#F5FAF6] uppercase tracking-wider">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#88DECC]" />
+              <span className="text-[11px] font-mono">Eligibility &amp; Consents</span>
+            </div>
+
+            <label className="flex items-start gap-2.5 cursor-pointer select-none p-1.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+              <input
+                type="checkbox"
+                id="ageConfirmation"
+                required
+                checked={ageConfirmed}
+                onChange={(e) => {
+                  setAgeConfirmed(e.target.checked);
+                  if (error) setError("");
+                }}
+                className="mt-0.5 w-3.5 h-3.5 rounded text-[#88DECC] bg-black/40 border-white/20 focus:ring-[#88DECC]"
+              />
+              <span className="text-[11px] text-[#ECF1EF] leading-tight">
+                I certify that I am at least <strong className="font-semibold text-[#F5FAF6]">18 years of age</strong> and all submitted information is accurate and genuine.
+              </span>
+            </label>
+
+            <label className="flex items-start gap-2.5 cursor-pointer select-none p-1.5 rounded-lg hover:bg-white/[0.03] transition-colors">
+              <input
+                type="checkbox"
+                id="communityGuidelines"
+                required
+                checked={guidelinesAgreed}
+                onChange={(e) => {
+                  setGuidelinesAgreed(e.target.checked);
+                  if (error) setError("");
+                }}
+                className="mt-0.5 w-3.5 h-3.5 rounded text-[#88DECC] bg-black/40 border-white/20 focus:ring-[#88DECC]"
+              />
+              <span className="text-[11px] text-[#ECF1EF] leading-tight">
+                I agree to the{" "}
+                <Link href="/legal/guidelines" target="_blank" className="text-[#88DECC] underline font-medium">
+                  Community Guidelines
+                </Link>{" "}
+                and have read the{" "}
+                <Link href="/legal/privacy" target="_blank" className="text-[#88DECC] underline font-medium">
+                  Privacy Notice
+                </Link>.
+              </span>
+            </label>
           </div>
         </div>
 
-        {/* Consents & Agreements */}
-        <div className={`space-y-4 bg-[var(--surface)] border rounded-2xl p-6 shadow-[var(--shadow-1)] transition-all ${
-          error && !ageConfirmed ? "border-red-400 ring-2 ring-red-100 dark:ring-red-950/40" : "border-[var(--border)]"
-        }`}>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text)] uppercase tracking-wider">
-            <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
-            <span>Eligibility &amp; Community Consents</span>
-          </div>
-
-          <label className="flex items-start gap-3 cursor-pointer select-none p-2 rounded-xl hover:bg-[var(--surface-2)] transition-colors">
-            <input
-              type="checkbox"
-              id="ageConfirmation"
-              required
-              checked={ageConfirmed}
-              onChange={(e) => {
-                setAgeConfirmed(e.target.checked);
-                if (error) setError("");
-              }}
-              className="mt-0.5 w-4 h-4 rounded text-[var(--brand-navy)] border-[var(--border-strong)] focus:ring-[var(--brand-gold)]"
-            />
-            <span className="text-xs text-[var(--text)] leading-relaxed">
-              I certify that I am at least <strong className="font-semibold text-[var(--text)]">18 years of age</strong> and the information submitted above is accurate and genuine.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 cursor-pointer select-none p-2 rounded-xl hover:bg-[var(--surface-2)] transition-colors">
-            <input
-              type="checkbox"
-              id="communityGuidelines"
-              required
-              checked={guidelinesAgreed}
-              onChange={(e) => {
-                setGuidelinesAgreed(e.target.checked);
-                if (error) setError("");
-              }}
-              className="mt-0.5 w-4 h-4 rounded text-[var(--brand-navy)] border-[var(--border-strong)] focus:ring-[var(--brand-gold)]"
-            />
-            <span className="text-xs text-[var(--text)] leading-relaxed">
-              I agree to abide by the{" "}
-              <Link href="/legal/guidelines" target="_blank" className="text-[var(--accent)] underline font-medium">
-                OASIS Community Guidelines
-              </Link>{" "}
-              and have read the{" "}
-              <Link href="/legal/privacy" target="_blank" className="text-[var(--accent)] underline font-medium">
-                Privacy Notice
-              </Link>.
-            </span>
-          </label>
-        </div>
-
-        {/* Form Actions */}
-        <div className="pt-2 flex items-center justify-between">
+        {/* ── Fixed Form Actions at Bottom ── */}
+        {/* ── Fixed Card Actions at Bottom ── */}
+        <div className="shrink-0 pt-2 border-t border-white/10 flex items-center justify-between gap-3">
           <Link href={`/join/details?role=${data.role}`}>
-            <Button type="button" variant="ghost" className="gap-2 text-xs">
-              <ArrowLeft className="w-3.5 h-3.5" />
+            <button
+              type="button"
+              className="h-8.5 sm:h-9 px-3.5 rounded-full bg-white/[0.04] border border-white/10 text-[11px] sm:text-xs text-[#ECF1EF]/70 hover:text-[#88DECC] hover:border-[#88DECC]/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <ArrowLeft className="w-3 h-3" />
               <span>Back</span>
-            </Button>
+            </button>
           </Link>
-          <Button
+          <button
             type="submit"
             disabled={submitting || !ageConfirmed || !guidelinesAgreed}
-            className="bg-[var(--brand-navy)] hover:bg-[var(--brand-navy)]/90 text-[var(--brand-cream)] font-medium text-xs px-8 h-12 rounded-xl shadow-xs gap-2"
+            className="join-cta-pill xs:w-auto w-auto px-4 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "Submitting application..." : "Submit application"}
-          </Button>
+            <span className="font-medium tracking-tight">
+              {submitting ? "Submitting application..." : "Submit application"}
+            </span>
+            <div className="join-cta-disc shrink-0">
+              <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <path d="M.6.6 4 4 .6 7.4" />
+              </svg>
+            </div>
+          </button>
         </div>
       </form>
     </div>
@@ -573,24 +530,58 @@ function JoinReviewForm() {
 
 export default function JoinReviewPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
-      <header className="w-full bg-[var(--brand-navy)] border-b border-[var(--brand-gold)]/20 px-6 lg:px-12 h-16 flex items-center">
-        <div className="w-full max-w-[1200px] mx-auto flex items-center justify-between">
-          <BrandLockup variant="horizontal" />
+    <div className="login-bg h-screen max-h-screen min-h-screen relative flex flex-col justify-between overflow-hidden bg-[#03080B] text-[#F5FAF6]">
+      {/* ── Top Header with Glass Logo Pill and Nav ──────────────────────────── */}
+      <header className="shrink-0 relative z-20 w-full px-4 sm:px-8 lg:px-12 py-2 sm:py-2.5 flex items-center justify-between pointer-events-auto">
+        <Link href="/" className="join-logo-pill" aria-label="OASIS ONE home">
+          <div className="w-[30px] h-[30px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 46 46" width="30" height="30" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M24.2 37V24" />
+              <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+              <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+              <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+              <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+              <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+              <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5 pl-2 select-none">
+            <span className="font-semibold text-xs sm:text-sm tracking-[0.16em] text-[#F5FAF6] uppercase">
+              OASIS
+            </span>
+            <span className="font-bold text-[8px] sm:text-[9px] tracking-wider bg-[#F3D3A2] text-[#12131F] px-1.5 py-0.5 rounded leading-none uppercase">
+              ONE
+            </span>
+          </div>
+        </Link>
+
+        <div className="flex items-center gap-3">
           <Link
-            href="/login"
-            className="text-sm font-medium text-[var(--brand-cream)]/85 hover:text-[var(--brand-gold)] transition-colors"
+            href="/"
+            className="hidden sm:inline-flex items-center text-xs font-normal text-[#ECF1EF]/70 hover:text-[#88DECC] transition-colors py-1.5 px-3"
           >
-            Log in
+            &larr; Back to Home
+          </Link>
+          <Link href="/login" className="join-login-pill inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+            <span>Already a member? Log in</span>
+            <svg viewBox="0 0 4 7" width="4" height="7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M.5.5 3.5 3.5.5 6.5" />
+            </svg>
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:py-16">
-        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--muted)]">Loading review...</div>}>
+      {/* ── Main Wizard Canvas ────────────────────────────────────────────────── */}
+      <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center px-4 sm:px-6 py-1 overflow-hidden">
+        <Suspense fallback={<div className="text-center text-sm text-[#ECF1EF]/60">Loading review...</div>}>
           <JoinReviewForm />
         </Suspense>
       </main>
+
+      {/* ── Footer ────────────────────────────────────────────────────────────── */}
+      <footer className="shrink-0 relative z-10 w-full py-1 sm:py-1.5 text-center text-[10px] sm:text-[10.5px] text-[#ECF1EF]/40 font-mono">
+        OASIS ONE &middot; Odisha Startup Community &middot; Admin-approved membership
+      </footer>
     </div>
   );
 }

@@ -314,16 +314,16 @@ function RegisterCompleteInner() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] py-12 px-4 sm:px-6">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] py-8 sm:py-12 px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8">
         {/* Top Header */}
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-6">
+        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3 border-b border-[var(--border)] pb-6">
           <BrandLockup variant="horizontal" href="/" />
-          <div className="text-right">
+          <div className="text-left xs:text-right">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
               Step 3 of 3 · Finalizing Google Account
             </span>
-            <div className="text-xs text-[var(--muted)] font-medium">
+            <div className="text-xs text-[var(--muted)] font-medium truncate max-w-[280px]">
               Signed in as {googleEmail || "Google Member"}
             </div>
           </div>
@@ -946,8 +946,8 @@ function RegisterCompleteInner() {
           )}
 
           {/* Age & Legal Consent */}
-          <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
-            <label className="flex items-start gap-3 cursor-pointer">
+          <div className="p-4 sm:p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+            <label className="flex items-start gap-3 cursor-pointer p-1 -m-1 rounded-lg hover:bg-black/[0.02]">
               <input
                 type="checkbox"
                 checked={ageConfirmed}
@@ -959,7 +959,7 @@ function RegisterCompleteInner() {
               </span>
             </label>
 
-            <label className="flex items-start gap-3 cursor-pointer">
+            <label className="flex items-start gap-3 cursor-pointer p-1 -m-1 rounded-lg hover:bg-black/[0.02]">
               <input
                 type="checkbox"
                 checked={guidelinesAgreed}

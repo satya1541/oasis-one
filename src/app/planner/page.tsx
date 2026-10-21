@@ -119,7 +119,7 @@ export default function PlannerPage() {
     <MemberShell>
       <div className="space-y-8 max-w-4xl mx-auto pb-20">
         {/* Editorial Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
               <CheckSquare className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
@@ -127,7 +127,7 @@ export default function PlannerPage() {
                 Founder Execution
               </span>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
               Planner &amp; Milestones
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1.5 font-sans leading-relaxed">
@@ -135,7 +135,7 @@ export default function PlannerPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#EFE8D8]/70 dark:bg-[#181928]/90 border border-[#D9CDAE]/60 dark:border-[#2C2E4A] backdrop-blur-md">
+          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#EFE8D8]/70 dark:bg-[#181928]/90 border border-[#D9CDAE]/60 dark:border-[#2C2E4A] backdrop-blur-md self-start sm:self-auto">
             <span className="text-xs px-3 py-1 rounded-xl bg-[var(--surface)] text-[var(--text)] font-mono font-medium shadow-2xs">
               {openTasks.length} pending
             </span>
@@ -146,7 +146,7 @@ export default function PlannerPage() {
         </div>
 
         {/* Task Creation Input Card */}
-        <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 shadow-sm backdrop-blur-md space-y-4">
+        <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 shadow-sm backdrop-blur-md space-y-4">
           <form onSubmit={handleAddTask} className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <input
@@ -159,14 +159,14 @@ export default function PlannerPage() {
               <Button
                 type="submit"
                 disabled={!newTaskInput.trim() || submitting}
-                className="gap-2 shrink-0 cursor-pointer h-12 px-6 rounded-2xl"
+                className="w-full sm:w-auto gap-2 shrink-0 cursor-pointer h-12 min-h-[44px] px-6 rounded-2xl"
               >
                 <Plus className="w-4 h-4" />
                 <span>{submitting ? "Adding..." : "Log Task"}</span>
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-5 text-xs text-[var(--muted)] pt-1">
+            <div className="flex flex-col xs:flex-row xs:items-center gap-3 xs:gap-5 text-xs text-[var(--muted)] pt-1">
               <label className="flex items-center gap-2.5 cursor-pointer select-none group">
                 <input
                   type="checkbox"
@@ -180,13 +180,13 @@ export default function PlannerPage() {
                 </span>
               </label>
 
-              <div className="flex items-center gap-2 bg-[var(--surface-2)] px-3 py-1.5 rounded-xl border border-[#D9CDAE]/60 dark:border-[#2C2E4A]">
-                <CalendarIcon className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
+              <div className="flex items-center gap-2 bg-[var(--surface-2)] px-3 py-1.5 rounded-xl border border-[#D9CDAE]/60 dark:border-[#2C2E4A] w-full xs:w-auto">
+                <CalendarIcon className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2] shrink-0" />
                 <input
                   type="datetime-local"
                   value={dueDateInput}
                   onChange={(e) => setDueDateInput(e.target.value)}
-                  className="bg-transparent border-0 text-xs text-[var(--text)] focus:outline-none font-mono cursor-pointer"
+                  className="w-full xs:w-auto bg-transparent border-0 text-xs text-[var(--text)] focus:outline-none font-mono cursor-pointer"
                 />
               </div>
             </div>

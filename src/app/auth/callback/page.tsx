@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AstrolabeStar } from "@/components/brand/AstrolabeStar";
+import { ShieldCheck, AlertCircle } from "lucide-react";
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -29,7 +31,6 @@ function AuthCallbackContent() {
 
         // Determine destination based on user profile and role
         if (user.adminLevel) {
-          // If admin, strictly route to /admin only if MFA is already verified, else /admin/mfa
           if (user.mfaVerified) {
             router.replace(nextParam && nextParam.startsWith("/admin") ? nextParam : "/admin");
           } else {
@@ -68,21 +69,91 @@ function AuthCallbackContent() {
   }, [router, nextParam]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#141522] text-[#FCF6E3] px-4">
-      <div className="flex flex-col items-center space-y-6 text-center max-w-sm">
-        <div className="relative flex items-center justify-center">
-          <AstrolabeStar className="w-12 h-12 text-[#D4AF37] animate-spin text-opacity-90" />
-        </div>
+    <div className="login-bg h-screen max-h-screen min-h-screen relative flex flex-col justify-between overflow-hidden bg-[#03080B] text-[#F5FAF6]">
+      {/* ── Top Header ──────────────────────────────────────────────────────── */}
+      <header className="shrink-0 relative z-20 w-full px-4 sm:px-8 lg:px-12 py-2 sm:py-2.5 flex items-center justify-between pointer-events-auto">
+        <Link href="/" className="join-logo-pill" aria-label="OASIS ONE home">
+          <div className="w-[30px] h-[30px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 46 46" width="30" height="30" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M24.2 37V24" />
+              <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+              <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+              <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+              <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+              <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+              <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5 pl-2 select-none">
+            <span className="font-semibold text-xs sm:text-sm tracking-[0.16em] text-[#F5FAF6] uppercase">
+              OASIS
+            </span>
+            <span className="font-bold text-[8px] sm:text-[9px] tracking-wider bg-[#F3D3A2] text-[#12131F] px-1.5 py-0.5 rounded leading-none uppercase">
+              ONE
+            </span>
+          </div>
+        </Link>
 
-        <div className="space-y-2">
-          <h2 className="text-xl font-display font-medium tracking-wide text-[#FCF6E3]">
-            {errorMsg ? "Authentication Error" : "Authorizing Session..."}
-          </h2>
-          <p className="text-xs text-[#FCF6E3]/60 leading-relaxed font-sans">
-            {errorMsg ? errorMsg : "Finalizing secure login to OASIS ONE. Directing you to your workspace."}
-          </p>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] font-mono text-[#88DECC]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#88DECC] animate-pulse" />
+            <span>Secure Handshake</span>
+          </div>
         </div>
-      </div>
+      </header>
+
+      {/* ── Main Authorizing Card ────────────────────────────────────────────── */}
+      <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center px-4 sm:px-6 py-1 overflow-hidden">
+        <div className="w-full max-w-[420px] mx-auto animate-fade-in-up my-auto">
+          <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.85)] text-center space-y-4 relative overflow-hidden">
+            {/* Top Specular Hairline */}
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/50 to-transparent" />
+
+            {/* Ambient Rotating Astrolabe */}
+            <div className="relative flex justify-center items-center py-2">
+              <div className="absolute inset-0 rounded-full bg-[#88DECC]/15 blur-2xl" />
+              <AstrolabeStar size={130} className="relative z-10" />
+            </div>
+
+            {/* Heading & Subhead */}
+            <div className="space-y-1">
+              <h2 className="join-hero-headline text-xl sm:text-2xl font-light text-[#F5FAF6] tracking-tight">
+                {errorMsg ? "Authentication Error" : "Authorizing Session..."}
+              </h2>
+              <p className="join-hero-subhead text-xs text-[#ECF1EF]/70 leading-relaxed font-normal max-w-xs mx-auto">
+                {errorMsg
+                  ? errorMsg
+                  : "Finalizing secure login to OASIS ONE. Directing you to your workspace."}
+              </p>
+            </div>
+
+            {/* Shimmering Progress Bar */}
+            {!errorMsg && (
+              <div className="w-36 h-1 mx-auto rounded-full bg-white/10 overflow-hidden relative">
+                <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-[#88DECC] to-transparent animate-pulse" />
+              </div>
+            )}
+
+            {errorMsg && (
+              <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-200 flex items-center justify-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>Redirecting back to login...</span>
+              </div>
+            )}
+
+            {/* Footer Guarantee */}
+            <div className="pt-2 border-t border-white/10 flex items-center justify-center gap-1.5 text-[10px] text-[#ECF1EF]/50">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#88DECC] shrink-0" />
+              <span>End-to-end encrypted session handshake</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ── Footer ────────────────────────────────────────────────────────────── */}
+      <footer className="shrink-0 relative z-10 w-full py-1 sm:py-1.5 text-center text-[10px] sm:text-[10.5px] text-[#ECF1EF]/40 font-mono">
+        OASIS ONE &middot; Curated &amp; Admin Vetted Startup Community &middot; Odisha
+      </footer>
     </div>
   );
 }
@@ -91,8 +162,11 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#141522] text-[#FCF6E3]">
-          <AstrolabeStar className="w-10 h-10 text-[#D4AF37] animate-spin" />
+        <div className="login-bg h-screen flex items-center justify-center bg-[#03080B] text-[#F5FAF6]">
+          <div className="flex flex-col items-center gap-3">
+            <AstrolabeStar size={90} />
+            <div className="text-xs font-mono text-[#88DECC]">Loading session...</div>
+          </div>
         </div>
       }
     >

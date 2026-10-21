@@ -118,90 +118,92 @@ export default function AdminEventsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-16">
       {/* ── Top Header ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
         <div>
-          <h1 className="text-2xl font-display font-medium text-[var(--text)]">
-            Community Events & Roundtable Builder
+          <h1 className="text-2xl sm:text-3xl font-light font-display text-[#F5FAF6] tracking-tight">
+            Community Events &amp; Roundtable Builder
           </h1>
-          <p className="text-xs text-[var(--muted)] mt-1">
+          <p className="text-xs sm:text-sm text-[#ECF1EF]/70 font-sans mt-1">
             Publish curated closed-door roundtables, monitor real-time RSVP counts, and export attendee manifests.
           </p>
         </div>
-        <Button
-          size="sm"
-          variant="primary"
+        <button
+          type="button"
           onClick={() => setCreateModalOpen(true)}
-          className="gap-2 shrink-0 cursor-pointer"
+          className="inline-flex items-center justify-between gap-2.5 px-4 py-2 rounded-full bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all cursor-pointer group shrink-0"
         >
-          <Plus className="w-4 h-4" />
           <span>New Community Event</span>
-        </Button>
+          <span className="w-5 h-5 rounded-full bg-[#03080B] flex items-center justify-center text-[#EEF1EA] group-hover:rotate-90 transition-transform">
+            <Plus className="w-3 h-3" />
+          </span>
+        </button>
       </div>
 
       {exportNotice && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-[var(--success)] flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
           <span>{exportNotice}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center p-16 text-xs text-[var(--muted)] gap-2">
-          <RotateCw className="w-4 h-4 animate-spin text-[var(--accent)]" />
+        <div className="flex items-center justify-center p-16 text-xs text-[#ECF1EF]/60 gap-2">
+          <RotateCw className="w-4 h-4 animate-spin text-[#88DECC]" />
           <span>Loading scheduled events...</span>
         </div>
       ) : events.length === 0 ? (
-        <div className="p-16 text-center rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-3">
-          <Calendar className="w-8 h-8 text-[var(--muted)] mx-auto opacity-40" />
-          <h3 className="font-display text-sm font-medium text-[var(--text)]">No Events Scheduled</h3>
-          <p className="text-xs text-[var(--muted)] max-w-sm mx-auto">
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-16 text-center border border-white/10 relative overflow-hidden space-y-3 shadow-lg">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
+          <Calendar className="w-8 h-8 text-[#88DECC] mx-auto opacity-70" />
+          <h3 className="font-display text-base font-light text-[#F5FAF6]">No Events Scheduled</h3>
+          <p className="text-xs text-[#ECF1EF]/60 max-w-sm mx-auto">
             Your community has no active or upcoming roundtables. Click &quot;New Community Event&quot; to schedule one.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-3.5">
           {events.map((evt) => (
             <div
               key={evt.id}
-              className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-strong)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 relative overflow-hidden group shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
-              <div className="space-y-1.5 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium text-sm text-[var(--text)]">{evt.title}</h3>
-                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[var(--surface-2)] text-[var(--muted)] border border-[var(--border)]">
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/20 to-transparent group-hover:via-[#88DECC]/50 transition-all" />
+              <div className="space-y-2 flex-1">
+                <div className="flex items-center gap-2.5">
+                  <h3 className="font-medium text-sm sm:text-base text-[#F5FAF6]">{evt.title}</h3>
+                  <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-white/[0.04] text-[#88DECC] border border-[#88DECC]/30 font-semibold">
                     {evt.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--muted)]">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
+                <div className="flex flex-wrap items-center gap-4 text-xs text-[#ECF1EF]/70 font-sans">
+                  <span className="flex items-center gap-1.5 font-mono">
+                    <Clock className="w-3.5 h-3.5 text-[#88DECC]" />
                     {new Date(evt.startAt).toLocaleDateString()} • {new Date(evt.startAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                   {evt.venueOrLink && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" />
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#F3D3A2]" />
                       {evt.venueOrLink}
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#88DECC]" />
                     {evt._count?.registrations || 0} registered / {evt.capacity || "Unlimited"} cap
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  size="sm"
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={() => handleExportCSV(evt.id, evt.title)}
-                  className="gap-1.5 text-xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#F5FAF6] text-xs font-medium transition-all cursor-pointer"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#88DECC]" />
                   <span>Export CSV</span>
-                </Button>
+                </button>
               </div>
             </div>
           ))}
@@ -210,16 +212,17 @@ export default function AdminEventsPage() {
 
       {/* ── Create Event Modal ────────────────────────────────────────────── */}
       {createModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-              <h2 className="text-base font-display font-medium text-[var(--text)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="join-glass-panel border border-white/10 rounded-2xl sm:rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-[0_24px_70px_rgba(0,0,0,0.9)] space-y-4 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/50 to-transparent" />
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <h2 className="text-base font-display font-light text-[#F5FAF6]">
                 Create Community Event / Roundtable
               </h2>
               <button
                 type="button"
                 onClick={() => setCreateModalOpen(false)}
-                className="text-[var(--muted)] hover:text-[var(--text)] p-1 cursor-pointer"
+                className="text-[#ECF1EF]/50 hover:text-[#F5FAF6] p-1 cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -227,7 +230,7 @@ export default function AdminEventsPage() {
 
             <form onSubmit={handleCreateEvent} className="space-y-4 text-xs">
               <div>
-                <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
+                <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
                   Event Title
                 </label>
                 <input
@@ -236,52 +239,52 @@ export default function AdminEventsPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. DeepTech Supply Chain Roundtable"
-                  className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                  className="w-full h-10 px-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                  Description & Agenda
+                <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
+                  Description &amp; Agenda
                 </label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Provide context and prerequisites for attendees..."
-                  className="w-full p-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                  className="w-full p-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                    Start Date & Time
+                  <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
+                    Start Date &amp; Time
                   </label>
                   <input
                     type="datetime-local"
                     required
                     value={startAt}
                     onChange={(e) => setStartAt(e.target.value)}
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-10 px-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
-                    End Date & Time
+                  <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
+                    End Date &amp; Time
                   </label>
                   <input
                     type="datetime-local"
                     value={endAt}
                     onChange={(e) => setEndAt(e.target.value)}
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-10 px-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
+                  <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
                     Venue or Meeting Link
                   </label>
                   <input
@@ -289,11 +292,11 @@ export default function AdminEventsPage() {
                     value={venueOrLink}
                     onChange={(e) => setVenueOrLink(e.target.value)}
                     placeholder="e.g. O-Hub Bhubaneswar or Zoom link"
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-10 px-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold uppercase tracking-wider text-[var(--muted)] block mb-1">
+                  <label className="font-mono text-[10.5px] uppercase tracking-wider text-[#ECF1EF]/70 block mb-1">
                     Attendee Capacity
                   </label>
                   <input
@@ -301,28 +304,26 @@ export default function AdminEventsPage() {
                     min={1}
                     value={capacity}
                     onChange={(e) => setCapacity(Number(e.target.value))}
-                    className="w-full h-10 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl text-[var(--text)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+                    className="w-full h-10 px-3 bg-white/[0.04] border border-white/12 rounded-xl text-xs sm:text-sm text-[#F5FAF6] focus:border-[#88DECC] focus:ring-1 focus:ring-[#88DECC]/20 outline-none transition-all"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
-                <Button
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+                <button
                   type="button"
-                  variant="secondary"
-                  size="sm"
                   onClick={() => setCreateModalOpen(false)}
+                  className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[#F5FAF6] text-xs font-medium transition-all cursor-pointer"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
-                  size="sm"
                   disabled={submitting}
-                  className="gap-1.5"
+                  className="px-5 py-2 rounded-full bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Publishing..." : "Publish Event"}
-                </Button>
+                </button>
               </div>
             </form>
           </div>
@@ -331,3 +332,4 @@ export default function AdminEventsPage() {
     </div>
   );
 }
+

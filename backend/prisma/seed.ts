@@ -178,6 +178,36 @@ async function main() {
     },
   });
 
+  await prisma.user.upsert({
+    where: { email: 'ssp.subham7@gmail.com' },
+    update: {
+      accountStatus: AccountStatus.active,
+      adminLevel: AdminLevel.super_admin,
+      emailVerified: true,
+    },
+    create: {
+      email: 'ssp.subham7@gmail.com',
+      passwordHash: adminPasswordHash,
+      primaryRole: UserRole.founder,
+      adminLevel: AdminLevel.super_admin,
+      accountStatus: AccountStatus.active,
+      emailVerified: true,
+      mfaEnabled: true,
+      mfaSecret: encryptedMfaSecret,
+      mfaBackupCodes: [backupCodeHash],
+      timeZone: 'Asia/Kolkata',
+      profile: {
+        create: {
+          name: 'Subham (Super Admin)',
+          headline: 'OASIS Platform Super Administrator',
+          city: 'Bhubaneswar',
+          state: 'Odisha',
+          country: 'India',
+        },
+      },
+    },
+  });
+
   console.log('Production seeding completed successfully with zero fake members.');
 }
 

@@ -151,9 +151,11 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <MemberShell>
-        <div className="flex items-center justify-center min-h-[50vh] text-[var(--muted)] gap-2 text-xs">
-          <RotateCw className="w-5 h-5 animate-spin text-[var(--accent)]" />
-          <span>Loading member settings...</span>
+        <div className="flex flex-col items-center justify-center min-h-[45vh] text-[#ECF1EF]/60 space-y-4 select-none">
+          <div className="w-12 h-12 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)]">
+            <RotateCw className="w-5 h-5 animate-spin text-[#88DECC]" />
+          </div>
+          <p className="text-xs font-mono text-[#ECF1EF]/60">Loading member settings...</p>
         </div>
       </MemberShell>
     );
@@ -163,7 +165,7 @@ export default function SettingsPage() {
     <MemberShell>
       <div className="space-y-8 max-w-4xl mx-auto pb-20">
         {/* Editorial Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
               <Shield className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
@@ -171,7 +173,7 @@ export default function SettingsPage() {
                 Member Governance
               </span>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
               Settings &amp; Privacy
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1.5 font-sans leading-relaxed">
@@ -180,7 +182,7 @@ export default function SettingsPage() {
           </div>
 
           {savedSuccess && (
-            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl animate-fade-in">
+            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl animate-fade-in self-start sm:self-auto">
               <Check className="w-4 h-4 text-emerald-500" />
               <span className="font-medium font-sans">Settings saved successfully</span>
             </div>
@@ -188,32 +190,32 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Selection */}
-        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#EFE8D8]/60 dark:bg-[#181928]/80 border border-[#D9CDAE]/50 dark:border-[#2C2E4A] w-fit">
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-[#EFE8D8]/60 dark:bg-[#181928]/80 border border-[#D9CDAE]/50 dark:border-[#2C2E4A] w-full sm:w-fit">
           <button
             type="button"
             onClick={() => setActiveTab("privacy")}
-            className={`px-4 py-2 text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 min-h-[40px] text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer text-center ${
               activeTab === "privacy"
                 ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] font-semibold shadow-xs"
                 : "text-[var(--muted)] hover:text-[var(--text)]"
             }`}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              <span>Privacy Controls (DPDP)</span>
+              <span>Privacy Controls</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("profile")}
-            className={`px-4 py-2 text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 min-h-[40px] text-xs font-medium rounded-xl transition-all duration-200 cursor-pointer text-center ${
               activeTab === "profile"
                 ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] font-semibold shadow-xs"
                 : "text-[var(--muted)] hover:text-[var(--text)]"
             }`}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               <User className="w-3.5 h-3.5" />
               <span>Profile Details</span>
             </span>
@@ -311,7 +313,7 @@ export default function SettingsPage() {
               <Button
                 onClick={handleSavePrivacy}
                 disabled={saving}
-                className="gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
+                className="w-full sm:w-auto h-12 min-h-[44px] gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? "Saving Preferences..." : "Save Privacy Preferences"}</span>
@@ -397,7 +399,7 @@ export default function SettingsPage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
+                className="w-full sm:w-auto h-12 min-h-[44px] gap-2 cursor-pointer rounded-2xl px-6 py-2.5"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? "Saving Changes..." : "Save Profile Details"}</span>

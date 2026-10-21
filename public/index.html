@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#03080B">
+  <title>OASIS ONE — One Community. Infinite Possibilities.</title>
+  <style>
+    @font-face {
+      font-family: "RV Display";
+      font-weight: 300;
+      src: url("assets/fonts/rv-display.woff2") format("woff2");
+      font-display: block;
+    }
+    @font-face {
+      font-family: "RV Brand";
+      font-weight: 600;
+      src: url("assets/fonts/rv-brand.woff2") format("woff2");
+      font-display: block;
+    }
+    @font-face {
+      font-family: "RV Text";
+      font-weight: 400;
+      src: url("assets/fonts/rv-text.woff2") format("woff2");
+      font-display: block;
+    }
+
+    :root {
+      --u: max(0.62px, min(100vw / 1280, 100dvh / 960));
+      --gutter: calc(48 * var(--u));
+      --color-shade: rgb(3, 8, 11);
+      --color-ink: #F5FAF6;
+      --color-ink-2: #ECF1EF;
+      --color-teal: #88DECC;
+      --color-icon-teal: #7EC4B5;
+      --color-chevron: #7CCBBA;
+      --color-moth: #315352;
+      --color-cream: #EEF1EA;
+      --color-pine: #122B2A;
+      --color-pine-hover: #26504D;
+      --color-logo-disc: #030909;
+      --color-gold: #F3D3A2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #03080B;
+      color: var(--color-ink);
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #03080B;
+    }
+
+    /* Video Background */
+    .bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 40%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @media (min-aspect-ratio: 16/9) {
+      .bg-video {
+        object-position: 50% 24%;
+      }
+    }
+
+    /* Shade Overlays */
+    .shade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .shade-horizontal {
+      background: linear-gradient(
+        to right,
+        rgba(3, 8, 11, 0.683) 0%,
+        rgba(3, 8, 11, 0.595) 20%,
+        rgba(3, 8, 11, 0.458) 40%,
+        rgba(3, 8, 11, 0.221) 60%,
+        rgba(3, 8, 11, 0.039) 80%,
+        rgba(3, 8, 11, 0.054) 100%
+      );
+    }
+
+    .shade-vertical {
+      background: linear-gradient(
+        to bottom,
+        rgba(3, 8, 11, 0.060) 0%,
+        rgba(3, 8, 11, 0.023) 20%,
+        rgba(3, 8, 11, 0.152) 40%,
+        rgba(3, 8, 11, 0.300) 60%,
+        rgba(3, 8, 11, 0.394) 80%,
+        rgba(3, 8, 11, 0.632) 100%
+      );
+    }
+
+    .shade-radial {
+      background: radial-gradient(
+        ellipse 93.8% 41.3% at 0% 100%,
+        rgba(3, 8, 11, 1) 0%,
+        rgba(3, 8, 11, 0) 100%
+      );
+    }
+
+    /* Header */
+    .site-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(40 * var(--u)) var(--gutter);
+      padding-top: max(calc(40 * var(--u)), env(safe-area-inset-top));
+      padding-left: max(var(--gutter), env(safe-area-inset-left));
+      padding-right: max(var(--gutter), env(safe-area-inset-right));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .site-header > * {
+      pointer-events: auto;
+    }
+
+    /* Top Left Logo Pill */
+    .logo-pill {
+      min-width: calc(104 * var(--u));
+      height: calc(46 * var(--u));
+      border-radius: calc(23 * var(--u));
+      background: rgba(150, 220, 130, 0.035);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      overflow: hidden;
+      padding-right: calc(12 * var(--u));
+      transition: border-color 0.25s ease;
+    }
+
+    .logo-disc {
+      width: calc(46 * var(--u));
+      height: calc(46 * var(--u));
+      border-radius: 50%;
+      background-color: var(--color-logo-disc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-tree {
+      width: calc(46 * var(--u));
+      height: calc(46 * var(--u));
+    }
+
+    .logo-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: calc(5 * var(--u));
+      padding-left: calc(8 * var(--u));
+      user-select: none;
+    }
+
+    .logo-brand-text {
+      font-family: "RV Brand", "Urbanist", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 600;
+      font-size: calc(13 * var(--u));
+      letter-spacing: 0.16em;
+      color: var(--color-ink);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .logo-brand-badge {
+      font-family: "RV Brand", "Urbanist", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 700;
+      font-size: calc(9 * var(--u));
+      letter-spacing: 0.08em;
+      background-color: var(--color-gold);
+      color: #12131F;
+      padding: calc(2 * var(--u)) calc(5 * var(--u));
+      border-radius: calc(4 * var(--u));
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* Header Nav Pill (Top Right of Center) */
+    .nav-pill {
+      min-width: calc(442 * var(--u));
+      height: calc(47 * var(--u));
+      border-radius: calc(24 * var(--u));
+      background-color: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-left: calc(22 * var(--u));
+      padding-right: calc(3 * var(--u));
+      position: absolute;
+      left: calc(50% + 14 * var(--u));
+      top: calc(40 * var(--u));
+      top: max(calc(40 * var(--u)), env(safe-area-inset-top));
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: calc(18 * var(--u));
+      list-style: none;
+    }
+
+    .nav-link {
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: calc(13 * var(--u));
+      font-weight: 400;
+      color: var(--color-ink-2);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: calc(5 * var(--u));
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover {
+      color: var(--color-teal);
+    }
+
+    .nav-link.current {
+      color: var(--color-teal);
+    }
+
+    .nav-chevron {
+      width: calc(9 * var(--u));
+      height: calc(5 * var(--u));
+      stroke: var(--color-chevron);
+    }
+
+    .partner-pill {
+      height: calc(41 * var(--u));
+      border-radius: calc(21 * var(--u));
+      background-color: var(--color-cream);
+      color: #03080B;
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: calc(13 * var(--u));
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      padding-left: calc(16 * var(--u));
+      padding-right: calc(4 * var(--u));
+      gap: calc(10 * var(--u));
+      transition: background-color 0.25s ease;
+      white-space: nowrap;
+      margin-left: calc(12 * var(--u));
+    }
+
+    .partner-disc {
+      width: calc(33 * var(--u));
+      height: calc(33 * var(--u));
+      border-radius: 50%;
+      background-color: var(--color-pine);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.25s ease;
+    }
+
+    .partner-pill:hover .partner-disc {
+      background-color: var(--color-pine-hover);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Mobile Menu Toggle Button (appears on mobile) */
+    .menu-btn {
+      display: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #000000;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 101;
+    }
+
+    .menu-icon {
+      width: 18px;
+      height: 14px;
+    }
+
+    .menu-bar {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      transform-box: view-box;
+      transform-origin: 9px 6px;
+    }
+
+    .menu-btn[aria-expanded="true"] .bar-top {
+      transform: translateY(5px) rotate(45deg);
+    }
+
+    .menu-btn[aria-expanded="true"] .bar-middle {
+      opacity: 0;
+    }
+
+    .menu-btn[aria-expanded="true"] .bar-bottom {
+      transform: translateY(-5px) rotate(-45deg);
+    }
+
+    /* Mobile Navigation Panel */
+    .mobile-nav-panel {
+      display: none;
+      position: absolute;
+      top: calc(max(calc(40 * var(--u)), env(safe-area-inset-top)) + 58px);
+      left: var(--gutter);
+      right: var(--gutter);
+      background-color: #000000;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 24px 24px 24px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-nav-panel.is-open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .mobile-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-links li a {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--color-ink-2);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: color 0.2s ease;
+    }
+
+    .mobile-links li:last-child a {
+      border-bottom: none;
+    }
+
+    .mobile-links li a:hover,
+    .mobile-links li a.current {
+      color: var(--color-teal);
+    }
+
+    .mobile-partner-wrap {
+      margin-top: 16px;
+    }
+
+    .mobile-partner-pill {
+      width: 100%;
+      height: 48px;
+      border-radius: 24px;
+      background-color: var(--color-cream);
+      color: #03080B;
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px 0 20px;
+    }
+
+    /* Bottom Left Hero */
+    .hero-content {
+      position: absolute;
+      left: max(var(--gutter), env(safe-area-inset-left));
+      bottom: max(calc(56 * var(--u)), env(safe-area-inset-bottom));
+      z-index: 10;
+      max-width: calc(880 * var(--u));
+    }
+
+    .brand-label {
+      display: block;
+      font-family: "RV Brand", "Urbanist", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 600;
+      font-size: calc(14 * var(--u));
+      color: var(--color-teal);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: calc(18 * var(--u));
+    }
+
+    .hero-headline {
+      font-family: "RV Display", "Poppins", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 300;
+      font-size: calc(76 * var(--u));
+      line-height: 1.02;
+      color: var(--color-ink);
+      white-space: nowrap;
+    }
+
+    .headline-mask {
+      display: block;
+      overflow: hidden;
+    }
+
+    .headline-line {
+      display: block;
+    }
+
+    .headline-line-1 {
+      letter-spacing: calc(-1.5 * var(--u));
+    }
+
+    .headline-line-2 {
+      letter-spacing: calc(-2.0 * var(--u));
+    }
+
+    .headline-line-3 {
+      letter-spacing: calc(-1.8 * var(--u));
+    }
+
+    .hero-lede {
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      font-size: calc(16 * var(--u));
+      line-height: 1.45;
+      color: var(--color-ink-2);
+      margin-top: calc(24 * var(--u));
+    }
+
+    .lede-line {
+      display: block;
+    }
+
+    .actions-row {
+      display: flex;
+      align-items: center;
+      gap: calc(28 * var(--u));
+      margin-top: calc(34 * var(--u));
+    }
+
+    .cta-pill {
+      height: calc(46 * var(--u));
+      border-radius: calc(23 * var(--u));
+      background-color: var(--color-cream);
+      color: #03080B;
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: calc(14 * var(--u));
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      padding-left: calc(22 * var(--u));
+      padding-right: calc(6 * var(--u));
+      gap: calc(16 * var(--u));
+      transition: background-color 0.25s ease;
+    }
+
+    .cta-disc {
+      width: calc(34 * var(--u));
+      height: calc(34 * var(--u));
+      border-radius: 50%;
+      background-color: var(--color-pine);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.25s ease;
+    }
+
+    .cta-pill:hover .cta-disc {
+      background-color: var(--color-pine-hover);
+    }
+
+    .action-link {
+      font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: calc(14 * var(--u));
+      font-weight: 400;
+      color: var(--color-ink-2);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease;
+    }
+
+    .action-link:hover {
+      color: var(--color-teal);
+    }
+
+    /* Focus Visible */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--color-teal);
+      outline-offset: 2px;
+    }
+
+    /* Initial hidden state for entrance animation */
+    body.waiting-entrance .logo-pill,
+    body.waiting-entrance .nav-pill,
+    body.waiting-entrance .menu-btn,
+    body.waiting-entrance .brand-label,
+    body.waiting-entrance .headline-line,
+    body.waiting-entrance .lede-line,
+    body.waiting-entrance .cta-pill,
+    body.waiting-entrance .action-link {
+      opacity: 0;
+    }
+
+    /* Responsive Specifications */
+    @media (max-width: 649.98px), (max-height: 500px) {
+      :root {
+        --u: clamp(0.94px, 100vw / 390, 1.2px);
+        --gutter: clamp(18px, 5.6vw, 32px);
+      }
+      .bg-video {
+        object-position: 63% 50%;
+      }
+      .shade-horizontal {
+        background: linear-gradient(
+          to right,
+          rgba(3, 8, 11, 0.45) 0%,
+          rgba(3, 8, 11, 0.28) 35%,
+          rgba(3, 8, 11, 0.08) 75%,
+          rgba(3, 8, 11, 0.02) 100%
+        );
+      }
+      .shade-vertical {
+        background: linear-gradient(
+          to bottom,
+          rgba(3, 8, 11, 0.08) 0%,
+          rgba(3, 8, 11, 0.22) 35%,
+          rgba(3, 8, 11, 0.62) 65%,
+          rgba(3, 8, 11, 0.94) 100%
+        );
+      }
+      .shade-radial {
+        display: none;
+      }
+      .headline-line-1 { letter-spacing: -0.025em; }
+      .headline-line-2 { letter-spacing: -0.035em; }
+      .headline-line-3 { letter-spacing: -0.03em; }
+      .actions-row {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .action-link {
+        padding: 10px 0;
+      }
+    }
+
+    @media (max-width: 649.98px) {
+      .nav-pill {
+        display: none;
+      }
+      .menu-btn {
+        display: flex;
+      }
+      .mobile-nav-panel {
+        display: block;
+      }
+      .hero-content {
+        left: max(var(--gutter), env(safe-area-inset-left));
+        bottom: max(calc(56 * var(--u)), env(safe-area-inset-bottom));
+      }
+      .hero-headline {
+        font-size: min(clamp(32px, 10.4vw, 60px), calc((100vw - (2 * var(--gutter))) / 8.7));
+      }
+    }
+
+    @media (max-height: 500px) and (min-aspect-ratio: 1/1) {
+      :root {
+        --u: clamp(0.82px, 100dvh / 415, 0.94px);
+      }
+      .bg-video {
+        object-position: 50% 30%;
+      }
+      .hero-headline {
+        font-size: clamp(28px, 10dvh, 44px);
+      }
+      .actions-row {
+        flex-wrap: nowrap;
+        margin-top: calc(16 * var(--u));
+      }
+      .hero-lede {
+        margin-top: calc(12 * var(--u));
+      }
+    }
+
+    @media (max-height: 500px) and (max-width: 649.98px) {
+      .mobile-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 16px;
+      }
+    }
+
+    @media (min-width: 650px) and (max-width: 1100px) and (min-height: 501px),
+           (min-width: 650px) and (max-aspect-ratio: 4/5) and (min-height: 501px) {
+      :root {
+        --u: 0.94px;
+      }
+    }
+
+    @media (min-width: 650px) and (max-aspect-ratio: 4/5) and (min-height: 501px) {
+      .hero-content {
+        transform: scale(1.1);
+        transform-origin: bottom left;
+      }
+      .bg-video {
+        object-position: 58% 50%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <!-- Background Video -->
+    <video
+      class="bg-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261005_182346_a590ff3b-72e5-41ce-8f69-a8c823eaecaa.mp4"
+    ></video>
+
+    <!-- Three Shade Overlays -->
+    <div class="shade shade-horizontal"></div>
+    <div class="shade shade-vertical"></div>
+    <div class="shade shade-radial"></div>
+
+    <!-- Header -->
+    <header class="site-header">
+      <!-- Top Left Logo Pill -->
+      <a href="/" class="logo-pill" aria-label="OASIS ONE home">
+        <div class="logo-disc">
+          <svg class="logo-tree" viewBox="0 0 46 46" fill="none" stroke="#7CC6B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path class="tree-stroke" d="M24.2 37V24" />
+            <path class="tree-stroke" d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+            <path class="tree-stroke" d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+            <path class="tree-stroke" d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+            <path class="tree-stroke" d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+            <path class="tree-stroke" d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+            <path class="tree-stroke" d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+          </svg>
+        </div>
+        <div class="logo-brand-wrap">
+          <span class="logo-brand-text">OASIS</span>
+          <span class="logo-brand-badge">ONE</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Pill (Top Right of Center) -->
+      <nav class="nav-pill" aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="#membership" class="nav-link">Who it's for</a></li>
+          <li>
+            <a href="#how-it-works" class="nav-link current" aria-current="page">
+              <span>Admission</span>
+              <svg class="nav-chevron" viewBox="0 0 11 6" fill="none" stroke-width="1.4">
+                <path d="M.7.7 5.5 5.3 10.3.7" />
+              </svg>
+            </a>
+          </li>
+          <li><a href="#sanctuary" class="nav-link">Experience</a></li>
+          <li><a href="/login" class="nav-link">Log in</a></li>
+        </ul>
+        <a href="/join" class="partner-pill">
+          <span>Join OASIS</span>
+          <div class="partner-disc">
+            <svg viewBox="0 0 4 7" width="4" height="7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M.5.5 3.5 3.5.5 6.5" />
+            </svg>
+          </div>
+        </a>
+      </nav>
+
+      <!-- Right Header Actions (Mobile Menu Toggle) -->
+      <div class="header-actions">
+        <!-- Mobile Menu Toggle Button (appears on mobile) -->
+        <button type="button" class="menu-btn" aria-label="Toggle Navigation Menu" aria-expanded="false">
+          <svg class="menu-icon" viewBox="0 0 18 14" fill="none" stroke="#ECF1EF" stroke-width="1.6" stroke-linecap="round">
+            <path class="menu-bar bar-top" d="M1 1h16" />
+            <path class="menu-bar bar-middle" d="M1 6h16" />
+            <path class="menu-bar bar-bottom" d="M1 11h16" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Navigation Panel -->
+    <div class="mobile-nav-panel" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+      <ul class="mobile-links">
+        <li><a href="#membership">Who it's for</a></li>
+        <li><a href="#how-it-works" class="current">Admission Protocol</a></li>
+        <li><a href="#sanctuary">Sanctuary Experience</a></li>
+        <li><a href="/login">Member Portal Sign In</a></li>
+        <li><a href="/join">Apply to Join</a></li>
+      </ul>
+      <div class="mobile-partner-wrap">
+        <a href="/join" class="mobile-partner-pill">
+          <span>Apply to Join OASIS</span>
+          <div class="partner-disc">
+            <svg viewBox="0 0 4 7" width="4" height="7" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M.5.5 3.5 3.5.5 6.5" />
+            </svg>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Bottom Left Hero -->
+    <main class="hero-content">
+      <span class="brand-label">ODISHA &middot; STARTUP COMMUNITY</span>
+      <h1 class="hero-headline">
+        <span class="headline-mask">
+          <span class="headline-line headline-line-1">One Community.</span>
+        </span>
+        <span class="headline-mask">
+          <span class="headline-line headline-line-2">Infinite</span>
+        </span>
+        <span class="headline-mask">
+          <span class="headline-line headline-line-3">Possibilities.</span>
+        </span>
+      </h1>
+      <div class="hero-lede">
+        <span class="lede-line">A private home for Odisha’s 650+ aspiring founders &amp; mentors</span>
+        <span class="lede-line">Connect with collaborators and build lasting companies together</span>
+      </div>
+      <div class="actions-row">
+        <a href="/join" class="cta-pill">
+          <span>Apply to Join</span>
+          <div class="cta-disc">
+            <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M.6.6 4 4 .6 7.4" />
+            </svg>
+          </div>
+        </a>
+        <a href="/login" class="action-link">Member Portal Sign In</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Select animated elements
+      const logoEl = document.querySelector('.logo-pill');
+      const treePaths = document.querySelectorAll('.tree-stroke');
+      const brandMarkEl = document.querySelector('.logo-brand-wrap');
+      const navEl = document.querySelector('.nav-pill');
+      const menuBtn = document.querySelector('.menu-btn');
+      const navLinks = document.querySelectorAll('.nav-links .nav-link, .partner-pill');
+      const brandEl = document.querySelector('.brand-label');
+      const headlineLines = document.querySelectorAll('.headline-line');
+      const ledeLines = document.querySelectorAll('.lede-line');
+      const ctaEl = document.querySelector('.cta-pill');
+      const actionLinkEl = document.querySelector('.action-link');
+      const mobileNavPanel = document.querySelector('.mobile-nav-panel');
+
+      // Add waiting class if motion is allowed
+      if (!prefersReduced) {
+        document.body.classList.add('waiting-entrance');
+      }
+
+      let entranceTriggered = false;
+
+      function runEntrance() {
+        if (entranceTriggered) return;
+        entranceTriggered = true;
+        clearTimeout(failsafeTimer);
+        document.body.classList.remove('waiting-entrance');
+
+        if (prefersReduced) {
+          return;
+        }
+
+        const isNarrow = window.innerWidth < 650;
+        const ctaHeight = ctaEl ? ctaEl.getBoundingClientRect().height || 46 : 46;
+        const scaleFactor = (ctaHeight / 46) * (isNarrow ? 0.8 : 1);
+        const dist = function (px) {
+          return Math.round(px * scaleFactor);
+        };
+
+        const animations = [];
+
+        // 0ms, 500ms, quart: logo fades in
+        if (logoEl) {
+          animations.push(
+            logoEl.animate(
+              [{ opacity: 0 }, { opacity: 1 }],
+              { duration: 500, delay: 0, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // Tree strokes: draw on with stroke-dashoffset, 80ms plus 45ms per path, 820ms, grow ease cubic-bezier(0.45, 0, 0.2, 1)
+        treePaths.forEach(function (path, i) {
+          const len = path.getTotalLength() || 40;
+          path.style.strokeDasharray = len + 'px';
+          const anim = path.animate(
+            [
+              { strokeDashoffset: len + 'px' },
+              { strokeDashoffset: '0px' }
+            ],
+            {
+              duration: 820,
+              delay: 80 + i * 45,
+              easing: 'cubic-bezier(0.45, 0, 0.2, 1)',
+              fill: 'backwards'
+            }
+          );
+          anim.onfinish = function () {
+            path.style.strokeDasharray = '';
+            path.style.strokeDashoffset = '';
+          };
+          animations.push(anim);
+        });
+
+        // Brand wordmark badge: fades and scales from 0.92 at 420ms for 650ms, expo cubic-bezier(0.16, 1, 0.3, 1)
+        if (brandMarkEl) {
+          animations.push(
+            brandMarkEl.animate(
+              [
+                { opacity: 0, transform: 'scale(0.92)' },
+                { opacity: 1, transform: 'scale(1)' }
+              ],
+              { duration: 650, delay: 420, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // 120ms, 700ms, expo: nav or menu lifts 8px
+        const headerNavElement = isNarrow ? menuBtn : navEl;
+        if (headerNavElement) {
+          animations.push(
+            headerNavElement.animate(
+              [
+                { opacity: 0, transform: 'translateY(' + dist(8) + 'px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              { duration: 700, delay: 120, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // Links ripple from 260ms, 45ms apart, lifting 4px
+        if (!isNarrow && navLinks.length) {
+          navLinks.forEach(function (link, i) {
+            animations.push(
+              link.animate(
+                [
+                  { opacity: 0, transform: 'translateY(' + dist(4) + 'px)' },
+                  { opacity: 1, transform: 'translateY(0)' }
+                ],
+                { duration: 600, delay: 260 + i * 45, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+              )
+            );
+          });
+        }
+
+        // 300ms: Brand supertitle lifts 10px, 650ms
+        if (brandEl) {
+          animations.push(
+            brandEl.animate(
+              [
+                { opacity: 0, transform: 'translateY(' + dist(10) + 'px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              { duration: 650, delay: 300, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // 380ms, then +90ms per line, 1050ms: each headline line rises from translateY(115%) inside its own clip mask
+        headlineLines.forEach(function (line, i) {
+          animations.push(
+            line.animate(
+              [
+                { transform: 'translateY(115%)' },
+                { transform: 'translateY(0)' }
+              ],
+              {
+                duration: 1050,
+                delay: 380 + i * 90,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                fill: 'backwards'
+              }
+            )
+          );
+        });
+
+        // 800ms and 860ms: the two lede lines lift 14px, 800ms
+        ledeLines.forEach(function (line, i) {
+          animations.push(
+            line.animate(
+              [
+                { opacity: 0, transform: 'translateY(' + dist(14) + 'px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              {
+                duration: 800,
+                delay: i === 0 ? 800 : 860,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                fill: 'backwards'
+              }
+            )
+          );
+        });
+
+        // 1000ms: CTA lifts 12px, 800ms
+        if (ctaEl) {
+          animations.push(
+            ctaEl.animate(
+              [
+                { opacity: 0, transform: 'translateY(' + dist(12) + 'px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              { duration: 800, delay: 1000, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // 1100ms: text link lifts 8px, 600ms, quart cubic-bezier(0.25, 1, 0.5, 1)
+        if (actionLinkEl) {
+          animations.push(
+            actionLinkEl.animate(
+              [
+                { opacity: 0, transform: 'translateY(' + dist(8) + 'px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              { duration: 600, delay: 1100, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'backwards' }
+            )
+          );
+        }
+
+        // When every animation finishes, force a one-frame redraw of the logo and action row
+        Promise.all(animations.map(function (a) { return a.finished; })).then(function () {
+          if (logoEl) void logoEl.offsetHeight;
+          const actionsRow = document.querySelector('.actions-row');
+          if (actionsRow) void actionsRow.offsetHeight;
+        }).catch(function () {});
+      }
+
+      // 3.5s failsafe
+      const failsafeTimer = setTimeout(runEntrance, 3500);
+
+      // Check font readiness and video loaded data
+      const fontsPromise = document.fonts ? document.fonts.ready : Promise.resolve();
+      const videoEl = document.querySelector('.bg-video');
+      const videoPromise = new Promise(function (resolve) {
+        if (!videoEl || videoEl.readyState >= 2) {
+          resolve();
+        } else {
+          videoEl.addEventListener('loadeddata', function () { resolve(); }, { once: true });
+          videoEl.addEventListener('error', function () { resolve(); }, { once: true });
+        }
+      });
+
+      Promise.all([fontsPromise, videoPromise]).then(function () {
+        runEntrance();
+      });
+
+      // Mobile Menu behavior
+      if (menuBtn && mobileNavPanel) {
+        const mobileNavLinks = mobileNavPanel.querySelectorAll('a');
+
+        function openMenu() {
+          menuBtn.setAttribute('aria-expanded', 'true');
+          mobileNavPanel.classList.add('is-open');
+          if (mobileNavLinks.length) {
+            mobileNavLinks[0].focus();
+          }
+        }
+
+        function closeMenu() {
+          menuBtn.setAttribute('aria-expanded', 'false');
+          mobileNavPanel.classList.remove('is-open');
+        }
+
+        menuBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+          if (isOpen) {
+            closeMenu();
+            menuBtn.focus();
+          } else {
+            openMenu();
+          }
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+            closeMenu();
+            menuBtn.focus();
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (menuBtn.getAttribute('aria-expanded') === 'true') {
+            if (!mobileNavPanel.contains(e.target) && !menuBtn.contains(e.target)) {
+              closeMenu();
+            }
+          }
+        });
+
+        mobileNavLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            closeMenu();
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

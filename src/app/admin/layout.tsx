@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BrandLockup } from "@/components/brand/BrandLockup";
 import { AstrolabeStar } from "@/components/brand/AstrolabeStar";
 import {
   LayoutDashboard,
@@ -13,14 +12,12 @@ import {
   Award,
   Calendar,
   Megaphone,
-  Tag,
   BarChart3,
   FileText,
   Settings,
   Shield,
   ShieldCheck,
   Building2,
-  Scale,
   Menu,
   X,
   LogOut,
@@ -40,15 +37,12 @@ const adminNav: AdminNavItem[] = [
   { name: "Applications", href: "/admin/applications", icon: FileCheck2, badgeKey: "pendingApplications" },
   { name: "Members", href: "/admin/members", icon: Users },
   { name: "Startups", href: "/admin/startups", icon: Building2 },
-  { name: "Taxonomy", href: "/admin/taxonomy", icon: Tag },
-  { name: "Migration & Invites", href: "/admin/migration", icon: FileText },
   { name: "Posts & Reports", href: "/admin/reports", icon: Flag, badgeKey: "openReports" },
   { name: "Achievements", href: "/admin/achievements", icon: Award, badgeKey: "pendingAchievements" },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Admins & Committee", href: "/admin/admins", icon: ShieldCheck, superAdminOnly: true },
-  { name: "Legal Documents", href: "/admin/legal", icon: Scale, superAdminOnly: true },
   { name: "Audit Log", href: "/admin/audit-log", icon: FileText, superAdminOnly: true },
   { name: "Settings", href: "/admin/settings", icon: Settings, superAdminOnly: true },
 ];
@@ -84,10 +78,10 @@ function AdminNavLinks({ adminLevel }: { adminLevel: string | null }) {
             key={item.name}
             href={item.href}
             className={cn(
-              "flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all duration-200 group",
+              "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all duration-200 group",
               isActive
-                ? "bg-white/10 text-[#FBF7EE] font-semibold border-l-2 border-[#D4AF37] shadow-xs backdrop-blur-md"
-                : "text-white/70 hover:bg-white/5 hover:text-[#FBF7EE]"
+                ? "bg-white/[0.08] text-[#F5FAF6] font-medium border-l-2 border-[#88DECC] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]"
+                : "text-[#ECF1EF]/65 hover:bg-white/[0.04] hover:text-[#F5FAF6]"
             )}
           >
             <div className="flex items-center gap-3">
@@ -95,14 +89,14 @@ function AdminNavLinks({ adminLevel }: { adminLevel: string | null }) {
                 className={cn(
                   "w-4 h-4 transition-colors",
                   isActive
-                    ? "text-[#F3D3A2]"
-                    : "text-white/40 group-hover:text-white/80"
+                    ? "text-[#88DECC]"
+                    : "text-[#ECF1EF]/40 group-hover:text-[#88DECC]/80"
                 )}
               />
               <span className="font-sans">{item.name}</span>
             </div>
             {Boolean(badgeCount && badgeCount > 0) && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#E9C68C] text-[#1E1F33] shadow-xs">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#88DECC] text-[#03080B] shadow-xs">
                 {badgeCount}
               </span>
             )}
@@ -152,7 +146,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
 
         if (!user.mfaVerified) {
-          // MFA not verified yet — immediately bounce to MFA verification screen
           if (typeof window !== "undefined") {
             window.location.href = "/admin/mfa";
           }
@@ -160,9 +153,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
 
         if (isMounted) {
-          setAdminLevel(user.adminLevel);
-          setAdminEmail(user.email);
           setAuthorized(true);
+          setAdminLevel(user.adminLevel);
+          setAdminEmail(user.email || null);
           setChecking(false);
         }
       } catch (err) {
@@ -191,25 +184,73 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   });
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col lg:flex-row relative">
+    <div className="admin-portal dark min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg flex flex-col lg:flex-row relative selection:bg-[#88DECC]/30 selection:text-[#03080B]">
       {/* ── Authorization Security Overlay (shown while validating session & MFA) ── */}
       {(checking || !authorized) && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#12131F] text-[#FCF6E3]">
-          <AstrolabeStar className="w-12 h-12 text-[#D4AF37] animate-spin" />
-          <p className="mt-4 text-xs font-mono text-[#D4AF37] uppercase tracking-wider">
-            Verifying Admin Credentials &amp; MFA...
-          </p>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center login-bg bg-[#03080B] text-[#F5FAF6] p-4 select-none">
+          <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 sm:p-7 max-w-[380px] w-full text-center border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.85)] relative overflow-hidden space-y-3.5 animate-in fade-in duration-200">
+            {/* Top Specular Mint Hairline */}
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/50 to-transparent" />
+
+            {/* Glowing Astrolabe Emblem */}
+            <div className="relative flex justify-center items-center py-2">
+              <div className="absolute inset-0 rounded-full bg-[#88DECC]/15 blur-2xl" />
+              <AstrolabeStar size={110} className="relative z-10" />
+            </div>
+
+            {/* Header & Subhead */}
+            <div className="space-y-1">
+              <h2 className="join-hero-headline text-lg sm:text-xl font-light text-[#F5FAF6] tracking-tight">
+                Verifying Credentials
+              </h2>
+              <p className="join-hero-subhead text-[11px] sm:text-xs text-[#ECF1EF]/70 leading-relaxed font-normal">
+                Authenticating admin permissions &amp; MFA status for OASIS governance console.
+              </p>
+            </div>
+
+            {/* Shimmering Loading Bar */}
+            <div className="w-32 h-1 mx-auto rounded-full bg-white/10 overflow-hidden relative">
+              <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-[#88DECC] to-transparent animate-pulse" />
+            </div>
+
+            {/* Status Footer */}
+            <div className="pt-2 border-t border-white/10 flex items-center justify-center gap-1.5 text-[10px] text-[#ECF1EF]/50 font-mono">
+              <Shield className="w-3 h-3 text-[#88DECC] shrink-0" />
+              <span>Admin Sanctuary Handshake</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ── Desktop Admin Sidebar (Midnight Navy) ─────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-[var(--brand-navy)] flex-col justify-between shrink-0 border-r border-[var(--brand-gold)]/20 min-h-screen sticky top-0">
+      {/* ── Desktop Admin Sidebar (Obsidian Glass) ─────────────────────────────── */}
+      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 min-h-screen sticky top-0">
         <div>
           {/* Header */}
-          <div className="p-5 border-b border-white/10">
-            <BrandLockup variant="horizontal" href="/admin" />
-            <div className="mt-3 flex items-center justify-between text-[10px] font-mono">
-              <span className="flex items-center gap-1.5 uppercase tracking-wider text-[var(--accent)] font-semibold">
+          <div className="p-4 border-b border-white/10 space-y-3">
+            <Link href="/admin" className="join-logo-pill" aria-label="OASIS ONE home">
+              <div className="w-[30px] h-[30px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 46 46" width="30" height="30" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M24.2 37V24" />
+                  <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+                  <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+                  <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+                  <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+                  <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+                  <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+                </svg>
+              </div>
+              <div className="flex items-center gap-1.5 pl-2 select-none">
+                <span className="font-semibold text-xs tracking-[0.16em] text-[#F5FAF6] uppercase">
+                  OASIS
+                </span>
+                <span className="font-bold text-[8px] tracking-wider bg-[#F3D3A2] text-[#12131F] px-1.5 py-0.5 rounded leading-none uppercase">
+                  ADMIN
+                </span>
+              </div>
+            </Link>
+
+            <div className="flex items-center justify-between text-[10px] font-mono pt-1">
+              <span className="flex items-center gap-1.5 uppercase tracking-wider text-[#88DECC] font-semibold">
                 <Shield className="w-3 h-3" />
                 <span>Console Active</span>
               </span>
@@ -217,15 +258,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={cn(
                   "px-2 py-0.5 rounded text-[9px] uppercase font-semibold border",
                   adminLevel === "super_admin"
-                    ? "bg-[#D4AF37]/20 text-[#F3D3A2] border-[#D4AF37]/40"
-                    : "bg-indigo-950/60 text-indigo-300 border-indigo-700"
+                    ? "bg-[#88DECC]/10 text-[#88DECC] border-[#88DECC]/30"
+                    : "bg-white/[0.04] text-[#ECF1EF]/70 border-white/10"
                 )}
               >
                 {adminLevel === "super_admin" ? "Super Admin" : "Moderator"}
               </span>
             </div>
             {adminEmail && (
-              <p className="mt-1.5 text-[10px] font-mono text-white/50 truncate">
+              <p className="text-[10px] font-mono text-[#ECF1EF]/40 truncate">
                 {adminEmail}
               </p>
             )}
@@ -238,11 +279,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* System & Session Status with Sign Out */}
-        <div className="p-4 border-t border-white/10 space-y-3">
-          <div className="flex items-center justify-between text-[11px] text-[var(--brand-cream)]/70">
-            <span className="font-medium">OASIS Governance</span>
-            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="p-3.5 border-t border-white/10 space-y-2.5">
+          <div className="flex items-center justify-between text-[11px] text-[#ECF1EF]/70">
+            <span className="font-medium text-xs">OASIS Governance</span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-[#88DECC] font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#88DECC] animate-pulse" />
               MFA Active
             </span>
           </div>
@@ -259,28 +300,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 window.location.href = "/login";
               }
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition-colors cursor-pointer border border-rose-500/20"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition-colors cursor-pointer border border-rose-500/20"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Sign Out of Console</span>
           </button>
 
-          <div className="text-[10px] font-mono text-[var(--brand-cream)]/40">
-            OASIS v2.0 · Committee Console
+          <div className="text-[9.5px] font-mono text-[#ECF1EF]/40 text-center">
+            OASIS v2.0 &middot; Committee Console
           </div>
         </div>
       </aside>
 
       {/* ── Mobile Admin Header ────────────────────────────────────────────────── */}
-      <div className="lg:hidden bg-[var(--brand-navy)] text-white px-5 py-3.5 flex items-center justify-between border-b border-white/10">
-        <BrandLockup variant="wordmark" href="/admin" />
+      <div className="lg:hidden bg-[#070D12]/95 backdrop-blur-2xl text-[#F5FAF6] px-4 py-3 flex items-center justify-between border-b border-white/10">
+        <Link href="/admin" className="join-logo-pill" aria-label="OASIS ONE home">
+          <div className="w-[28px] h-[28px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 46 46" width="24" height="24" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M24.2 37V24" />
+              <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+              <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+              <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+              <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+              <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+              <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1 pl-1.5 select-none">
+            <span className="font-semibold text-xs tracking-wider text-[#F5FAF6] uppercase">
+              OASIS
+            </span>
+          </div>
+        </Link>
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              "text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold",
+              "text-[9px] font-mono px-2 py-0.5 rounded uppercase font-semibold border",
               adminLevel === "super_admin"
-                ? "bg-[#D4AF37]/20 text-[#F3D3A2]"
-                : "bg-indigo-950/60 text-indigo-300"
+                ? "bg-[#88DECC]/10 text-[#88DECC] border-[#88DECC]/30"
+                : "bg-white/[0.04] text-[#ECF1EF]/70 border-white/10"
             )}
           >
             {adminLevel === "super_admin" ? "Super Admin" : "Moderator"}
@@ -288,7 +346,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-lg hover:bg-white/10"
+            className="p-1.5 rounded-lg hover:bg-white/10 cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -297,13 +355,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[var(--brand-navy)] p-4 space-y-2 border-b border-white/10">
+        <div className="lg:hidden bg-[#070D12]/95 backdrop-blur-2xl p-4 space-y-2 border-b border-white/10">
           {visibleNav.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-lg text-xs text-[var(--brand-cream)]/80 hover:bg-white/10"
+              className="flex items-center justify-between p-2.5 rounded-lg text-xs text-[#ECF1EF]/80 hover:bg-white/10"
             >
               <span>{item.name}</span>
             </Link>
@@ -329,7 +387,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Content View ──────────────────────────────────────────────────────── */}
-      <main className="flex-1 min-w-0 p-6 lg:p-10">{children}</main>
+      <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">{children}</main>
     </div>
   );
 }

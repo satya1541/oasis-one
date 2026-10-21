@@ -56,6 +56,24 @@
   --info: #7DB4F0;
 }
 
+.admin-portal {
+  --bg: #03080B;
+  --surface: rgba(7, 13, 18, 0.78);
+  --surface-2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --text: #F5FAF6;
+  --muted: rgba(236, 241, 239, 0.65);
+  --accent: #88DECC;
+  --accent-fill: #88DECC;
+  --primary: #EEF1EA;
+  --primary-hover: #FFFFFF;
+  --on-primary: #03080B;
+  --brand-navy: #070D12;
+  --brand-gold: #F3D3A2;
+  --brand-cream: #F5FAF6;
+}
+
 @theme {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -84,6 +102,13 @@
   --font-mono: var(--font-jetbrains-mono), monospace;
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
@@ -91,6 +116,40 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100dvh;
+}
+
+/* Touch & tap ergonomics for mobile / tablets */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Prevent iOS Safari from zooming in on input focus (requires >=16px) */
+@media screen and (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Apple safe area utility helpers */
+.safe-pb {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+.safe-pt {
+  padding-top: max(0.875rem, env(safe-area-inset-top, 0px));
+}
+.safe-bottom {
+  bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
 ::selection {
@@ -225,12 +284,206 @@ body {
 .text-gold-gradient {
   background: linear-gradient(135deg, #FCF6E3 0%, #F3D3A2 50%, #C9A96E 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-navy-gradient {
   background: linear-gradient(135deg, #1E1F33 0%, #30314A 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* ── OASIS ONE Ambient Dark Luxury & Auth Design System ── */
+.login-bg {
+  background-color: #03080B;
+  background-image:
+    radial-gradient(ellipse 900px 600px at 15% 15%, rgba(136, 222, 204, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 800px 500px at 85% 85%, rgba(243, 211, 162, 0.06) 0%, transparent 70%),
+    radial-gradient(circle at 50% 50%, rgba(3, 8, 11, 0.3) 0%, #03080B 100%);
+}
+
+.join-hero-headline {
+  font-family: "RV Display", "Poppins", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+}
+
+.join-hero-subhead {
+  font-family: "RV Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+.join-glass-panel {
+  background: rgba(3, 8, 11, 0.76);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dark select & dropdown option styling across browsers and OSs */
+.admin-portal select,
+.dark select,
+select.dark-select {
+  color-scheme: dark;
+  background-color: #070D12;
+  color: #F5FAF6;
+}
+
+.admin-portal select option,
+.dark select option,
+select.dark-select option {
+  background-color: #070D12;
+  color: #F5FAF6;
+}
+
+.join-logo-pill {
+  height: 38px;
+  border-radius: 19px;
+  background: rgba(150, 220, 130, 0.035);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  overflow: hidden;
+  padding-right: 12px;
+  flex-shrink: 0;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.join-logo-pill:hover {
+  border-color: rgba(136, 222, 204, 0.4);
+  background: rgba(150, 220, 130, 0.06);
+}
+
+.join-login-pill {
+  height: 34px;
+  border-radius: 17px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #ECF1EF;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.join-login-pill:hover {
+  border-color: #88DECC;
+  color: #88DECC;
+}
+
+.join-cta-pill {
+  height: 38px;
+  border-radius: 20px;
+  background-color: #EEF1EA;
+  color: #03080B;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 14px;
+  padding-right: 4px;
+  gap: 10px;
+  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+.join-cta-pill:hover:not(:disabled) {
+  background-color: #F5FAF6;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.join-cta-disc {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #122B2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 0.25s ease;
+}
+
+.join-cta-pill:hover:not(:disabled) .join-cta-disc {
+  background-color: #26504D;
+}
+
+.join-role-card {
+  position: relative;
+  text-align: left;
+  border-radius: 12px;
+  padding: 8px 10px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 94px;
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.join-role-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(136, 222, 204, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.join-role-card.selected {
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px solid #88DECC;
+  box-shadow: 0 8px 28px rgba(136, 222, 204, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Custom subtle scrollbar for auth & join cards */
+.auth-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.auth-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+}
+.auth-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+.auth-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(136, 222, 204, 0.4);
+}
+
+/* ── OASIS Admin Portal Dark Luxury Tokens ── */
+.admin-portal {
+  --bg: #03080B;
+  --surface: rgba(7, 13, 18, 0.82);
+  --surface-2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.10);
+  --text: #F5FAF6;
+  --muted: rgba(236, 241, 239, 0.65);
+  --accent: #88DECC;
+  --accent-fill: #122B2A;
+  color-scheme: dark;
+}
+
 

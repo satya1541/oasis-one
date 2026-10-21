@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MemberShell } from "@/components/layout/MemberShell";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { MessageSquare, Plus, CheckCircle2, ArrowRight, X, RotateCw } from "lucide-react";
+import {
+  MessageSquare,
+  Plus,
+  CheckCircle2,
+  ArrowRight,
+  X,
+  RotateCw,
+  ChevronDown,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const filterChips = [
@@ -38,7 +46,8 @@ interface PostItem {
   };
 }
 
-export default function CommunityPage() {
+function CommunityContent() {
+  const searchParams = useSearchParams();
   const [activeFilter, setActiveFilter] = useState("All");
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,12 +60,20 @@ export default function CommunityPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Auto-open modal if ?action=new-question is in the URL
+  useEffect(() => {
+    if (searchParams.get("action") === "new-question") {
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const url = activeFilter === "All"
-        ? "/api/v1/posts"
-        : `/api/v1/posts?category=${encodeURIComponent(activeFilter)}`;
+      const url =
+        activeFilter === "All"
+          ? "/api/v1/posts"
+          : `/api/v1/posts?category=${encodeURIComponent(activeFilter)}`;
       const res = await fetch(url);
       if (res.ok) {
         const json = await res.json();
@@ -92,7 +109,7 @@ export default function CommunityPage() {
       });
 
       if (!res.ok) {
-        const errJson = await res.json();
+        const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error?.message || "Failed to publish question");
       }
 
@@ -129,36 +146,36 @@ export default function CommunityPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-light text-[var(--text)] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl font-light text-[#F5FAF6] tracking-tight">
               Community
             </h1>
-            <p className="text-xs text-[var(--muted)] mt-1">
+            <p className="text-xs sm:text-sm text-[#ECF1EF]/60 mt-1 font-sans">
               Live questions, insights, and collaborative answers across Odisha’s founder network.
             </p>
           </div>
 
-          <Button
-            size="md"
-            className="gap-2 shrink-0 cursor-pointer"
+          <button
+            type="button"
+            className="w-full sm:w-auto px-5 py-2.5 min-h-[42px] bg-[#EEF1EA] text-[#03080B] font-semibold text-xs rounded-full hover:bg-white hover:shadow-[0_0_15px_rgba(136,222,204,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shrink-0"
             onClick={() => setIsModalOpen(true)}
           >
-            <Plus className="w-4 h-4" />
-            Ask a question
-          </Button>
+            <Plus className="w-4 h-4 text-[#03080B]" />
+            <span>Ask a question</span>
+          </button>
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2.5 pt-1 scrollbar-none touch-pan-x -mx-1 px-1">
           {filterChips.map((chip) => (
             <button
               key={chip}
               type="button"
               onClick={() => setActiveFilter(chip)}
               className={cn(
-                "px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer shadow-2xs",
+                "px-4 py-2 min-h-[38px] rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none",
                 activeFilter === chip
-                  ? "bg-[var(--brand-navy)] text-[var(--brand-cream)] font-semibold border border-[var(--brand-gold)]/40 shadow-xs"
-                  : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)] hover:border-[var(--accent)]/50 hover:text-[var(--text)]"
+                  ? "bg-[#EEF1EA] text-[#03080B] font-semibold shadow-xs"
+                  : "bg-white/[0.04] text-[#ECF1EF]/70 border border-white/10 hover:border-[#88DECC]/40 hover:text-[#F5FAF6]"
               )}
             >
               {chip}
@@ -168,52 +185,46 @@ export default function CommunityPage() {
 
         {/* Posts Feed */}
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-[var(--muted)] gap-3 text-xs">
-            <RotateCw className="w-5 h-5 animate-spin text-[var(--accent)]" />
-            <span className="font-mono">Loading community threads...</span>
+          <div className="flex flex-col items-center justify-center py-20 text-[#ECF1EF]/60 space-y-4 select-none">
+            <div className="w-12 h-12 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)]">
+              <RotateCw className="w-5 h-5 animate-spin text-[#88DECC]" />
+            </div>
+            <span className="font-mono text-xs">Loading community threads...</span>
           </div>
         ) : posts.length === 0 ? (
-          <Card className="p-14 text-center text-xs text-[var(--muted)] border-dashed card-luxury">
+          <div className="p-10 sm:p-14 text-center text-xs text-[#ECF1EF]/50 join-glass-panel border border-white/10 rounded-2xl sm:rounded-3xl border-dashed">
             No discussions found in this sector. Start the first conversation!
-          </Card>
+          </div>
         ) : (
-          <div className="space-y-4.5">
+          <div className="space-y-4">
             {posts.map((post) => (
-              <Card
+              <div
                 key={post.id}
-                hoverEffect
-                className="p-6 transition-all"
+                className="join-glass-panel rounded-2xl sm:rounded-3xl border border-white/10 hover:border-white/20 p-5 sm:p-6 text-[#F5FAF6] shadow-[0_12px_36px_rgba(0,0,0,0.45)] relative overflow-hidden transition-all duration-200"
               >
-                <div className="flex flex-col space-y-2.5">
-                  <div className="flex items-center justify-between gap-3 text-xs text-[var(--muted)]">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-[var(--text)]">
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/25 to-transparent" />
+                <div className="flex flex-col space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#ECF1EF]/60">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <span className="font-semibold text-[#F5FAF6]">
                         {post.author?.name || "Community Member"}
                       </span>
                       {post.author?.primaryRole && (
-                        <Badge
-                          variant={
-                            post.author.primaryRole === "mentor"
-                              ? "mentor"
-                              : post.author.primaryRole === "aspiring_entrepreneur"
-                              ? "aspiring"
-                              : "founder"
-                          }
-                        >
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-[#88DECC]/10 text-[#88DECC] border border-[#88DECC]/30 uppercase">
                           {post.author.primaryRole === "mentor"
                             ? "Mentor"
                             : post.author.primaryRole === "aspiring_entrepreneur"
                             ? "Aspiring"
                             : "Founder"}
-                        </Badge>
+                        </span>
                       )}
                       <span>•</span>
-                      <span>{post.category || "General"}</span>
+                      <span className="text-[#88DECC]">{post.category || "General"}</span>
                       <span>•</span>
-                      <span>{formatTimeAgo(post.createdAt)}</span>
+                      <span className="font-mono text-[11px]">{formatTimeAgo(post.createdAt)}</span>
                     </div>
                     {post.isResolved && (
-                      <div className="flex items-center gap-1 text-[var(--success)] text-xs font-medium">
+                      <div className="flex items-center gap-1 text-emerald-400 text-xs font-medium font-mono">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         Resolved
                       </div>
@@ -221,60 +232,75 @@ export default function CommunityPage() {
                   </div>
 
                   <Link href={`/community/${post.id}`} className="group">
-                    <h2 className="font-display text-lg font-medium text-[var(--text)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+                    <h2 className="font-display text-base sm:text-lg font-medium text-[#F5FAF6] group-hover:text-[#88DECC] transition-colors leading-snug">
                       {post.title}
                     </h2>
                   </Link>
 
-                  <p className="text-xs sm:text-sm text-[var(--muted)] line-clamp-2 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#ECF1EF]/70 line-clamp-2 leading-relaxed font-sans">
                     {post.body}
                   </p>
 
-                  <div className="pt-3 mt-2 border-t border-[var(--border)] flex items-center justify-between text-xs text-[var(--muted)]">
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <MessageSquare className="w-3.5 h-3.5 text-[var(--accent)]" />
+                  <div className="pt-3 mt-1 border-t border-white/10 flex items-center justify-between text-xs text-[#ECF1EF]/60">
+                    <span className="flex items-center gap-1.5 font-mono text-[11px]">
+                      <MessageSquare className="w-3.5 h-3.5 text-[#88DECC]" />
                       {post.responseCount || 0} replies
                     </span>
                     <Link
                       href={`/community/${post.id}`}
-                      className="text-[var(--accent)] font-semibold hover:underline flex items-center gap-1"
+                      className="text-xs font-semibold text-[#88DECC] hover:underline flex items-center gap-1"
                     >
                       View discussion
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}
 
-        {/* Create Post Dialog Modal */}
+        {/* ── Ask a Community Question Modal ───────────────────────────────── */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-            <div className="w-full max-w-lg bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-                <h3 className="font-display text-lg font-medium text-[var(--text)]">
-                  Ask a Community Question
-                </h3>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#03080B]/85 backdrop-blur-xl animate-in fade-in duration-200 select-none overflow-y-auto"
+            onClick={() => setIsModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-lg max-h-[92dvh] overflow-y-auto join-glass-panel border border-white/10 rounded-3xl p-6 sm:p-7 shadow-[0_24px_70px_rgba(0,0,0,0.85)] relative overflow-hidden space-y-5 text-[#F5FAF6] my-auto animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Specular Top Hairline */}
+              <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/50 to-transparent" />
+
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="space-y-0.5">
+                  <h3 className="font-display text-xl font-light text-[#F5FAF6] tracking-tight">
+                    Ask a Community Question
+                  </h3>
+                  <p className="text-xs text-[#ECF1EF]/60 font-sans">
+                    Tap into the collective intelligence of verified founders and mentors.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="text-[var(--muted)] hover:text-[var(--text)]"
+                  className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 hover:bg-white/10 text-[#ECF1EF]/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  aria-label="Close modal"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
               {submitError && (
-                <div className="p-3 rounded-xl bg-rose-50 text-[var(--danger)] text-xs border border-rose-200">
+                <div className="p-3.5 rounded-2xl bg-rose-500/10 text-rose-300 text-xs border border-rose-500/25">
                   {submitError}
                 </div>
               )}
 
               <form onSubmit={handleCreatePost} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-[var(--muted)] mb-1">
+                  <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-[#ECF1EF]/70 mb-2">
                     Question Title
                   </label>
                   <input
@@ -283,30 +309,48 @@ export default function CommunityPage() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="e.g., What are the STPI registration requirements in Bhubaneswar?"
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full px-4 py-3 text-xs sm:text-sm rounded-2xl border border-white/10 bg-white/[0.04] text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:border-[#88DECC]/60 focus:ring-2 focus:ring-[#88DECC]/20 transition-all font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-[var(--muted)] mb-1">
+                  <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-[#ECF1EF]/70 mb-2">
                     Category
                   </label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                  >
-                    <option value="Collaboration">Collaboration</option>
-                    <option value="Regulation">Regulation</option>
-                    <option value="Hardware">Hardware</option>
-                    <option value="Funding">Funding</option>
-                    <option value="Hiring">Hiring</option>
-                    <option value="DeepTech">DeepTech</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      style={{ colorScheme: "dark" }}
+                      className="w-full appearance-none px-4 py-3 pr-10 text-xs sm:text-sm rounded-2xl border border-white/10 bg-[#070D12] text-[#F5FAF6] focus:outline-none focus:border-[#88DECC]/60 focus:ring-2 focus:ring-[#88DECC]/20 transition-all cursor-pointer font-sans"
+                    >
+                      <option value="Collaboration" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        Collaboration
+                      </option>
+                      <option value="Regulation" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        Regulation
+                      </option>
+                      <option value="Hardware" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        Hardware
+                      </option>
+                      <option value="Funding" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        Funding
+                      </option>
+                      <option value="Hiring" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        Hiring
+                      </option>
+                      <option value="DeepTech" className="bg-[#070D12] text-[#F5FAF6] py-2.5">
+                        DeepTech
+                      </option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#88DECC]">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-[var(--muted)] mb-1">
+                  <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-[#ECF1EF]/70 mb-2">
                     Details / Context
                   </label>
                   <textarea
@@ -315,25 +359,25 @@ export default function CommunityPage() {
                     value={newBody}
                     onChange={(e) => setNewBody(e.target.value)}
                     placeholder="Describe your context, background, and specific advice you are looking for..."
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                    className="w-full px-4 py-3 text-xs sm:text-sm rounded-2xl border border-white/10 bg-white/[0.04] text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:border-[#88DECC]/60 focus:ring-2 focus:ring-[#88DECC]/20 transition-all font-sans resize-none"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-                  <Button
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                  <button
                     type="button"
-                    variant="ghost"
                     onClick={() => setIsModalOpen(false)}
+                    className="px-5 py-2.5 rounded-full text-xs font-medium text-[#ECF1EF]/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="submit"
-                    variant="primary"
                     disabled={submitting || !newTitle.trim() || !newBody.trim()}
+                    className="px-6 py-2.5 rounded-full bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
                   >
                     {submitting ? "Publishing..." : "Post Question"}
-                  </Button>
+                  </button>
                 </div>
               </form>
             </div>
@@ -341,5 +385,13 @@ export default function CommunityPage() {
         )}
       </div>
     </MemberShell>
+  );
+}
+
+export default function CommunityPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg" />}>
+      <CommunityContent />
+    </Suspense>
   );
 }

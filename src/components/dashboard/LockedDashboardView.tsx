@@ -170,9 +170,9 @@ export function LockedDashboardView({
       />
 
       {/* ── Email Verification Banner ─────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-900 dark:text-amber-200 gap-3 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300 gap-3 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
           <span className="font-sans leading-relaxed">
             Please verify your email address to expedite committee vetting. A verification link was dispatched to your inbox.
           </span>
@@ -181,35 +181,38 @@ export function LockedDashboardView({
           type="button"
           onClick={handleResendEmail}
           disabled={resendCooldown}
-          className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline disabled:opacity-50 shrink-0 cursor-pointer text-left sm:text-right"
+          className="text-xs font-semibold text-amber-300 hover:text-amber-200 hover:underline disabled:opacity-50 shrink-0 cursor-pointer text-left sm:text-right"
         >
           {resendCooldown ? "Link sent (wait 60s)" : "Resend email"}
         </button>
       </div>
 
       {/* ── Application Status Card (Live) ────────────────────────── */}
-      <div className="p-7 sm:p-8 rounded-3xl border border-[#D4AF37]/30 dark:border-[#F3D3A2]/25 bg-[var(--surface)] shadow-md space-y-6 backdrop-blur-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80 pb-6">
+      <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl join-glass-panel border border-white/10 text-[#F5FAF6] shadow-[0_12px_36px_rgba(0,0,0,0.5)] space-y-6 relative overflow-hidden">
+        {/* Specular Top Hairline */}
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/35 to-transparent" />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
           <div>
             {isInfoRequested ? (
-              <div className="text-[11px] uppercase font-mono font-bold tracking-widest text-amber-600 dark:text-amber-400 flex items-center gap-2 animate-pulse mb-1">
+              <div className="text-[11px] uppercase font-mono font-bold tracking-widest text-amber-400 flex items-center gap-2 animate-pulse mb-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 <span>Action Required • Information Requested</span>
               </div>
             ) : (
-              <div className="text-[11px] uppercase font-mono font-semibold tracking-widest text-[#86601F] dark:text-[#F3D3A2] mb-1">
+              <div className="text-[11px] uppercase font-mono font-semibold tracking-widest text-[#88DECC] mb-1">
                 Admissions Vetting In Progress
               </div>
             )}
-            <h2 className="font-display text-2xl sm:text-3xl font-light text-[var(--text)] tracking-tight">
-              Welcome to OASIS, {userName}
+            <h2 className="font-display text-2xl sm:text-3xl font-light text-[#F5FAF6] tracking-tight">
+              Welcome to OASIS, <span className="font-normal text-white">{userName}</span>
             </h2>
             {isInfoRequested ? (
-              <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300 mt-1 font-sans">
+              <p className="text-xs sm:text-sm text-amber-300/90 mt-1 font-sans">
                 The Admissions Committee requested additional verification details. Reply in the dialogue below.
               </p>
             ) : (
-              <p className="text-xs sm:text-sm text-[var(--muted)] mt-1 font-sans">
+              <p className="text-xs sm:text-sm text-[#ECF1EF]/60 mt-1 font-sans">
                 Under confidential review by the OASIS membership council. We typically resolve applications in 48 hours.
               </p>
             )}
@@ -217,31 +220,31 @@ export function LockedDashboardView({
 
           <div className="flex flex-wrap items-center gap-3">
             {isInfoRequested ? (
-              <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none animate-pulse">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+              <div className="text-xs font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none animate-pulse">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                 <span>Action Required</span>
               </div>
             ) : (
-              <div className="text-xs font-medium text-[#86601F] dark:text-[#F3D3A2] bg-[#86601F]/10 border border-[#86601F]/20 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none">
+              <div className="text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/25 flex items-center gap-2 px-3.5 py-1.5 rounded-full select-none">
                 <Lock className="w-3.5 h-3.5" />
                 <span>Pre-Vetting Mode</span>
               </div>
             )}
 
             {referenceId && (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-2)] border border-[#D9CDAE]/60 dark:border-[#2C2E4A] font-mono text-xs shadow-2xs">
-                <span className="text-[var(--muted)]">Docket:</span>
-                <span className="font-semibold text-[var(--text)] truncate max-w-[120px]">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 font-mono text-xs text-[#F5FAF6]">
+                <span className="text-[#ECF1EF]/50">Docket:</span>
+                <span className="font-semibold text-[#88DECC] truncate max-w-[120px]">
                   {referenceId.slice(0, 8)}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyRef}
-                  className="text-[var(--muted)] hover:text-[#86601F] ml-1 cursor-pointer transition-colors"
+                  className="text-[#ECF1EF]/50 hover:text-white ml-1 cursor-pointer transition-colors"
                   title="Copy reference ID"
                 >
                   {copiedRef ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
@@ -254,14 +257,14 @@ export function LockedDashboardView({
         {/* Action Required Banner for Info Request */}
         {isInfoRequested && (
           <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs space-y-2.5">
-            <div className="flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-300 font-mono uppercase tracking-wider text-[11px]">
-              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="flex items-center gap-2 font-semibold text-amber-300 font-mono uppercase tracking-wider text-[11px]">
+              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>Admissions Committee Inquiry Note:</span>
             </div>
-            <div className="p-4 bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] rounded-2xl font-medium text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap font-sans">
+            <div className="p-4 bg-black/40 border border-amber-500/20 rounded-2xl font-medium text-[#F5FAF6] leading-relaxed break-words whitespace-pre-wrap font-sans">
               {decisionReason || messages.find((m) => m.authorType === "admin")?.body || "Please share proof of business incorporation, Pitch Deck, or active founder LinkedIn link."}
             </div>
-            <p className="text-[11px] text-[var(--muted)] font-mono">
+            <p className="text-[11px] text-[#ECF1EF]/60 font-mono">
               Provide your documents or explanation in the Admissions Channel below.
             </p>
           </div>
@@ -269,14 +272,14 @@ export function LockedDashboardView({
 
         {/* Messaging Box with Admins */}
         <div className="space-y-4">
-          <div className="text-xs font-mono uppercase tracking-wider text-[var(--muted)] flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+          <div className="text-xs font-mono uppercase tracking-wider text-[#ECF1EF]/60 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-[#88DECC]" />
             <span>Admissions Council Dialogue</span>
           </div>
 
-          <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-2 auth-scrollbar">
             {messages.length === 0 ? (
-              <div className="p-6 rounded-2xl border border-dashed border-[#D9CDAE]/80 dark:border-[#2C2E4A] bg-[var(--surface-2)]/30 text-xs text-[var(--muted)] text-center font-sans leading-relaxed">
+              <div className="p-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] text-xs text-[#ECF1EF]/50 text-center font-sans leading-relaxed">
                 Your dossier has entered the evaluation pool. Any inquiries, verification notices, or decisions from admissions will stream here in real-time.
               </div>
             ) : (
@@ -287,12 +290,12 @@ export function LockedDashboardView({
                     key={m.id}
                     className={`p-4 rounded-2xl border text-xs space-y-1.5 font-sans ${
                       isAdmin
-                        ? "bg-[#1E1F33] text-[#FBF7EE] border-[#F3D3A2]/30 shadow-xs"
-                        : "bg-[var(--surface-2)] text-[var(--text)] border-[#D9CDAE]/60 dark:border-[#2C2E4A]"
+                        ? "bg-amber-500/10 text-[#F5FAF6] border-amber-500/25 shadow-xs"
+                        : "bg-white/[0.04] text-[#F5FAF6] border-white/10"
                     }`}
                   >
-                    <div className="flex items-center justify-between text-[11px] opacity-75 font-mono">
-                      <span className={isAdmin ? "text-[#F3D3A2] font-semibold" : "font-semibold"}>
+                    <div className="flex items-center justify-between text-[11px] text-[#ECF1EF]/60 font-mono">
+                      <span className={isAdmin ? "text-amber-300 font-semibold" : "text-[#88DECC] font-semibold"}>
                         {m.author?.profile?.name || (isAdmin ? "Admissions Council" : "You")}
                       </span>
                       <span>
@@ -312,27 +315,26 @@ export function LockedDashboardView({
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder="Reply to the reviewer with links or clarifications..."
-              className="flex-1 text-xs px-4 py-3 rounded-2xl border border-[#D9CDAE]/70 dark:border-[#2C2E4A] bg-[var(--surface-2)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans"
+              className="flex-1 text-xs px-4 py-3 rounded-2xl border border-white/10 bg-white/[0.04] text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:ring-1 focus:ring-[#88DECC] font-sans"
             />
-            <Button
-              size="sm"
+            <button
               type="submit"
               disabled={submittingReply || !replyText.trim()}
-              className="rounded-2xl px-5 cursor-pointer"
+              className="rounded-2xl px-5 h-11 bg-[#EEF1EA] text-[#03080B] font-semibold text-xs hover:bg-white hover:shadow-[0_0_15px_rgba(136,222,204,0.35)] transition-all cursor-pointer flex items-center justify-center disabled:opacity-50"
             >
               <Send className="w-3.5 h-3.5" />
-            </Button>
+            </button>
           </form>
         </div>
 
         {/* Withdrawal Link */}
-        <div className="pt-4 border-t border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--muted)] font-mono text-[11px]">
-          <span>Assistance: <a href="mailto:support@oasis.community" className="text-[#86601F] dark:text-[#F3D3A2] hover:underline">support@oasis.community</a></span>
+        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#ECF1EF]/50 font-mono text-[11px]">
+          <span>Assistance: <a href="mailto:support@oasis.community" className="text-[#88DECC] hover:underline">support@oasis.community</a></span>
           {!withdrawn && (
             <button
               type="button"
               onClick={() => setWithdrawModalOpen(true)}
-              className="text-rose-500 hover:text-rose-600 hover:underline cursor-pointer text-left sm:text-right"
+              className="text-rose-400 hover:text-rose-300 hover:underline cursor-pointer text-left sm:text-right"
             >
               Withdraw Application
             </button>
@@ -342,31 +344,30 @@ export function LockedDashboardView({
 
       {/* Withdraw Modal */}
       {withdrawModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A] rounded-3xl p-6 sm:p-7 space-y-4 text-xs shadow-2xl animate-fade-in">
-            <h3 className="font-display text-lg font-medium text-[var(--text)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#03080B]/80 backdrop-blur-xl">
+          <div className="w-full max-w-md join-glass-panel border border-white/10 text-[#F5FAF6] rounded-3xl p-6 sm:p-7 space-y-4 text-xs shadow-2xl animate-fade-in relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
+            <h3 className="font-display text-lg font-medium text-[#F5FAF6]">
               Withdraw Application
             </h3>
-            <p className="text-[var(--muted)] leading-relaxed font-sans">
+            <p className="text-[#ECF1EF]/70 leading-relaxed font-sans">
               Are you certain you wish to withdraw your application? Your docket records will be purged from the review queue and you will need to re-apply if you reconsider.
             </p>
             <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-xl"
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-[#ECF1EF]/80 text-xs transition-colors cursor-pointer"
                 onClick={() => setWithdrawModalOpen(false)}
               >
                 Cancel
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                className="bg-rose-600 hover:bg-rose-500 text-white rounded-xl"
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-md transition-colors cursor-pointer"
                 onClick={handleWithdraw}
               >
                 Confirm Withdrawal
-              </Button>
+              </button>
             </div>
           </div>
         </div>

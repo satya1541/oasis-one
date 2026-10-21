@@ -278,27 +278,32 @@ export function AccountLockedModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#0B0C14]/85 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300 select-none overflow-y-auto"
+      className="admin-portal dark fixed inset-0 z-50 bg-[#03080B]/85 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-300 select-none overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 rounded-3xl max-w-[560px] w-full p-7 sm:p-9 text-center shadow-2xl space-y-6 relative animate-in zoom-in-95 duration-200 my-auto ${
+        className={`join-glass-panel border border-white/10 text-[#F5FAF6] rounded-2xl sm:rounded-3xl max-w-[540px] w-full p-5 sm:p-7 text-center shadow-[0_24px_70px_rgba(0,0,0,0.85)] space-y-4 relative animate-in zoom-in-95 duration-200 my-auto overflow-hidden ${
           shake ? "animate-wiggle" : ""
         }`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Top Glowing Hairline */}
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/50 to-transparent" />
+
         {/* Top Brand Mark / Astrolabe Emblem */}
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center pt-1">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-linear-to-b from-[#D4AF37]/20 to-[#86601F]/5 blur-lg" />
-            <div className="w-16 h-16 rounded-3xl bg-linear-to-b from-[#1E1F33] to-[#12131F] border border-[#F3D3A2]/30 flex items-center justify-center p-2.5 shadow-lg relative">
-              <Image
-                src="/brand/icon-192.png"
-                alt="OASIS ONE"
-                width={46}
-                height={46}
-                className="object-contain"
-              />
+            <div className="absolute inset-0 rounded-full bg-[#88DECC]/20 blur-xl" />
+            <div className="w-13 h-13 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)] relative p-2">
+              <svg viewBox="0 0 46 46" width="34" height="34" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M24.2 37V24" />
+                <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+                <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+                <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+                <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+                <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+                <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+              </svg>
             </div>
           </div>
         </div>
@@ -306,18 +311,18 @@ export function AccountLockedModal({
         {/* Status Pill Indicator */}
         <div className="flex justify-center">
           {isApproved ? (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               <span>Membership Approved</span>
             </div>
           ) : isInfoRequested ? (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-mono font-semibold animate-pulse">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-semibold animate-pulse">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
               <span>Action Required • Information Requested</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#86601F]/10 border border-[#86601F]/20 text-[#86601F] dark:text-[#F3D3A2] text-xs font-mono font-medium">
-              <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-mono font-medium">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
               <span>Vetting in Progress • Admissions Review</span>
             </div>
           )}
@@ -325,7 +330,7 @@ export function AccountLockedModal({
 
         {/* Heading & Email */}
         <div className="space-y-2">
-          <h2 className="font-display text-2xl sm:text-3xl font-light text-[var(--text)] tracking-tight">
+          <h2 className="font-display text-2xl sm:text-3xl font-light text-[#F5FAF6] tracking-tight">
             {isApproved
               ? "Access Approved"
               : isInfoRequested
@@ -333,9 +338,9 @@ export function AccountLockedModal({
               : "Account Under Review"}
           </h2>
 
-          <div className="text-xs text-[var(--muted)] font-sans">
-            Registered dossier:{" "}
-            <span className="font-mono text-[11px] text-[var(--text)] bg-[var(--surface-2)] px-2.5 py-1 rounded-xl border border-[#D9CDAE]/60 dark:border-[#2C2E4A]">
+          <div className="text-xs text-[#ECF1EF]/70 font-sans flex items-center justify-center gap-2 flex-wrap">
+            <span>Registered dossier:</span>
+            <span className="font-mono text-[11px] text-[#88DECC] bg-white/[0.04] px-3 py-0.5 rounded-full border border-white/10">
               {email}
             </span>
           </div>
@@ -346,26 +351,26 @@ export function AccountLockedModal({
           <div className="space-y-4 text-left">
             {/* Committee Request Box */}
             <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-amber-800 dark:text-amber-300 font-mono">
+              <div className="flex items-center justify-between text-xs font-semibold text-amber-300 font-mono">
                 <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                  <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
+                  <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
                   Admissions Council Request:
                 </span>
-                <span className="text-[10px] px-2 py-0.5 bg-amber-500/20 rounded-md">
+                <span className="text-[10px] px-2 py-0.5 bg-amber-500/20 text-amber-200 rounded-md">
                   Action Pending
                 </span>
               </div>
-              <div className="p-3.5 rounded-xl bg-[var(--surface)] border border-amber-500/20 text-xs text-[var(--text)] font-sans leading-relaxed break-words whitespace-pre-wrap">
+              <div className="p-3.5 rounded-xl bg-black/40 border border-amber-500/20 text-xs text-[#F5FAF6] font-sans leading-relaxed break-words whitespace-pre-wrap">
                 {displayRequestNote}
               </div>
-              <p className="text-[11px] text-[var(--muted)] font-mono">
+              <p className="text-[11px] text-[#ECF1EF]/60 font-mono">
                 Submit documents or clarifications below so admissions can complete vetting.
               </p>
             </div>
 
             {/* Direct Reply Form */}
             <form onSubmit={handleSendReply} className="space-y-3">
-              <label className="text-xs font-mono uppercase tracking-wider text-[var(--muted)] font-semibold block">
+              <label className="text-xs font-mono uppercase tracking-wider text-[#ECF1EF]/70 font-semibold block">
                 Your Response &amp; Verification Links:
               </label>
               <textarea
@@ -373,26 +378,26 @@ export function AccountLockedModal({
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Share your response, incorporation documents, or cloud folder link..."
-                className="w-full text-xs p-3.5 rounded-2xl border border-[#D9CDAE]/70 dark:border-[#2C2E4A] bg-[var(--surface-2)] text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:ring-2 focus:ring-[#86601F]/30 dark:focus:ring-[#F3D3A2]/30 font-sans resize-none"
+                className="w-full text-xs p-3.5 rounded-2xl border border-white/10 bg-white/[0.03] text-[#F5FAF6] placeholder:text-[#ECF1EF]/40 focus:outline-none focus:ring-1 focus:ring-[#88DECC] font-sans resize-none"
               />
               <button
                 type="submit"
                 disabled={submittingReply || !replyText.trim()}
-                className="w-full h-12 bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] font-medium text-xs rounded-2xl shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full h-11 bg-[#EEF1EA] text-[#03080B] font-semibold text-xs rounded-full shadow-md hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <Send className="w-3.5 h-3.5 text-[#86601F] dark:text-[#86601F]" />
+                <Send className="w-3.5 h-3.5 text-[#03080B]" />
                 <span>{submittingReply ? "Transmitting..." : "Submit to Admissions Reviewer"}</span>
               </button>
             </form>
           </div>
         ) : (
           /* ── STANDARD PENDING REVIEW MODE ───────────────────────────────── */
-          <div className="text-xs text-[var(--muted)] leading-relaxed space-y-2 max-w-md mx-auto font-sans">
+          <div className="text-xs text-[#ECF1EF]/70 leading-relaxed space-y-2 max-w-md mx-auto font-sans">
             <p>
               Your membership submission is undergoing validation with the{" "}
-              <strong className="text-[var(--text)]">OASIS Admissions Committee</strong>.
+              <strong className="text-[#F5FAF6] font-semibold">OASIS Admissions Committee</strong>.
             </p>
-            <p className="text-[var(--text)] font-medium">
+            <p className="text-[#ECF1EF]/90 font-medium">
               Once verified by an administrator, full sanctuary capabilities will unlock instantly and an encrypted confirmation will be sent to your email.
             </p>
           </div>
@@ -400,21 +405,21 @@ export function AccountLockedModal({
 
         {/* Message History Collapsible */}
         {messages.length > 0 && (
-          <div className="pt-3 text-left border-t border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
+          <div className="pt-3 text-left border-t border-white/10">
             <button
               type="button"
               onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center justify-between w-full text-xs font-mono text-[var(--muted)] hover:text-[var(--text)] transition-colors py-1 cursor-pointer"
+              className="flex items-center justify-between w-full text-xs font-mono text-[#ECF1EF]/70 hover:text-[#F5FAF6] transition-colors py-1 cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                <MessageSquare className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
+                <MessageSquare className="w-3.5 h-3.5 text-[#88DECC]" />
                 <span>Conversation Log ({messages.length})</span>
               </span>
               {showHistory ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {showHistory && (
-              <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 auth-scrollbar">
                 {messages.map((m) => {
                   const isAdmin = m.authorType === "admin";
                   return (
@@ -422,12 +427,12 @@ export function AccountLockedModal({
                       key={m.id}
                       className={`p-3 rounded-2xl border text-xs space-y-1 font-sans ${
                         isAdmin
-                          ? "bg-amber-500/10 border-amber-500/20 text-[var(--text)]"
-                          : "bg-[var(--surface-2)] border-[#D9CDAE]/60 dark:border-[#2C2E4A] text-[var(--text)]"
+                          ? "bg-amber-500/10 border-amber-500/20 text-[#F5FAF6]"
+                          : "bg-white/[0.03] border-white/10 text-[#F5FAF6]"
                       }`}
                     >
-                      <div className="flex items-center justify-between text-[10px] text-[var(--muted)] font-mono">
-                        <span className="font-semibold text-[var(--text)]">
+                      <div className="flex items-center justify-between text-[10px] text-[#ECF1EF]/60 font-mono">
+                        <span className="font-semibold text-[#F5FAF6]">
                           {isAdmin ? "Admissions Council" : "You"}
                         </span>
                         <span>{new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
@@ -443,8 +448,8 @@ export function AccountLockedModal({
 
         {/* Live Feedback / Success Toast */}
         {replySuccess && (
-          <div className="p-3.5 rounded-2xl border bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs text-left animate-in fade-in duration-150 flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-2xl border bg-emerald-500/15 border-emerald-500/30 text-emerald-300 text-xs text-left animate-in fade-in duration-150 flex items-start gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span className="font-sans">{replySuccess}</span>
           </div>
         )}
@@ -453,8 +458,8 @@ export function AccountLockedModal({
           <div
             className={`p-3.5 rounded-2xl border text-xs text-left animate-in fade-in duration-150 font-sans ${
               isApproved
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-200"
-                : "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-300"
             }`}
           >
             {statusMessage}
@@ -462,14 +467,14 @@ export function AccountLockedModal({
         )}
 
         {/* Actions: Refresh Status & Sign Out */}
-        <div className="pt-2 flex flex-col items-center gap-3">
+        <div className="pt-2 flex flex-col items-center gap-2.5">
           <button
             type="button"
             onClick={handleCheckStatus}
             disabled={checking || isApproved}
-            className="w-full sm:w-64 h-12 bg-[var(--surface-2)] hover:bg-[#D9CDAE]/40 dark:hover:bg-[#2C2E4A] border border-[#D9CDAE]/70 dark:border-[#2C2E4A] text-[var(--text)] font-medium text-xs rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer font-sans"
+            className="w-full sm:w-64 h-11 bg-[#EEF1EA] hover:bg-white text-[#03080B] font-semibold text-xs rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer font-sans disabled:opacity-50"
           >
-            <RotateCw className={`w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2] ${checking ? "animate-spin" : ""}`} />
+            <RotateCw className={`w-3.5 h-3.5 text-[#03080B] ${checking ? "animate-spin" : ""}`} />
             <span>{checking ? "Polling admissions status..." : "Synchronize Verification"}</span>
           </button>
 
@@ -477,7 +482,7 @@ export function AccountLockedModal({
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="text-xs text-[var(--muted)] hover:text-rose-600 transition-colors flex items-center gap-1.5 cursor-pointer pt-1 font-mono text-[11px]"
+            className="text-[11px] text-[#ECF1EF]/60 hover:text-rose-400 transition-colors flex items-center gap-1.5 cursor-pointer font-mono"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>{signingOut ? "Signing out..." : "Sign out of account"}</span>
@@ -485,17 +490,17 @@ export function AccountLockedModal({
         </div>
 
         {/* Footer Support Links */}
-        <div className="pt-4 border-t border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80 flex items-center justify-center gap-4 text-[11px] text-[var(--muted)] font-mono">
+        <div className="pt-3 border-t border-white/10 flex items-center justify-center gap-4 text-[10.5px] text-[#ECF1EF]/40 font-mono">
           <Link
             href="/contact"
-            className="hover:text-[#86601F] dark:hover:text-[#F3D3A2] transition-colors"
+            className="hover:text-[#88DECC] transition-colors"
           >
             Contact Admissions
           </Link>
-          <span className="text-[#D9CDAE] dark:text-[#2C2E4A]">•</span>
+          <span className="text-white/20">•</span>
           <Link
             href="/legal/guidelines"
-            className="hover:text-[#86601F] dark:hover:text-[#F3D3A2] transition-colors"
+            className="hover:text-[#88DECC] transition-colors"
           >
             Community Code
           </Link>

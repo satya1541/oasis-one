@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import {
   FileCheck2,
   Users,
@@ -10,8 +9,11 @@ import {
   AlertTriangle,
   ArrowRight,
   Award,
-  CheckCircle2,
   RotateCw,
+  Building2,
+  ShieldCheck,
+  Compass,
+  Sparkles,
 } from "lucide-react";
 
 interface OverviewStats {
@@ -77,182 +79,300 @@ export default function AdminOverviewPage() {
   }, []);
 
   return (
-    <div className="max-w-[1040px] mx-auto space-y-8 pb-16">
-      {/* Editorial Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[11px] font-mono uppercase tracking-widest text-[#86601F] dark:text-[#F3D3A2] font-semibold">
+    <div className="max-w-[1180px] mx-auto space-y-8 pb-16 selection:bg-[#88DECC]/30 selection:text-[#03080B]">
+      {/* ── Ambient Radial Atmosphere (No video) ───────────────────────────── */}
+      <div
+        className="fixed top-20 right-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(136,222,204,0.05)_0%,transparent_70%)] blur-3xl pointer-events-none -z-10"
+        aria-hidden="true"
+      />
+      <div
+        className="fixed bottom-10 left-1/3 w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(243,211,162,0.04)_0%,transparent_70%)] blur-3xl pointer-events-none -z-10"
+        aria-hidden="true"
+      />
+
+      {/* ── Editorial Header ───────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pb-6 border-b border-white/10">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#88DECC]/10 border border-[#88DECC]/25 shadow-[0_0_15px_rgba(136,222,204,0.15)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#88DECC] animate-pulse" />
+            <span className="text-[10.5px] font-mono uppercase tracking-widest text-[#88DECC] font-semibold">
               Live Governance Telemetry
             </span>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+          <h1 className="join-hero-headline text-3xl sm:text-4xl lg:text-5xl font-light text-[#F5FAF6] tracking-tight">
             Governance Console
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--muted)] font-sans">
-            Real-time applicant triage, audit logs, and member verification oversight.
+          <p className="join-hero-subhead text-xs sm:text-sm text-[#ECF1EF]/70 font-sans max-w-2xl leading-relaxed font-normal">
+            Real-time applicant triage, audit trails, and ecosystem verification oversight for Odisha founders.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
+
+        <button
+          type="button"
           onClick={loadData}
           disabled={loading}
-          className="gap-2 rounded-2xl text-xs px-4 py-2 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-[#88DECC]/40 text-xs font-mono uppercase tracking-wider text-[#F5FAF6] transition-all duration-200 cursor-pointer shadow-xs disabled:opacity-50 shrink-0 self-start sm:self-auto"
         >
-          <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#86601F] dark:text-[#F3D3A2]" : ""}`} />
+          <RotateCw className={`w-3.5 h-3.5 text-[#88DECC] ${loading ? "animate-spin" : ""}`} />
           <span>Synchronize</span>
-        </Button>
+        </button>
       </div>
 
-      {/* ── Four KPI Metric Cards (Connected to Live Database) ───────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
-            <span className="uppercase tracking-wider text-[11px]">Active Members</span>
-            <Users className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+      {/* ── Four KPI Metric Cards (Connected to Live Database) ─────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Active Members */}
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#88DECC]/30 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/20 to-transparent group-hover:via-[#88DECC]/50 transition-all duration-300" />
+          <div className="flex items-center justify-between text-xs mb-3 font-mono">
+            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Active Members</span>
+            <div className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#88DECC]">
+              <Users className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-light text-[var(--text)] tracking-tight">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[#F5FAF6] tracking-tight">
             {stats.activeMembers}
           </div>
-          <div className="mt-2 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
-            Pre-vetted ecosystem
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-mono text-[#88DECC]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#88DECC]" />
+            <span>Pre-vetted ecosystem</span>
           </div>
         </div>
 
-        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
-            <span className="uppercase tracking-wider text-[11px]">Triage Queue</span>
-            <FileCheck2 className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+        {/* Card 2: Triage Queue */}
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#F3D3A2]/40 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#F3D3A2]/20 to-transparent group-hover:via-[#F3D3A2]/50 transition-all duration-300" />
+          <div className="flex items-center justify-between text-xs mb-3 font-mono">
+            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Triage Queue</span>
+            <div className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F3D3A2]">
+              <FileCheck2 className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-light text-[#86601F] dark:text-[#F3D3A2] tracking-tight">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[#F3D3A2] tracking-tight">
             {stats.pendingApplications}
           </div>
-          <div className="mt-2 text-[11px] font-mono text-amber-600 dark:text-amber-400">
-            {stats.pendingApplications > 0 ? "Pending committee decision" : "Review queue clear"}
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-mono text-amber-300/90">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>{stats.pendingApplications > 0 ? "Pending committee decision" : "Review queue clear"}</span>
           </div>
         </div>
 
-        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
-            <span className="uppercase tracking-wider text-[11px]">Conclaves</span>
-            <Calendar className="w-4 h-4 text-[#86601F] dark:text-[#F3D3A2]" />
+        {/* Card 3: Conclaves */}
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#88DECC]/30 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/20 to-transparent group-hover:via-[#88DECC]/50 transition-all duration-300" />
+          <div className="flex items-center justify-between text-xs mb-3 font-mono">
+            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Conclaves</span>
+            <div className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#88DECC]">
+              <Calendar className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-light text-[var(--text)] tracking-tight">
+          <div className="text-3xl sm:text-4xl font-display font-light text-[#F5FAF6] tracking-tight">
             {stats.upcomingEvents}
           </div>
-          <div className="mt-2 text-[11px] font-mono text-[var(--muted)]">
+          <div className="mt-3 text-[11px] font-mono text-[#ECF1EF]/50">
             Scheduled across Odisha
           </div>
         </div>
 
-        <div className="group rounded-3xl p-6 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/30 dark:hover:border-[#F3D3A2]/30 shadow-xs hover:shadow-lg transition-all duration-300 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-2 font-mono">
-            <span className="uppercase tracking-wider text-[11px]">Reported Flags</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
+        {/* Card 4: Reported Flags */}
+        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-rose-500/30 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+          <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-rose-500/20 to-transparent group-hover:via-rose-500/50 transition-all duration-300" />
+          <div className="flex items-center justify-between text-xs mb-3 font-mono">
+            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Reported Flags</span>
+            <div className="w-8 h-8 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-light text-rose-600 dark:text-rose-400 tracking-tight">
+          <div className="text-3xl sm:text-4xl font-display font-light text-rose-400 tracking-tight">
             {stats.openReports}
           </div>
-          <div className="mt-2 text-[11px] font-mono text-rose-600/80 dark:text-rose-400/80">
-            {stats.openReports > 0 ? "Requires committee audit" : "Zero open disputes"}
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-mono text-rose-400/90">
+            <span className={`w-1.5 h-1.5 rounded-full ${stats.openReports > 0 ? "bg-rose-400 animate-pulse" : "bg-emerald-400"}`} />
+            <span>{stats.openReports > 0 ? "Requires committee audit" : "Zero open disputes"}</span>
           </div>
         </div>
       </div>
 
-      {/* ── Needs Your Attention Section ───────────────────────────────────────── */}
-      <div className="bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 backdrop-blur-md">
+      {/* ── Priority Action Stream ─────────────────────────────────────────── */}
+      <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/10 relative overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] space-y-6">
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#88DECC]/30 to-transparent" />
+        
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-[#86601F] dark:text-[#F3D3A2] font-semibold">
-            Priority Action Stream
+          <h2 className="text-xs font-mono uppercase tracking-widest text-[#88DECC] font-semibold flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Priority Action Stream</span>
           </h2>
-          <span className="text-[11px] font-mono text-[var(--muted)]">
-            Auto-sorted by SLA
+          <span className="text-[10px] font-mono text-[#ECF1EF]/50 px-2.5 py-0.5 rounded-full bg-white/[0.03] border border-white/10">
+            Auto-sorted by committee SLA
           </span>
         </div>
 
-        <div className="divide-y divide-[#EAE1CF]/70 dark:divide-[#2C2E4A]/80">
+        <div className="divide-y divide-white/10">
           {/* Row 1: Applications */}
           <div className="py-5 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 flex items-center justify-center shrink-0 text-[#86601F] dark:text-[#F3D3A2] shadow-2xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#88DECC]/10 border border-[#88DECC]/25 flex items-center justify-center shrink-0 text-[#88DECC] shadow-[0_0_15px_rgba(136,222,204,0.15)]">
                 <FileCheck2 className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-[#F5FAF6]">
                   {stats.pendingApplications > 0
                     ? `${stats.pendingApplications} applicant dossier${stats.pendingApplications > 1 ? "s" : ""} awaiting committee vetting`
                     : "Review pool up to date"}
                 </p>
-                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
+                <p className="text-xs text-[#ECF1EF]/60 font-sans leading-relaxed">
                   {oldestApp
                     ? `Earliest submission by ${oldestApp.name} on ${oldestApp.date}`
                     : "No pending founder verification submissions in the triage queue."}
                 </p>
               </div>
             </div>
-            <Link href="/admin/applications">
-              <Button size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
-                <span>Open Queue</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
+            <Link href="/admin/applications" className="w-full sm:w-auto shrink-0">
+              <button
+                type="button"
+                className="w-full sm:w-auto inline-flex items-center justify-between gap-3 px-4 py-2 rounded-full bg-[#EEF1EA] text-[#03080B] font-medium text-xs hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all cursor-pointer group"
+              >
+                <span className="font-sans font-semibold">Open Queue</span>
+                <span className="w-6 h-6 rounded-full bg-[#03080B] flex items-center justify-center text-[#EEF1EA] group-hover:translate-x-0.5 transition-transform">
+                  <ArrowRight className="w-3 h-3" />
+                </span>
+              </button>
             </Link>
           </div>
 
           {/* Row 2: Reports */}
           <div className="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-500 shadow-2xs">
+              <div className="w-11 h-11 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center shrink-0 text-rose-400">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-[#F5FAF6]">
                   {stats.openReports > 0
                     ? `${stats.openReports} discussion post${stats.openReports > 1 ? "s" : ""} flagged for moderation`
                     : "Zero content violations reported"}
                 </p>
-                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
+                <p className="text-xs text-[#ECF1EF]/60 font-sans leading-relaxed">
                   {stats.openReports > 0
                     ? "Audit flagged posts and determine community compliance action."
                     : "All active discussions adhere to Odisha startup community guidelines."}
                 </p>
               </div>
             </div>
-            <Link href="/admin/reports">
-              <Button variant="secondary" size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
+            <Link href="/admin/reports" className="w-full sm:w-auto shrink-0">
+              <button
+                type="button"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#F5FAF6] text-xs font-medium transition-all cursor-pointer"
+              >
                 <span>Audit Flags</span>
-              </Button>
+              </button>
             </Link>
           </div>
 
           {/* Row 3: Achievements */}
           <div className="py-5 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400 shadow-2xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#F3D3A2]/10 border border-[#F3D3A2]/25 flex items-center justify-center shrink-0 text-[#F3D3A2]">
                 <Award className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-[#F5FAF6]">
                   {stats.pendingAchievements > 0
                     ? `${stats.pendingAchievements} venture milestone${stats.pendingAchievements > 1 ? "s" : ""} pending publication`
                     : "No pending member celebrations"}
                 </p>
-                <p className="text-xs text-[var(--muted)] mt-0.5 font-sans">
+                <p className="text-xs text-[#ECF1EF]/60 font-sans leading-relaxed">
                   {stats.pendingAchievements > 0
                     ? "Review and authorize milestone celebrations for the community banner."
                     : "Milestone announcements are fully published across member dashboards."}
                 </p>
               </div>
             </div>
-            <Link href="/admin/achievements">
-              <Button variant="secondary" size="sm" className="gap-2 rounded-2xl text-xs px-5 py-2 w-full sm:w-auto cursor-pointer">
+            <Link href="/admin/achievements" className="w-full sm:w-auto shrink-0">
+              <button
+                type="button"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 text-[#F5FAF6] text-xs font-medium transition-all cursor-pointer"
+              >
                 <span>Authorize Milestones</span>
-              </Button>
+              </button>
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* ── Governance Sanctuary Quick-Access Hub ────────────────────────────── */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-[#ECF1EF]/60 font-semibold">
+            Executive Sanctuary Directory
+          </h2>
+          <span className="text-[10.5px] font-mono text-[#88DECC]">
+            Odisha Ecosystem Oversight
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/admin/applications"
+            className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+          >
+            <div className="w-9 h-9 rounded-xl bg-[#88DECC]/10 border border-[#88DECC]/25 flex items-center justify-center text-[#88DECC] mb-3 group-hover:scale-105 transition-transform">
+              <FileCheck2 className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-medium text-[#F5FAF6] group-hover:text-[#88DECC] transition-colors">
+              Application Triage
+            </h3>
+            <p className="text-[11px] text-[#ECF1EF]/60 mt-1 font-sans leading-relaxed">
+              Review founder dossiers, evaluate pitch decks &amp; issue admission invites.
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/members"
+            className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#88DECC] mb-3 group-hover:scale-105 transition-transform">
+              <Users className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-medium text-[#F5FAF6] group-hover:text-[#88DECC] transition-colors">
+              Member Directory
+            </h3>
+            <p className="text-[11px] text-[#ECF1EF]/60 mt-1 font-sans leading-relaxed">
+              Govern active members, assign Verified Mentor badges, and handle sanctions.
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/startups"
+            className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F3D3A2] mb-3 group-hover:scale-105 transition-transform">
+              <Building2 className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-medium text-[#F5FAF6] group-hover:text-[#F3D3A2] transition-colors">
+              Verified Startups
+            </h3>
+            <p className="text-[11px] text-[#ECF1EF]/60 mt-1 font-sans leading-relaxed">
+              Showcase Odisha startups, evaluate venture stages &amp; investor readiness.
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/audit-log"
+            className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#88DECC] mb-3 group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-medium text-[#F5FAF6] group-hover:text-[#88DECC] transition-colors">
+              Security &amp; Audit Trail
+            </h3>
+            <p className="text-[11px] text-[#ECF1EF]/60 mt-1 font-sans leading-relaxed">
+              Examine immutable committee records, MFA compliance, and administrative actions.
+            </p>
+          </Link>
         </div>
       </div>
     </div>
   );
 }
+

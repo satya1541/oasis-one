@@ -133,7 +133,7 @@ export default function PeoplePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-light text-[var(--text)] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl font-light text-[var(--text)] tracking-tight">
               People
             </h1>
             <p className="text-xs text-[var(--muted)] mt-1">
@@ -142,12 +142,12 @@ export default function PeoplePage() {
           </div>
 
           {/* Tab Selector */}
-          <div className="flex items-center rounded-2xl bg-[var(--surface-2)] p-1.5 border border-[var(--border)] text-xs shadow-xs">
+          <div className="flex items-center rounded-2xl bg-[var(--surface-2)] p-1.5 border border-[var(--border)] text-xs shadow-xs w-full sm:w-auto justify-between sm:justify-start">
             <button
               type="button"
               onClick={() => setActiveTab("mentors")}
               className={cn(
-                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
+                "flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 min-h-[40px] rounded-xl font-medium transition-all duration-200 cursor-pointer text-center",
                 activeTab === "mentors"
                   ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -159,7 +159,7 @@ export default function PeoplePage() {
               type="button"
               onClick={() => setActiveTab("directory")}
               className={cn(
-                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
+                "flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 min-h-[40px] rounded-xl font-medium transition-all duration-200 cursor-pointer text-center",
                 activeTab === "directory"
                   ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -171,7 +171,7 @@ export default function PeoplePage() {
               type="button"
               onClick={() => setActiveTab("connections")}
               className={cn(
-                "px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer",
+                "flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 min-h-[40px] rounded-xl font-medium transition-all duration-200 cursor-pointer text-center",
                 activeTab === "connections"
                   ? "bg-[var(--surface)] text-[var(--text)] font-semibold shadow-xs"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -191,23 +191,24 @@ export default function PeoplePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, expertise, or startup..."
-              className="w-full h-11 pl-10 pr-4 text-xs sm:text-sm bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              className="w-full h-11 min-h-[44px] pl-10 pr-4 text-xs sm:text-sm bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--muted)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-[var(--muted)] shrink-0" />
+            <Filter className="w-4 h-4 text-[var(--muted)] shrink-0 hidden sm:block" />
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="h-11 px-3 text-xs rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] cursor-pointer"
+              style={{ colorScheme: "dark" }}
+              className="w-full sm:w-auto h-11 min-h-[44px] px-3.5 text-xs rounded-xl bg-[#070D12] border border-white/10 text-[#F5FAF6] focus:outline-none focus:ring-1 focus:ring-[#88DECC] cursor-pointer"
             >
-              <option value="All">All Odisha Locations</option>
-              <option value="Bhubaneswar">Bhubaneswar</option>
-              <option value="Cuttack">Cuttack</option>
-              <option value="Rourkela">Rourkela</option>
-              <option value="Sambalpur">Sambalpur</option>
-              <option value="Berhampur">Berhampur</option>
+              <option value="All" className="bg-[#070D12] text-[#F5FAF6]">All Odisha Locations</option>
+              <option value="Bhubaneswar" className="bg-[#070D12] text-[#F5FAF6]">Bhubaneswar</option>
+              <option value="Cuttack" className="bg-[#070D12] text-[#F5FAF6]">Cuttack</option>
+              <option value="Rourkela" className="bg-[#070D12] text-[#F5FAF6]">Rourkela</option>
+              <option value="Sambalpur" className="bg-[#070D12] text-[#F5FAF6]">Sambalpur</option>
+              <option value="Berhampur" className="bg-[#070D12] text-[#F5FAF6]">Berhampur</option>
             </select>
           </div>
         </div>
@@ -225,7 +226,7 @@ export default function PeoplePage() {
                 No verified mentors found matching your filters.
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredMentors.map((m) => {
                   const initials = m.name
                     .split(" ")
@@ -295,7 +296,7 @@ export default function PeoplePage() {
                 No members found matching your search.
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredDirectory.map((p) => {
                   const initials = (p.name || "Member")
                     .split(" ")

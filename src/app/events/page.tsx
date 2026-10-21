@@ -126,7 +126,7 @@ export default function EventsPage() {
     <MemberShell>
       <div className="space-y-8 max-w-5xl mx-auto pb-20">
         {/* Editorial Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 pb-6 border-b border-[#EAE1CF]/70 dark:border-[#2C2E4A]/80">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#86601F]/10 dark:bg-[#F3D3A2]/10 border border-[#86601F]/20 dark:border-[#F3D3A2]/20 mb-3">
               <Sparkles className="w-3.5 h-3.5 text-[#86601F] dark:text-[#F3D3A2]" />
@@ -134,7 +134,7 @@ export default function EventsPage() {
                 Sanctuary Calendar
               </span>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
+            <h1 className="font-display text-2xl sm:text-4xl font-light text-[var(--text)] tracking-tight">
               Masterclasses &amp; Conclaves
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1.5 max-w-xl font-sans leading-relaxed">
@@ -143,12 +143,12 @@ export default function EventsPage() {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center p-1 rounded-2xl bg-[#EFE8D8]/70 dark:bg-[#181928]/90 border border-[#D9CDAE]/60 dark:border-[#2C2E4A] backdrop-blur-md shrink-0">
+          <div className="flex items-center p-1 rounded-2xl bg-[#EFE8D8]/70 dark:bg-[#181928]/90 border border-[#D9CDAE]/60 dark:border-[#2C2E4A] backdrop-blur-md shrink-0 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveFilter("all")}
               className={cn(
-                "px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 cursor-pointer",
+                "flex-1 sm:flex-initial px-4 py-2 min-h-[40px] rounded-xl text-xs font-medium transition-all duration-300 cursor-pointer text-center",
                 activeFilter === "all"
                   ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] shadow-sm font-semibold scale-[1.02]"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -160,7 +160,7 @@ export default function EventsPage() {
               type="button"
               onClick={() => setActiveFilter("registered")}
               className={cn(
-                "px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 cursor-pointer flex items-center gap-1.5",
+                "flex-1 sm:flex-initial px-4 py-2 min-h-[40px] rounded-xl text-xs font-medium transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5",
                 activeFilter === "registered"
                   ? "bg-[#1E1F33] dark:bg-[#FBF7EE] text-[#FBF7EE] dark:text-[#1E1F33] shadow-sm font-semibold scale-[1.02]"
                   : "text-[var(--muted)] hover:text-[var(--text)]"
@@ -181,7 +181,7 @@ export default function EventsPage() {
             <span className="font-mono uppercase tracking-widest text-[11px]">Synchronizing calendar schedule...</span>
           </div>
         ) : filteredEvents.length === 0 ? (
-          <Card className="p-16 text-center text-xs text-[var(--muted)] border-dashed border-[#D9CDAE]/80 dark:border-[#2C2E4A] bg-[var(--surface)]/50 backdrop-blur-sm rounded-3xl space-y-3">
+          <Card className="p-10 sm:p-16 text-center text-xs text-[var(--muted)] border-dashed border-[#D9CDAE]/80 dark:border-[#2C2E4A] bg-[var(--surface)]/50 backdrop-blur-sm rounded-3xl space-y-3">
             <Calendar className="w-10 h-10 text-[var(--muted)]/40 mx-auto" />
             <h3 className="font-display text-base font-medium text-[var(--text)]">
               {activeFilter === "registered" ? "No Reserved Passes" : "No Scheduled Conclaves"}
@@ -193,7 +193,7 @@ export default function EventsPage() {
             </p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-5 sm:gap-6">
             {filteredEvents.map((evt) => {
               const { month, day, time } = formatEventDate(evt.startAt);
               const capacity = evt.capacity || 50;
@@ -208,9 +208,9 @@ export default function EventsPage() {
               return (
                 <div
                   key={evt.id}
-                  className="group relative rounded-3xl p-6 sm:p-7 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/40 dark:hover:border-[#F3D3A2]/40 shadow-xs hover:shadow-xl hover:shadow-[#1E1F33]/5 transition-all duration-300 backdrop-blur-md"
+                  className="group relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/90 hover:border-[#86601F]/40 dark:hover:border-[#F3D3A2]/40 shadow-xs hover:shadow-xl hover:shadow-[#1E1F33]/5 transition-all duration-300 backdrop-blur-md"
                 >
-                  <div className="flex flex-col sm:flex-row gap-6 sm:items-start">
+                  <div className="flex flex-col xs:flex-row gap-4 sm:gap-6 xs:items-start">
                     {/* Ticket Stub Date Badge */}
                     <div className="w-20 h-20 rounded-2xl bg-linear-to-b from-[#1E1F33] to-[#12131F] text-[#FBF7EE] border border-[#F3D3A2]/30 flex flex-col items-center justify-center text-center shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
                       <span className="font-display text-[10px] font-bold tracking-widest uppercase text-[#F3D3A2]">
@@ -311,7 +311,7 @@ export default function EventsPage() {
                             variant="outline"
                             disabled={processingId === evt.id}
                             onClick={() => handleCancelRegistration(evt.id)}
-                            className="text-xs border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl cursor-pointer"
+                            className="w-full sm:w-auto text-xs min-h-[44px] border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl cursor-pointer"
                           >
                             {processingId === evt.id ? "Updating Pass..." : "Cancel Reserved Pass"}
                           </Button>
@@ -321,7 +321,7 @@ export default function EventsPage() {
                             variant="primary"
                             disabled={processingId === evt.id || (isFull && !evt.waitlistEnabled)}
                             onClick={() => handleRegister(evt.id)}
-                            className="rounded-xl px-5 py-2 cursor-pointer"
+                            className="w-full sm:w-auto text-xs min-h-[44px] rounded-xl px-5 py-2.5 cursor-pointer font-medium"
                           >
                             {processingId === evt.id
                               ? "Reserving..."

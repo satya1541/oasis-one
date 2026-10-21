@@ -3,9 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BrandLockup } from "@/components/brand/BrandLockup";
-import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Check, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
 
 function JoinAccountForm() {
   const router = useRouter();
@@ -49,7 +47,7 @@ function JoinAccountForm() {
     }
     const cleanPhone = phone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      setError("Please enter a valid 10-digit mobile number for security verification.");
+      setError("Please enter a valid 10-digit mobile number.");
       return;
     }
     if (!isPasswordValid) {
@@ -72,182 +70,190 @@ function JoinAccountForm() {
   };
 
   return (
-    <div className="w-full max-w-[540px] mx-auto">
+    <div className="w-full max-w-[540px] mx-auto space-y-1.5 sm:space-y-2 relative z-10 animate-fade-in-up my-auto">
       {/* Progress Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between text-xs mb-2.5">
-          <span className="font-display uppercase tracking-[0.22em] text-[var(--accent)] font-semibold text-[11px]">
-            Step 2 of 4
+      <div className="px-1">
+        <div className="flex items-center justify-between text-xs mb-1">
+          <span className="text-[10px] sm:text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[#88DECC] font-mono">
+            Step 2 of 4 &middot; Account Details
           </span>
-          <span className="text-xs text-[var(--muted)] font-medium">Account Details</span>
+          <span className="text-[10px] sm:text-[10.5px] text-[#ECF1EF]/60 font-normal">Security &amp; Credentials</span>
         </div>
-        <div className="grid grid-cols-4 gap-2.5 h-1.5 w-full">
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
-          <div className="bg-gradient-to-r from-[var(--brand-gold)] to-[#E9C68C] rounded-full h-full shadow-[0_0_8px_rgba(243,211,162,0.6)]" />
-          <div className="bg-[var(--border)]/70 rounded-full h-full" />
-          <div className="bg-[var(--border)]/70 rounded-full h-full" />
+        {/* 4-Segment Progress Bar */}
+        <div className="grid grid-cols-4 gap-1.5 h-1 w-full">
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+          <div className="bg-gradient-to-r from-[#88DECC] to-[#7EC4B5] rounded-full h-full shadow-[0_0_10px_rgba(136,222,204,0.6)]" />
+          <div className="bg-white/10 rounded-full h-full" />
+          <div className="bg-white/10 rounded-full h-full" />
         </div>
       </div>
 
       {/* Heading */}
-      <div className="text-center mb-8 space-y-1.5">
-        <h1 className="text-3xl lg:text-4xl font-display font-light text-[var(--text)] tracking-tight">
+      <div className="text-center space-y-0.5">
+        <h1 className="join-hero-headline text-lg sm:text-xl font-light text-[#F5FAF6] tracking-tight">
           Create your account
         </h1>
-        <p className="text-sm text-[var(--muted)]">
+        <p className="join-hero-subhead text-[11px] sm:text-xs text-[#ECF1EF]/70">
           Join 650+ verified founders and mentors across Odisha.
         </p>
       </div>
 
-      {/* Form Card */}
-      <div className="card-luxury p-7 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Main Glass Panel */}
+      <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-4.5 border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.85)]">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-2.5">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-[var(--danger)]">
+            <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/25 text-[11px] text-red-200">
               {error}
             </div>
           )}
 
-          {/* Full Name */}
-          <div>
-            <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-              Full name
-            </label>
-            <input
-              type="text"
-              required
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="Your full name"
-              className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-              Email address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="name@startup.in"
-              className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
-            />
-          </div>
-
-          {/* Mobile Number */}
-          <div>
-            <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider mb-2">
-              Mobile number (SMS / OTP verification)
-            </label>
-            <div className="flex rounded-xl bg-[var(--surface-2)] border border-[var(--border)] focus-within:bg-white focus-within:border-[var(--brand-navy)] focus-within:ring-2 focus-within:ring-[var(--brand-gold)]/20 transition-all overflow-hidden">
-              <span className="inline-flex items-center px-3.5 text-xs font-mono font-semibold text-[var(--muted)] border-r border-[var(--border)] bg-black/[0.02]">
-                +91
-              </span>
+          {/* 2-Column Responsive Input Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+            {/* Full Name */}
+            <div>
+              <label className="block text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-0.5">
+                Full name
+              </label>
               <input
-                type="tel"
+                type="text"
                 required
-                value={phone}
+                value={fullName}
                 onChange={(e) => {
-                  setPhone(e.target.value);
+                  setFullName(e.target.value);
                   if (error) setError("");
                 }}
-                placeholder="98765 43210"
-                className="w-full h-12 px-4 bg-transparent text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:outline-none"
+                placeholder="Your full name"
+                className="w-full h-8.5 sm:h-9 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all"
               />
             </div>
-            <p className="text-[11px] text-[var(--muted)] mt-1.5">
-              Required for SMS authentication and platform trust verification.
-            </p>
+
+            {/* Email */}
+            <div>
+              <label className="block text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-0.5">
+                Email address
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="name@startup.in"
+                className="w-full h-8.5 sm:h-9 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all"
+              />
+            </div>
+
+            {/* Mobile Number */}
+            <div>
+              <label className="block text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-0.5">
+                Mobile number
+              </label>
+              <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] focus-within:ring-1.5 focus-within:ring-[#88DECC]/20 transition-all overflow-hidden h-8.5 sm:h-9">
+                <span className="inline-flex items-center px-2.5 text-xs font-mono font-semibold text-[#88DECC] border-r border-white/10 bg-black/30">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="98765 43210"
+                  className="w-full h-full px-2.5 bg-transparent text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-0.5">
+                <label className="block text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#ECF1EF]/75">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[9.5px] sm:text-[10px] text-[#ECF1EF]/60 hover:text-[#88DECC] flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-2.5 h-2.5" /> : <Eye className="w-2.5 h-2.5" />}
+                  <span>{showPassword ? "Hide" : "Show"}</span>
+                </button>
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="••••••••••••"
+                className="w-full h-8.5 sm:h-9 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-xs sm:text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all"
+              />
+            </div>
           </div>
 
-          {/* Password */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-medium text-[var(--muted)] uppercase tracking-wider">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-xs text-[var(--muted)] hover:text-[var(--text)] flex items-center gap-1 cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                <span>{showPassword ? "Hide" : "Show"}</span>
-              </button>
-            </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="••••••••••••"
-              className="w-full h-12 px-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-sm text-[var(--text)] placeholder-[var(--muted)]/60 focus:bg-white focus:outline-none focus:border-[var(--brand-navy)] focus:ring-2 focus:ring-[var(--brand-gold)]/20 transition-all"
-            />
-
-            {/* Password Validation Requirements */}
-            <div className="mt-3 p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--border)]/60 space-y-1.5 text-xs">
-              <span className="block text-[11px] font-medium text-[var(--muted)] mb-1">
-                Password requirements:
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-[11px]">
-                <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
-                  <Check className={`w-3 h-3 ${hasMinLength ? "opacity-100" : "opacity-30"}`} />
-                  <span>8+ characters</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${hasUppercase ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
-                  <Check className={`w-3 h-3 ${hasUppercase ? "opacity-100" : "opacity-30"}`} />
-                  <span>Uppercase letter</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${hasLowercase ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
-                  <Check className={`w-3 h-3 ${hasLowercase ? "opacity-100" : "opacity-30"}`} />
-                  <span>Lowercase letter</span>
-                </div>
-                <div className={`flex items-center gap-1.5 ${hasNumber ? "text-[var(--success)]" : "text-[var(--muted)]"}`}>
-                  <Check className={`w-3 h-3 ${hasNumber ? "opacity-100" : "opacity-30"}`} />
-                  <span>Number (0-9)</span>
-                </div>
+          {/* Password Validation Badges */}
+          <div className="p-1.5 rounded-lg bg-black/30 border border-white/10 text-[9.5px] sm:text-[10px]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-1.5">
+              <div className={`flex items-center gap-1 ${hasMinLength ? "text-[#88DECC]" : "text-[#ECF1EF]/40"}`}>
+                <Check className={`w-2.5 h-2.5 ${hasMinLength ? "opacity-100" : "opacity-30"}`} />
+                <span>8+ chars</span>
+              </div>
+              <div className={`flex items-center gap-1 ${hasUppercase ? "text-[#88DECC]" : "text-[#ECF1EF]/40"}`}>
+                <Check className={`w-2.5 h-2.5 ${hasUppercase ? "opacity-100" : "opacity-30"}`} />
+                <span>Uppercase</span>
+              </div>
+              <div className={`flex items-center gap-1 ${hasLowercase ? "text-[#88DECC]" : "text-[#ECF1EF]/40"}`}>
+                <Check className={`w-2.5 h-2.5 ${hasLowercase ? "opacity-100" : "opacity-30"}`} />
+                <span>Lowercase</span>
+              </div>
+              <div className={`flex items-center gap-1 ${hasNumber ? "text-[#88DECC]" : "text-[#ECF1EF]/40"}`}>
+                <Check className={`w-2.5 h-2.5 ${hasNumber ? "opacity-100" : "opacity-30"}`} />
+                <span>Number (0-9)</span>
               </div>
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-2">
-            <Button type="submit" size="lg" className="w-full">
-              Continue
-            </Button>
+          {/* Signature Cream CTA Pill */}
+          <div className="pt-0.5">
+            <button
+              type="submit"
+              className="join-cta-pill group"
+            >
+              <span className="font-medium tracking-tight">Continue to Startup Details</span>
+              <div className="join-cta-disc shrink-0">
+                <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <path d="M.6.6 4 4 .6 7.4" />
+                </svg>
+              </div>
+            </button>
           </div>
         </form>
 
         {/* Divider */}
-        <div className="relative my-6">
+        <div className="relative my-1.5 sm:my-2">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[var(--border)]" />
+            <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-[var(--surface)] px-3 text-[var(--muted)] font-medium">or</span>
+            <span className="bg-[#0b1419] px-2 font-mono text-[8.5px] uppercase tracking-wider text-[#ECF1EF]/40">
+              or
+            </span>
           </div>
         </div>
 
-        {/* Google OAuth */}
+        {/* Google OAuth in Dark Glass */}
         <button
           type="button"
           onClick={handleGoogleSignUp}
-          className="w-full h-12 flex items-center justify-center gap-3 px-4 rounded-xl border border-[var(--border)] bg-transparent hover:bg-[var(--surface-2)] text-sm font-medium text-[var(--text)] transition-colors cursor-pointer"
+          className="w-full h-8.5 rounded-full bg-white/[0.04] border border-white/10 text-[11px] sm:text-xs font-medium text-[#F5FAF6] hover:bg-white/[0.08] hover:border-white/20 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
@@ -268,18 +274,18 @@ function JoinAccountForm() {
           Continue with Google
         </button>
 
-        <p className="mt-5 text-center text-xs text-[var(--muted)]">
-          We&apos;ll send a link to confirm your email.
+        <p className="mt-1 text-center text-[9.5px] text-[#ECF1EF]/40 font-mono">
+          We&apos;ll send an email confirmation upon approval.
         </p>
       </div>
 
       {/* Back button */}
-      <div className="mt-6 text-center">
+      <div className="text-center">
         <Link
           href={`/join?role=${roleParam}`}
-          className="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors"
+          className="inline-flex items-center gap-1.5 py-0.5 px-2.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-[#ECF1EF]/70 hover:text-[#88DECC] hover:border-[#88DECC]/30 transition-all cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-2.5 h-2.5" />
           <span>Change role selection</span>
         </Link>
       </div>
@@ -289,30 +295,57 @@ function JoinAccountForm() {
 
 export default function JoinAccountPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
-      {/* ── Top Header ────────────────────────────────────────────────────────── */}
-      <header className="w-full bg-[var(--brand-navy)] border-b border-[var(--brand-gold)]/20 px-6 lg:px-12 h-16 flex items-center">
-        <div className="w-full max-w-[1200px] mx-auto flex items-center justify-between">
-          <BrandLockup variant="horizontal" />
+    <div className="login-bg h-screen max-h-screen min-h-screen relative flex flex-col justify-between overflow-hidden bg-[#03080B] text-[#F5FAF6]">
+      {/* ── Top Header with Glass Logo Pill and Nav ──────────────────────────── */}
+      <header className="shrink-0 relative z-20 w-full px-4 sm:px-8 lg:px-12 py-2 sm:py-2.5 flex items-center justify-between pointer-events-auto">
+        <Link href="/" className="join-logo-pill" aria-label="OASIS ONE home">
+          <div className="w-[30px] h-[30px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 46 46" width="30" height="30" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M24.2 37V24" />
+              <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
+              <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
+              <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
+              <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
+              <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
+              <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5 pl-2 select-none">
+            <span className="font-semibold text-xs sm:text-sm tracking-[0.16em] text-[#F5FAF6] uppercase">
+              OASIS
+            </span>
+            <span className="font-bold text-[8px] sm:text-[9px] tracking-wider bg-[#F3D3A2] text-[#12131F] px-1.5 py-0.5 rounded leading-none uppercase">
+              ONE
+            </span>
+          </div>
+        </Link>
+
+        <div className="flex items-center gap-3">
           <Link
-            href="/login"
-            className="text-sm font-medium text-[var(--brand-cream)]/85 hover:text-[var(--brand-gold)] transition-colors"
+            href="/"
+            className="hidden sm:inline-flex items-center text-xs font-normal text-[#ECF1EF]/70 hover:text-[#88DECC] transition-colors py-1.5 px-3"
           >
-            Log in
+            &larr; Back to Home
+          </Link>
+          <Link href="/login" className="join-login-pill inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+            <span>Already a member? Log in</span>
+            <svg viewBox="0 0 4 7" width="4" height="7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M.5.5 3.5 3.5.5 6.5" />
+            </svg>
           </Link>
         </div>
       </header>
 
       {/* ── Main Wizard Canvas ────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 lg:py-16">
-        <Suspense fallback={<div className="text-center text-sm text-[var(--muted)]">Loading step...</div>}>
+      <main className="relative z-10 flex-1 min-h-0 flex flex-col items-center justify-center px-4 sm:px-6 py-1 overflow-hidden">
+        <Suspense fallback={<div className="text-center text-sm text-[#ECF1EF]/60">Loading step...</div>}>
           <JoinAccountForm />
         </Suspense>
       </main>
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer className="py-6 border-t border-[var(--border)]/40 text-center text-xs text-[var(--muted)]">
-        OASIS ONE · Odisha Startup Community · Admin-approved membership
+      <footer className="shrink-0 relative z-10 w-full py-1 sm:py-1.5 text-center text-[10px] sm:text-[10.5px] text-[#ECF1EF]/40 font-mono">
+        OASIS ONE &middot; Odisha Startup Community &middot; Admin-approved membership
       </footer>
     </div>
   );

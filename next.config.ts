@@ -14,16 +14,25 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const backendUrl = process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:7500";
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${backendUrl}/api/:path*`,
-      },
-      {
-        source: "/socket.io/:path*",
-        destination: `${backendUrl}/socket.io/:path*`,
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: "/",
+          destination: "/index.html",
+        },
+      ],
+      afterFiles: [
+        {
+          source: "/api/:path*",
+          destination: `${backendUrl}/api/:path*`,
+        },
+        {
+          source: "/socket.io/:path*",
+          destination: `${backendUrl}/socket.io/:path*`,
+        },
+      ],
+      fallback: [],
+    };
   },
 };
 

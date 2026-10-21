@@ -162,9 +162,11 @@ function QuestionDetailContent({
   if (loading) {
     return (
       <MemberShell>
-        <div className="flex items-center justify-center min-h-[50vh] text-[var(--muted)] gap-2 text-xs">
-          <RotateCw className="w-5 h-5 animate-spin text-[var(--accent)]" />
-          <span>Loading discussion thread...</span>
+        <div className="flex flex-col items-center justify-center min-h-[45vh] text-[#ECF1EF]/60 space-y-4 select-none">
+          <div className="w-12 h-12 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)]">
+            <RotateCw className="w-5 h-5 animate-spin text-[#88DECC]" />
+          </div>
+          <p className="text-xs font-mono text-[#ECF1EF]/60">Loading discussion thread...</p>
         </div>
       </MemberShell>
     );

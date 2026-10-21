@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { AstrolabeStar } from "@/components/brand/AstrolabeStar";
@@ -20,32 +21,37 @@ import {
   Calendar,
   MessageSquare,
   Users,
+  Menu,
+  X,
 } from "lucide-react";
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] selection:bg-[#F3D3A2]/30 selection:text-[#1E1F33]">
       {/* ── Top Bar (Apple-style Translucent Luxury Glass) ───────────────────────── */}
-      <header className="sticky top-0 z-50 w-full bg-[#1E1F33]/85 backdrop-blur-2xl border-b border-[#F3D3A2]/15 px-6 lg:px-12 h-16 sm:h-[72px] flex items-center transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.25)]">
+      <header className="sticky top-0 z-50 w-full bg-[#1E1F33]/85 backdrop-blur-2xl border-b border-[#F3D3A2]/15 px-4 sm:px-8 lg:px-12 h-16 sm:h-[72px] flex items-center transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.25)] pt-[env(safe-area-inset-top,0px)]">
         <div className="w-full max-w-[1240px] mx-auto flex items-center justify-between">
           <BrandLockup variant="horizontal" priority />
 
-          <nav className="flex items-center gap-6 sm:gap-8">
+          {/* Desktop & Tablet Navigation */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link
               href="#membership"
-              className="hidden md:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
+              className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Who it's for
             </Link>
             <Link
               href="#how-it-works"
-              className="hidden md:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
+              className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Admission
             </Link>
             <Link
               href="#sanctuary"
-              className="hidden lg:inline-block text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
+              className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Experience
             </Link>
@@ -64,11 +70,112 @@ export default function LandingPage() {
               <Link href="/join">Join OASIS</Link>
             </Button>
           </nav>
+
+          {/* Mobile Right Bar (<768px) */}
+          <div className="flex md:hidden items-center gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[var(--brand-gold)]/40 text-[var(--brand-gold)] hover:bg-[var(--brand-gold)]/15 font-medium h-8.5 px-3 rounded-full text-xs"
+              asChild
+            >
+              <Link href="/join">Join</Link>
+            </Button>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-xl text-[var(--brand-cream)]/80 hover:text-[var(--brand-cream)] hover:bg-white/10 active:bg-white/15 transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
+              aria-label="Open mobile menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
+      {/* ── Mobile Navigation Drawer (<768px) ─────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-[#12131F]/80 backdrop-blur-md flex flex-col justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-[var(--brand-cream)] animate-in fade-in duration-200"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div className="flex items-center justify-between pb-5 border-b border-white/10">
+            <BrandLockup variant="horizontal" priority />
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex flex-col space-y-4 py-8 text-base font-medium">
+            <Link
+              href="#membership"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Who it's for
+            </Link>
+            <Link
+              href="#how-it-works"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Admission Protocol
+            </Link>
+            <Link
+              href="#sanctuary"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Sanctuary Experience
+            </Link>
+            <Link
+              href="/faq"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Frequently Asked Questions
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-3 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Contact &amp; Support
+            </Link>
+          </div>
+
+          <div className="space-y-3 pt-6 border-t border-white/10">
+            <Button
+              variant="gold"
+              size="lg"
+              className="w-full justify-center rounded-2xl h-12 text-sm font-semibold shadow-lg"
+              asChild
+            >
+              <Link href="/join" onClick={() => setMobileMenuOpen(false)}>
+                Apply to Join OASIS
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full justify-center rounded-2xl h-12 text-sm text-[var(--brand-cream)] border-white/20 hover:bg-white/5"
+              asChild
+            >
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                Member Portal Sign In
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* ── Hero Section (Cinematic Midnight Navy with Specular Lighting) ────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#151624] via-[#1E1F33] to-[#181928] text-[var(--brand-cream)] px-6 lg:px-12 pt-20 pb-28 border-b border-[var(--brand-gold)]/20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#151624] via-[#1E1F33] to-[#181928] text-[var(--brand-cream)] px-4 sm:px-8 lg:px-12 pt-12 sm:pt-20 pb-16 sm:pb-28 border-b border-[var(--brand-gold)]/20">
         {/* Apple-grade Atmospheric Ambient Mesh Glows */}
         <div
           className="absolute -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(243,211,162,0.08)_0%,transparent_70%)] blur-3xl pointer-events-none"
@@ -79,22 +186,22 @@ export default function LandingPage() {
           aria-hidden="true"
         />
 
-        <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
+        <div className="max-w-[1240px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-8 items-center relative z-10">
           {/* Hero Content (Left 7 Columns) */}
-          <div className="lg:col-span-7 flex flex-col space-y-7">
+          <div className="lg:col-span-7 flex flex-col space-y-5 sm:space-y-7">
             {/* Super-title Pill */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[var(--brand-gold)]/25 backdrop-blur-md w-fit">
+            <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[var(--brand-gold)]/25 backdrop-blur-md w-fit">
               <span className="w-2 h-2 rounded-full bg-[#187952] animate-pulse" />
-              <span className="font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-gold)]">
+              <span className="font-display text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.22em] text-[var(--brand-gold)]">
                 ODISHA · STARTUP COMMUNITY
               </span>
-              <span className="text-[11px] text-[var(--brand-cream)]/50 hidden sm:inline">
+              <span className="text-[10px] sm:text-[11px] text-[var(--brand-cream)]/50 hidden sm:inline">
                 | Curated &amp; Admin Vetted
               </span>
             </div>
 
             {/* Monumental Headline */}
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight text-[var(--brand-cream)] leading-[1.08]">
+            <h1 className="font-display text-3xl xs:text-4xl sm:text-6xl lg:text-7xl font-light tracking-tight text-[var(--brand-cream)] leading-[1.12] sm:leading-[1.08]">
               One Community. <br />
               <span className="font-normal text-gold-gradient drop-shadow-[0_2px_12px_rgba(243,211,162,0.2)]">
                 Infinite Possibilities.
@@ -102,16 +209,16 @@ export default function LandingPage() {
             </h1>
 
             {/* Cinematic Subtitle */}
-            <p className="text-base sm:text-lg text-[var(--brand-cream)]/80 max-w-xl leading-relaxed font-sans font-normal">
+            <p className="text-sm sm:text-base lg:text-lg text-[var(--brand-cream)]/80 max-w-xl leading-relaxed font-sans font-normal">
               A private, members-only digital home for Odisha’s 650+ aspiring entrepreneurs, startup founders, and verified mentors. Find your collaborators, ask critical questions, and build lasting companies together.
             </p>
 
             {/* CTAs */}
-            <div className="pt-2 flex flex-wrap items-center gap-4">
+            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center gap-3 sm:gap-4">
               <Button
                 variant="gold"
                 size="lg"
-                className="gap-2.5 rounded-full text-sm font-semibold tracking-wide px-7 shadow-[0_8px_24px_rgba(233,198,140,0.35)]"
+                className="w-full xs:w-auto justify-center gap-2.5 rounded-full text-sm font-semibold tracking-wide px-7 h-12 shadow-[0_8px_24px_rgba(233,198,140,0.35)]"
                 asChild
               >
                 <Link href="/join">
@@ -123,7 +230,7 @@ export default function LandingPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full text-sm font-medium px-6 text-[var(--brand-cream)] border-white/20 hover:border-[var(--brand-gold)] hover:bg-white/5"
+                className="w-full xs:w-auto justify-center rounded-full text-sm font-medium px-6 h-12 text-[var(--brand-cream)] border-white/20 hover:border-[var(--brand-gold)] hover:bg-white/5"
                 asChild
               >
                 <Link href="/login">Member Portal Sign In</Link>
@@ -131,41 +238,41 @@ export default function LandingPage() {
             </div>
 
             {/* Verified Footprint Strip */}
-            <div className="pt-6 border-t border-[var(--brand-gold)]/15 flex flex-wrap items-center gap-y-3 gap-x-6 text-xs text-[var(--brand-cream)]/70 font-sans">
+            <div className="pt-5 sm:pt-6 border-t border-[var(--brand-gold)]/15 flex flex-wrap items-center gap-y-2.5 gap-x-5 text-xs text-[var(--brand-cream)]/70 font-sans">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[var(--brand-gold)] shrink-0" />
                 <span className="font-medium text-[var(--brand-cream)]">
                   650+ Vetted Members
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-[var(--brand-cream)]/60">
-                <MapPin className="w-3.5 h-3.5 text-[var(--brand-gold)]/80" />
-                <span>Bhubaneswar · Cuttack · Rourkela · Sambalpur · Berhampur</span>
+              <div className="flex items-center gap-1.5 text-[var(--brand-cream)]/60 text-[11px] sm:text-xs">
+                <MapPin className="w-3.5 h-3.5 text-[var(--brand-gold)]/80 shrink-0" />
+                <span>Bhubaneswar · Cuttack · Rourkela · Sambalpur</span>
               </div>
             </div>
           </div>
 
           {/* Astrolabe Motif (Right 5 Columns) with Apple-grade Radial Depth */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end relative">
+          <div className="lg:col-span-5 flex justify-center lg:justify-end relative pt-4 lg:pt-0">
             <div className="relative">
               {/* Outer Glow Halo */}
               <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(243,211,162,0.18)_0%,transparent_65%)] blur-2xl scale-125" />
-              <AstrolabeStar size={440} className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[440px] lg:h-[440px]" />
+              <AstrolabeStar size={440} className="w-[240px] h-[240px] xs:w-[280px] xs:h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[440px] lg:h-[440px]" />
             </div>
           </div>
         </div>
       </section>
 
       {/* ── Quiet Trust Strip (Warm Ivory Level 2 Surface) ─────────────────────── */}
-      <div className="bg-[var(--surface-2)]/80 border-b border-[var(--border)] py-4.5 px-6 backdrop-blur-md">
+      <div className="bg-[var(--surface-2)]/80 border-b border-[var(--border)] py-3.5 sm:py-4.5 px-4 sm:px-6 backdrop-blur-md">
         <div className="max-w-[1240px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[var(--muted)]">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 text-center sm:text-left">
             <CheckCircle2 className="w-4 h-4 text-[var(--success)] shrink-0" />
             <span className="font-medium text-[var(--text)]">
               Admin review for every candidate before access is granted.
             </span>
           </div>
-          <div className="flex items-center gap-4 text-xs font-mono tracking-wide text-[var(--muted)]">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs font-mono tracking-wide text-[var(--muted)]">
             <span>NO MARKETING FLUFF</span>
             <span>•</span>
             <span>VERIFIED DIRECTORY</span>
