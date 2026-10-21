@@ -36,21 +36,25 @@ export class AuthController {
   }
 
   private setSessionCookie(res: Response, token: string) {
+    const domain = process.env.COOKIE_DOMAIN || undefined;
     res.cookie('oasis_sid', token, {
       httpOnly: true,
       secure: this.isProd,
       sameSite: 'lax',
       path: '/',
+      domain,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
 
   private clearSessionCookie(res: Response) {
+    const domain = process.env.COOKIE_DOMAIN || undefined;
     res.clearCookie('oasis_sid', {
       httpOnly: true,
       secure: this.isProd,
       sameSite: 'lax',
       path: '/',
+      domain,
     });
   }
 
