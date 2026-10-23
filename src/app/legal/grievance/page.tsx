@@ -2,8 +2,8 @@ import Link from "next/link";
 import { AlertCircle, Clock, ShieldCheck, Mail, Phone, MapPin, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Grievance Redressal, Support & Appeals Policy · OASIS ONE",
-  description: "Official Grievance Officer contacts, statutory escalation timelines, independent admin misconduct oversight, and appeals procedures for OASIS ONE.",
+  title: "Grievance Redressal, Support & Appeals Policy · OASIS",
+  description: "Official Grievance Officer contacts, statutory escalation timelines, independent admin misconduct oversight, and appeals procedures for OASIS.",
 };
 
 const SLA_STAGES = [
@@ -29,7 +29,7 @@ export default function GrievancePolicyPage() {
           </span>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS ONE — Grievance Redressal, Appeals &amp; Admin Governance
+          OASIS — Grievance Redressal, Appeals &amp; Admin Governance
         </h1>
         <p className="text-sm text-[var(--muted)] leading-relaxed">
           Statutory compliance under Rule 3(2) of the Information Technology (Intermediary Guidelines) Rules, 2021 and Section 13 of the Digital Personal Data Protection Act, 2023.
@@ -73,7 +73,7 @@ export default function GrievancePolicyPage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              OASIS ONE provides universal access to grievance submission across all user states—including to pending applicants on the Locked Dashboard and to members on the Suspended Account screen:
+              OASIS provides universal access to grievance submission across all user states—including to pending applicants on the Locked Dashboard and to members on the Suspended Account screen:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2">

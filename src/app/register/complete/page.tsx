@@ -179,8 +179,9 @@ function RegisterCompleteInner() {
       }
 
       const json = await res.json();
+      const fileId = json.data?.id || json.id;
       setUploadedEvidence({
-        fileId: json.id,
+        fileId,
         filename: file.name,
         docType: category,
       });

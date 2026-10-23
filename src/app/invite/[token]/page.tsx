@@ -143,7 +143,7 @@ function InviteClaimContent() {
                   <ShieldCheck className="w-7 h-7 text-[var(--accent)]" />
                 </div>
                 <h1 className="font-display text-2xl font-medium tracking-tight text-[var(--text)]">
-                  Welcome to OASIS ONE
+                  Welcome to OASIS
                 </h1>
                 <p className="text-xs text-[var(--muted)] leading-relaxed max-w-sm mx-auto">
                   You have been invited by the <strong>{invite.invitedBy || "OASIS Selection Committee"}</strong> as a pre-approved member. Complete your credentials below to enter the portal.

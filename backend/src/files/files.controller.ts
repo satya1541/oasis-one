@@ -26,12 +26,13 @@ export class FilesController {
     private readonly storage: StorageService,
   ) {}
 
+  @Public()
   @Post('uploads')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @MulterFile() file: Express.Multer.File,
     @Body('purpose') purposeStr: string,
-    @CurrentUser('id') userId: string,
+    @CurrentUser('id') userId?: string,
   ) {
     if (!file) {
       throw new HttpException(
@@ -41,8 +42,8 @@ export class FilesController {
     }
 
     const purpose = (purposeStr as FilePurpose) || FilePurpose.application_attachment;
-    const uploaded = await this.filesService.uploadFile(file, purpose, userId || 'system');
-    return { id: uploaded.id };
+    const uploaded = await this.filesService.uploadFile(file, purpose, userId || null);
+    return { id: uploaded.id, filename: uploaded.filename };
   }
 
   @Get('files/:signedToken')

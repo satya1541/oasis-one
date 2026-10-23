@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandLockup } from "@/components/brand/BrandLockup";
+import { GlassLogoPill } from "@/components/brand/GlassLogoPill";
 import { Button } from "@/components/ui/Button";
 import {
   Home,
@@ -151,35 +152,25 @@ function MobileBottomNavLinks({ isLocked = false }: { isLocked?: boolean }) {
 
 // Module-level session cache to ensure instant, flicker-free page transitions
 let globalSessionUser: any = null;
+let isHydrated = false;
 
 function getCachedSession() {
-  if (globalSessionUser) return globalSessionUser;
-  if (typeof window !== "undefined") {
-    try {
-      const stored = sessionStorage.getItem("oasis_member_session");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === "object" && parsed.id) {
-          globalSessionUser = parsed;
-          return parsed;
-        }
-      }
-    } catch (_) {}
-  }
-  return null;
+  // Only return in-memory cache if hydration has already succeeded in the current browser session
+  if (!isHydrated) return null;
+  return globalSessionUser;
 }
 
 function setCachedSession(u: any) {
+  if (typeof window === "undefined") return;
   globalSessionUser = u;
-  if (typeof window !== "undefined") {
-    try {
-      if (u) {
-        sessionStorage.setItem("oasis_member_session", JSON.stringify(u));
-      } else {
-        sessionStorage.removeItem("oasis_member_session");
-      }
-    } catch (_) {}
-  }
+  if (!u) isHydrated = false;
+  try {
+    if (u) {
+      sessionStorage.setItem("oasis_member_session", JSON.stringify(u));
+    } else {
+      sessionStorage.removeItem("oasis_member_session");
+    }
+  } catch (_) {}
 }
 
 export function MemberShell({ children }: MemberShellProps) {
@@ -221,7 +212,41 @@ export function MemberShell({ children }: MemberShellProps) {
   const isLocked = loadingAuth || !user || user.accountStatus !== "active";
 
   useEffect(() => {
+    isHydrated = true;
     let isMounted = true;
+
+    // Immediately restore from sessionStorage if available to avoid any network delay
+    if (!globalSessionUser && typeof window !== "undefined") {
+      try {
+        const stored = sessionStorage.getItem("oasis_member_session");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === "object" && parsed.id) {
+            globalSessionUser = parsed;
+            if (isMounted) {
+              setUser(parsed);
+              const name = parsed.name || parsed.email?.split("@")[0] || "Member";
+              setUserName(name);
+              const parts = name.trim().split(" ");
+              if (parts.length > 1) {
+                setUserInitials((parts[0][0] + parts[parts.length - 1][0]).toUpperCase());
+              } else if (parts[0]) {
+                setUserInitials(parts[0].slice(0, 2).toUpperCase());
+              }
+              const role =
+                parsed.primaryRole === "mentor"
+                  ? "Mentor"
+                  : parsed.primaryRole === "aspiring_entrepreneur"
+                  ? "Aspiring"
+                  : "Founder";
+              setUserRole(role);
+              setLoadingAuth(false);
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
     async function loadUser() {
       // Only show full loading screen if we have no cached session at all (cold initial visit)
       if (!globalSessionUser) {
@@ -388,10 +413,10 @@ export function MemberShell({ children }: MemberShellProps) {
           </div>
           <div className="space-y-1">
             <h3 className="font-display text-sm font-medium text-[#F5FAF6] tracking-wide">
-              OASIS ONE
+              OASIS
             </h3>
             <p className="text-xs font-mono text-[#ECF1EF]/60">
-              Verifying OASIS ONE credentials...
+              Verifying OASIS credentials...
             </p>
           </div>
         </div>
@@ -410,7 +435,7 @@ export function MemberShell({ children }: MemberShellProps) {
           </div>
           <div className="space-y-1">
             <h3 className="font-display text-sm font-medium text-[#F5FAF6] tracking-wide">
-              OASIS ONE
+              OASIS
             </h3>
             <p className="text-xs font-mono text-[#ECF1EF]/60">
               Redirecting to sign in...
@@ -460,27 +485,7 @@ export function MemberShell({ children }: MemberShellProps) {
         <div>
           {/* Brand Header */}
           <div className="p-4 border-b border-white/10">
-            <Link href="/dashboard" className="join-logo-pill" aria-label="OASIS ONE home">
-              <div className="w-[30px] h-[30px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 46 46" width="30" height="30" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M24.2 37V24" />
-                  <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
-                  <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
-                  <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
-                  <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
-                  <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
-                  <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
-                </svg>
-              </div>
-              <div className="flex items-center gap-1.5 pl-2 select-none">
-                <span className="font-semibold text-xs tracking-[0.16em] text-[#F5FAF6] uppercase">
-                  OASIS
-                </span>
-                <span className="font-bold text-[8px] tracking-wider bg-[#88DECC] text-[#03080B] px-1.5 py-0.5 rounded leading-none uppercase">
-                  ONE
-                </span>
-              </div>
-            </Link>
+            <GlassLogoPill href="/dashboard" />
           </div>
 
           {/* Five Core Destinations Navigation */}
@@ -544,16 +549,7 @@ export function MemberShell({ children }: MemberShellProps) {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <Link href="/dashboard" className="join-logo-pill" aria-label="OASIS ONE home">
-              <div className="w-[28px] h-[28px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 46 46" width="22" height="22" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M24.2 37V24" />
-                </svg>
-              </div>
-              <span className="font-semibold text-xs tracking-wider text-[#F5FAF6] pl-2 uppercase">
-                OASIS ONE
-              </span>
-            </Link>
+            <GlassLogoPill href="/dashboard" />
           </div>
 
           {/* Search Trigger (⌘K) */}
@@ -842,16 +838,7 @@ export function MemberShell({ children }: MemberShellProps) {
           >
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <Link href="/dashboard" className="join-logo-pill" aria-label="OASIS ONE home">
-                  <div className="w-[28px] h-[28px] rounded-full bg-[#030909] flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 46 46" width="22" height="22" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M24.2 37V24" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold text-xs tracking-wider text-[#F5FAF6] pl-2 uppercase">
-                    OASIS ONE
-                  </span>
-                </Link>
+                <GlassLogoPill href="/dashboard" />
                 <button
                   type="button"
                   onClick={() => setMobileDrawerOpen(false)}

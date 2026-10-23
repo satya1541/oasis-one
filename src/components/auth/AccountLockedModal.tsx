@@ -15,6 +15,9 @@ import {
   ChevronDown,
   ChevronUp,
   HelpCircle,
+  Upload,
+  FileText,
+  Check,
 } from "lucide-react";
 import { subscribeToAccountStatus, subscribeToApplicationMessages } from "@/lib/socket";
 
@@ -270,6 +273,55 @@ export function AccountLockedModal({
     }
   };
 
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docUploadSuccess, setDocUploadSuccess] = useState<string | null>(null);
+  const [docUploadError, setDocUploadError] = useState<string | null>(null);
+
+  const handleApplicantDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingDoc(true);
+      setDocUploadError(null);
+      setDocUploadSuccess(null);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("purpose", "verification_evidence");
+
+      const uploadRes = await fetch("/api/v1/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Failed to upload document. Please ensure it is a PDF, PNG, or JPEG.");
+      }
+
+      const json = await uploadRes.json();
+      const fileId = json.data?.id || json.id;
+
+      const attachRes = await fetch("/api/v1/applications/me/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileId }),
+      });
+
+      if (!attachRes.ok) {
+        throw new Error("Failed to attach document to your application.");
+      }
+
+      setDocUploadSuccess(`Successfully attached "${file.name}" to your dossier.`);
+      await fetchAppData();
+    } catch (err: any) {
+      setDocUploadError(err.message || "Failed to attach document.");
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = "";
+    }
+  };
+
   const isInfoRequested = appStatus === "info_requested";
   const displayRequestNote =
     decisionReason ||
@@ -293,17 +345,15 @@ export function AccountLockedModal({
         {/* Top Brand Mark / Astrolabe Emblem */}
         <div className="flex justify-center items-center pt-1">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-[#88DECC]/20 blur-xl" />
-            <div className="w-13 h-13 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)] relative p-2">
-              <svg viewBox="0 0 46 46" width="34" height="34" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M24.2 37V24" />
-                <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
-                <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
-                <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
-                <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
-                <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
-                <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
-              </svg>
+            <div className="absolute inset-0 rounded-full bg-[#F3D3A2]/20 blur-xl" />
+            <div className="w-13 h-13 rounded-2xl bg-[#030909] border border-[#F3D3A2]/30 flex items-center justify-center shadow-[0_0_20px_rgba(243,211,162,0.2)] relative p-2 overflow-hidden">
+              <Image
+                src="/brand/oasis-mark.png"
+                alt="OASIS Official Logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(243,211,162,0.4)]"
+              />
             </div>
           </div>
         </div>
@@ -368,11 +418,31 @@ export function AccountLockedModal({
               </p>
             </div>
 
-            {/* Direct Reply Form */}
+              {/* Direct Reply Form */}
             <form onSubmit={handleSendReply} className="space-y-3">
-              <label className="text-xs font-mono uppercase tracking-wider text-[#ECF1EF]/70 font-semibold block">
-                Your Response &amp; Verification Links:
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono uppercase tracking-wider text-[#ECF1EF]/70 font-semibold block">
+                  Your Response &amp; Verification Links:
+                </label>
+                <label className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 hover:border-[#88DECC]/50 text-[11px] text-[#88DECC] cursor-pointer transition-colors">
+                  <Upload className="w-3 h-3" />
+                  <span>Attach Document</span>
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={handleApplicantDocUpload}
+                    className="hidden"
+                    disabled={uploadingDoc}
+                  />
+                </label>
+              </div>
+
+              {uploadingDoc && (
+                <div className="text-[11px] text-[#88DECC] flex items-center gap-1">
+                  <RotateCw className="w-3 h-3 animate-spin" /> Uploading document...
+                </div>
+              )}
+
               <textarea
                 rows={3}
                 value={replyText}
@@ -392,7 +462,7 @@ export function AccountLockedModal({
           </div>
         ) : (
           /* ── STANDARD PENDING REVIEW MODE ───────────────────────────────── */
-          <div className="text-xs text-[#ECF1EF]/70 leading-relaxed space-y-2 max-w-md mx-auto font-sans">
+          <div className="text-xs text-[#ECF1EF]/70 leading-relaxed space-y-3 max-w-md mx-auto font-sans">
             <p>
               Your membership submission is undergoing validation with the{" "}
               <strong className="text-[#F5FAF6] font-semibold">OASIS Admissions Committee</strong>.
@@ -400,6 +470,39 @@ export function AccountLockedModal({
             <p className="text-[#ECF1EF]/90 font-medium">
               Once verified by an administrator, full sanctuary capabilities will unlock instantly and an encrypted confirmation will be sent to your email.
             </p>
+
+            <div className="pt-1 text-center">
+              <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 hover:border-[#88DECC]/50 text-xs text-[#88DECC] cursor-pointer transition-colors shadow-xs">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Attach ID / Verification Document</span>
+                <input
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={handleApplicantDocUpload}
+                  className="hidden"
+                  disabled={uploadingDoc}
+                />
+              </label>
+              {uploadingDoc && (
+                <div className="text-[11px] text-[#88DECC] mt-2 flex items-center justify-center gap-1">
+                  <RotateCw className="w-3 h-3 animate-spin" /> Uploading &amp; attaching document...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {docUploadSuccess && (
+          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs flex items-center justify-center gap-2">
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{docUploadSuccess}</span>
+          </div>
+        )}
+
+        {docUploadError && (
+          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs flex items-center justify-center gap-2">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+            <span>{docUploadError}</span>
           </div>
         )}
 

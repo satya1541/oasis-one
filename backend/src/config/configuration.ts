@@ -28,7 +28,7 @@ export const configuration = () => ({
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
-    from: process.env.MAIL_FROM || 'OASIS ONE <no-reply@oasisodisha.in>',
+    from: process.env.MAIL_FROM || 'OASIS <no-reply@oasisodisha.in>',
     logoUrl: process.env.EMAIL_LOGO_URL || 'https://oasisodisha.in/brand/oasis-logo-email.png',
     grievanceEmail: process.env.GRIEVANCE_EMAIL || 'grievance@oasisodisha.in',
     oversightEmail: process.env.OVERSIGHT_EMAIL || 'oversight@oasisodisha.in',

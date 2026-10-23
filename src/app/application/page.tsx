@@ -413,7 +413,7 @@ export default function ApplicationStatusPage() {
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
       <footer className="py-6 border-t border-[var(--border)]/40 text-center text-xs text-[var(--muted)]">
-        OASIS ONE · Odisha Startup Community · Admin-approved membership
+        OASIS · Odisha Startup Community · Admin-approved membership
       </footer>
     </div>
   );

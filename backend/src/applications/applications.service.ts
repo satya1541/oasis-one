@@ -175,6 +175,42 @@ export class ApplicationsService {
     return message;
   }
 
+  async attachDocument(userId: string, fileId: string) {
+    const app = await this.prisma.application.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!app) {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Application not found' }, HttpStatus.NOT_FOUND);
+    }
+
+    const snapshot = (app.submittedProfileSnapshot as Record<string, any>) || {};
+    const existing = Array.isArray(snapshot.evidenceFileIds) ? [...snapshot.evidenceFileIds] : [];
+    if (!existing.includes(fileId)) {
+      existing.push(fileId);
+    }
+
+    await this.prisma.application.update({
+      where: { id: app.id },
+      data: {
+        submittedProfileSnapshot: {
+          ...snapshot,
+          evidenceFileIds: existing,
+        },
+      },
+    });
+
+    await this.prisma.uploadedFile.updateMany({
+      where: { id: fileId },
+      data: { ownerId: userId, status: 'attached' },
+    });
+
+    this.realtime.emitToAdmins('admin.application.update', { applicationId: app.id });
+
+    return { ok: true, evidenceFileIds: existing };
+  }
+
   async withdrawMyApplication(userId: string) {
     const app = await this.prisma.application.findFirst({
       where: { userId },

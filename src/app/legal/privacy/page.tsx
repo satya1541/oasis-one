@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Lock, Clock, ShieldCheck, Database, Eye, Trash2, Download, AlertCircle } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Notice & Data Protection Policy · OASIS ONE",
-  description: "Statutory data protection policy under the Digital Personal Data Protection Act, 2023 (DPDP Act) for the OASIS ONE platform in Odisha.",
+  title: "Privacy Notice & Data Protection Policy · OASIS",
+  description: "Statutory data protection policy under the Digital Personal Data Protection Act, 2023 (DPDP Act) for the OASIS platform in Odisha.",
 };
 
 const DATA_CATEGORIES = [
@@ -61,7 +61,7 @@ export default function PrivacyNoticePage() {
           </span>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS ONE — Privacy Notice &amp; Data Protection Policy
+          OASIS — Privacy Notice &amp; Data Protection Policy
         </h1>
         <p className="text-sm text-[var(--muted)] leading-relaxed">
           Drafted and enforced in accordance with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong> of India, the IT Act 2000, and SPDI Rules 2011.
@@ -118,7 +118,7 @@ export default function PrivacyNoticePage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              <strong>OASIS</strong>, headquartered in Bhubaneswar, Odisha, India, operates the OASIS ONE platform and acts as the <strong>Data Fiduciary</strong> in respect of all personal data collected and processed through the Platform under the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.
+              <strong>OASIS</strong>, headquartered in Bhubaneswar, Odisha, India, operates the OASIS platform and acts as the <strong>Data Fiduciary</strong> in respect of all personal data collected and processed through the Platform under the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.
             </p>
             <p>
               Personal data is collected strictly on the lawful basis of your free, specific, informed, unconditional, and unambiguous <strong>Consent</strong> (immutably recorded in <code className="font-mono text-xs">ConsentRecord</code>) and for legitimate community safety and administration uses under Section 4 and Section 7 of the DPDP Act.

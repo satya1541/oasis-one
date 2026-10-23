@@ -131,6 +131,16 @@ export class AdminController {
     return this.adminService.addApplicationMessage(id, adminId, body);
   }
 
+  @UseGuards(AdminGuard)
+  @Post('applications/:id/documents')
+  async attachDocument(
+    @Param('id') id: string,
+    @CurrentUser('id') adminId: string,
+    @Body('fileId') fileId: string,
+  ) {
+    return this.adminService.attachDocumentToApplication(id, adminId, fileId);
+  }
+
   // 4. Members & Restrictions
   @UseGuards(AdminGuard)
   @Get('members')
@@ -448,6 +458,17 @@ export class AdminController {
   }
 
   @UseGuards(AdminGuard)
+  @Delete('events/:id')
+  async deleteEvent(
+    @Param('id') id: string,
+    @CurrentUser('id') adminId: string,
+    @Req() req: Request,
+  ) {
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
+    return this.adminService.deleteEvent(id, adminId, clientIp);
+  }
+
+  @UseGuards(AdminGuard)
   @Put('events/:id/form')
   async setEventForm(
     @Param('id') eventId: string,
@@ -491,13 +512,53 @@ export class AdminController {
   @UseGuards(AdminGuard)
   @Get('events/:id/registrations')
   async getEventRegistrations(@Param('id') eventId: string) {
-    return this.prisma.eventRegistration.findMany({
+    const regs = await this.prisma.eventRegistration.findMany({
       where: { eventId },
-      include: {
-        user: { select: { id: true, email: true, profile: { select: { name: true, city: true } } } },
-      },
       orderBy: { registeredAt: 'asc' },
     });
+
+    const userIds = Array.from(new Set(regs.map((r) => r.userId)));
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        primaryRole: true,
+        accountStatus: true,
+        profile: {
+          select: {
+            name: true,
+            headline: true,
+            city: true,
+            state: true,
+            profilePhotoUrl: true,
+            linkedinUrl: true,
+          },
+        },
+      },
+    });
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    return regs.map((r) => ({
+      ...r,
+      user: userMap.get(r.userId) || {
+        id: r.userId,
+        email: 'Unknown Member',
+        phone: null,
+        primaryRole: 'member',
+        accountStatus: 'archived',
+        profile: {
+          name: 'Former Member',
+          headline: null,
+          city: null,
+          state: null,
+          profilePhotoUrl: null,
+          linkedinUrl: null,
+        },
+      },
+    }));
   }
 
   @UseGuards(AdminGuard)
@@ -505,9 +566,13 @@ export class AdminController {
   async checkInRegistration(
     @Param('regId') regId: string,
   ) {
+    const existing = await this.prisma.eventRegistration.findUnique({
+      where: { id: regId },
+      select: { checkedInAt: true },
+    });
     return this.prisma.eventRegistration.update({
       where: { id: regId },
-      data: { checkedInAt: new Date() },
+      data: { checkedInAt: existing?.checkedInAt ? null : new Date() },
     });
   }
 
@@ -667,9 +732,9 @@ export class AdminController {
     const inviteUrl = `${this.frontendUrl}/invite/${rawToken}`;
     this.adminService['mail'].sendMail({
       to: invite.email,
-      subject: 'OASIS ONE Invitation Reminder',
+      subject: 'OASIS Invitation Reminder',
       headline: `Hello ${invite.name || 'Member'},`,
-      body: `Your invitation to join the OASIS ONE private network is waiting. Click below to claim your account.`,
+      body: `Your invitation to join the OASIS private network is waiting. Click below to claim your account.`,
       actionText: 'Activate Account',
       actionUrl: inviteUrl,
     });
@@ -859,9 +924,9 @@ export class AdminController {
     const setPasswordUrl = `${this.frontendUrl}/reset-password?token=${rawToken}`;
     this.adminService['mail'].sendMail({
       to: email,
-      subject: 'OASIS ONE Administrative Access Granted',
+      subject: 'OASIS Administrative Access Granted',
       headline: 'Administrative Invitation',
-      body: `You have been added as an administrator (${body.adminLevel}) on OASIS ONE. Click below to configure your password and enroll in mandatory MFA.`,
+      body: `You have been added as an administrator (${body.adminLevel}) on OASIS. Click below to configure your password and enroll in mandatory MFA.`,
       actionText: 'Set Password & Enroll',
       actionUrl: setPasswordUrl,
     });

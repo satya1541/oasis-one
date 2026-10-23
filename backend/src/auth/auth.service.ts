@@ -293,8 +293,8 @@ export class AuthService {
     const verifyUrl = `${this.frontendUrl}/verify-email?token=${rawVerifyToken}`;
     this.mailService.sendMail({
       to: email,
-      subject: 'Verify your email address for OASIS ONE',
-      headline: 'Welcome to OASIS ONE',
+      subject: 'Verify your email address for OASIS',
+      headline: 'Welcome to OASIS',
       body: `Thank you for starting your registration. Please verify your email address to submit your membership application for admin review.`,
       actionText: 'Verify Email Address',
       actionUrl: verifyUrl,
@@ -763,7 +763,7 @@ export class AuthService {
       const verifyUrl = `${this.frontendUrl}/verify-email?token=${rawToken}`;
       this.mailService.sendMail({
         to: email,
-        subject: 'Verify your email address for OASIS ONE',
+        subject: 'Verify your email address for OASIS',
         body: 'Click below to verify your email address and submit your application for review.',
         actionText: 'Verify Email',
         actionUrl: verifyUrl,
@@ -795,9 +795,9 @@ export class AuthService {
       const resetUrl = `${this.frontendUrl}/reset-password?token=${rawToken}`;
       this.mailService.sendMail({
         to: email,
-        subject: 'Reset your password for OASIS ONE',
+        subject: 'Reset your password for OASIS',
         headline: 'Password Reset Request',
-        body: 'We received a request to reset your OASIS ONE password. This link is valid for 1 hour.',
+        body: 'We received a request to reset your OASIS password. This link is valid for 1 hour.',
         actionText: 'Reset Password',
         actionUrl: resetUrl,
       });
@@ -853,7 +853,7 @@ export class AuthService {
 
     const secret = authenticator.generateSecret();
     const encryptedSecret = encryptField(secret, this.fieldKey);
-    const otpauthUrl = authenticator.keyuri(user.email, 'OASIS ONE Admin', secret);
+    const otpauthUrl = authenticator.keyuri(user.email, 'OASIS Admin', secret);
     const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
 
     // Generate 8 backup codes

@@ -5,7 +5,7 @@ import { MemberShell } from "@/components/layout/MemberShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Calendar, MapPin, Users, Video, Clock, CheckCircle2, RotateCw, Sparkles } from "lucide-react";
+import { Calendar, MapPin, Users, Video, Clock, CheckCircle2, RotateCw, Sparkles, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EventItem {
@@ -15,6 +15,7 @@ interface EventItem {
   startAt: string;
   endAt?: string;
   venueOrLink?: string;
+  meetingLink?: string;
   capacity?: number;
   registeredCount?: number;
   waitlistEnabled?: boolean;
@@ -294,6 +295,17 @@ export default function EventsPage() {
                           <span className="truncate max-w-[280px]">
                             {evt.venueOrLink || "Bhubaneswar Innovation Center, Odisha"}
                           </span>
+                          {evt.meetingLink && (evt.meetingLink.includes("maps.google.com") || evt.meetingLink.includes("google.com/maps")) && (
+                            <a
+                              href={evt.meetingLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 dark:text-[#88DECC] hover:underline shrink-0 ml-1"
+                            >
+                              <span>Map</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
                         </div>
                       </div>
 

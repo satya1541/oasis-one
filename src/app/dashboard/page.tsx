@@ -436,7 +436,7 @@ function DashboardContent() {
           <div className="w-12 h-12 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)]">
             <RotateCw className="w-5 h-5 animate-spin text-[#88DECC]" />
           </div>
-          <p className="text-xs font-mono text-[#ECF1EF]/60">Connecting to OASIS ONE Network...</p>
+          <p className="text-xs font-mono text-[#ECF1EF]/60">Connecting to OASIS Network...</p>
         </div>
       </MemberShell>
     );
@@ -849,7 +849,7 @@ function DashboardContent() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
               <div>
                 <h3 className="font-display text-lg font-medium text-[#F5FAF6]">
-                  Getting Started with OASIS ONE
+                  Getting Started with OASIS
                 </h3>
                 <p className="text-xs text-[#ECF1EF]/60 mt-1">
                   Complete these three quick milestones to unlock maximum community value.

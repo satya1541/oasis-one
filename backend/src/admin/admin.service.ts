@@ -84,7 +84,7 @@ export class AdminService {
     // Generate TOTP secret
     const secret = authenticator.generateSecret();
     const encryptedSecret = encryptField(secret, this.fieldKey);
-    const otpauthUrl = authenticator.keyuri(email, 'OASIS ONE SuperAdmin', secret);
+    const otpauthUrl = authenticator.keyuri(email, 'OASIS SuperAdmin', secret);
     const qrCode = await QRCode.toDataURL(otpauthUrl);
 
     const user = await this.prisma.user.create({
@@ -340,10 +340,48 @@ export class AdminService {
     }
 
     const snapshot: any = app.submittedProfileSnapshot || {};
+    const fileIdSet = new Set<string>();
+
+    if (Array.isArray(snapshot.evidenceFileIds)) {
+      snapshot.evidenceFileIds.forEach((id: any) => id && typeof id === 'string' && fileIdSet.add(id));
+    }
+    if (Array.isArray(snapshot.roleData?.evidenceFileIds)) {
+      snapshot.roleData.evidenceFileIds.forEach((id: any) => id && typeof id === 'string' && fileIdSet.add(id));
+    }
+    if (snapshot.roleData?.uploadedEvidence?.fileId && typeof snapshot.roleData.uploadedEvidence.fileId === 'string') {
+      fileIdSet.add(snapshot.roleData.uploadedEvidence.fileId);
+    }
+    if (snapshot.uploadedEvidence?.fileId && typeof snapshot.uploadedEvidence.fileId === 'string') {
+      fileIdSet.add(snapshot.uploadedEvidence.fileId);
+    }
+    if (Array.isArray(app.messages)) {
+      for (const msg of app.messages) {
+        if (msg.attachments && typeof msg.attachments === 'object') {
+          const atts = Array.isArray(msg.attachments) ? msg.attachments : [msg.attachments];
+          for (const a of atts) {
+            const att = a as any;
+            if (att?.fileId && typeof att.fileId === 'string') fileIdSet.add(att.fileId);
+            if (att?.id && typeof att.id === 'string') fileIdSet.add(att.id);
+          }
+        }
+      }
+    }
+
+    const orClauses: any[] = [];
+    if (fileIdSet.size > 0) {
+      orClauses.push({ id: { in: Array.from(fileIdSet) } });
+    }
+    if (app.userId) {
+      orClauses.push({ ownerId: app.userId });
+    }
+
     let evidenceFiles: any[] = [];
-    if (Array.isArray(snapshot.evidenceFileIds) && snapshot.evidenceFileIds.length > 0) {
+    if (orClauses.length > 0) {
       evidenceFiles = await this.prisma.uploadedFile.findMany({
-        where: { id: { in: snapshot.evidenceFileIds } },
+        where: {
+          OR: orClauses,
+          status: { not: 'deleted' },
+        },
         select: {
           id: true,
           filename: true,
@@ -352,6 +390,7 @@ export class AdminService {
           purpose: true,
           createdAt: true,
         },
+        orderBy: { createdAt: 'desc' },
       });
     }
 
@@ -359,6 +398,36 @@ export class AdminService {
       ...app,
       evidenceFiles,
     };
+  }
+
+  async attachDocumentToApplication(appId: string, adminId: string, fileId: string) {
+    const app = await this.prisma.application.findUnique({ where: { id: appId } });
+    if (!app) {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Application not found' }, HttpStatus.NOT_FOUND);
+    }
+    const snapshot: any = app.submittedProfileSnapshot || {};
+    const existing = Array.isArray(snapshot.evidenceFileIds) ? [...snapshot.evidenceFileIds] : [];
+    if (!existing.includes(fileId)) {
+      existing.push(fileId);
+    }
+    await this.prisma.application.update({
+      where: { id: appId },
+      data: {
+        submittedProfileSnapshot: {
+          ...snapshot,
+          evidenceFileIds: existing,
+        },
+      },
+    });
+
+    if (app.userId) {
+      await this.prisma.uploadedFile.updateMany({
+        where: { id: fileId },
+        data: { ownerId: app.userId, status: 'attached' },
+      });
+    }
+
+    return { ok: true, evidenceFileIds: existing };
   }
 
   async claimApplication(appId: string, adminId: string) {
@@ -497,9 +566,9 @@ export class AdminService {
       // Send welcome email
       this.mail.sendMail({
         to: app.user.email,
-        subject: 'Welcome to OASIS ONE — Your Membership is Approved!',
+        subject: 'Welcome to OASIS — Your Membership is Approved!',
         headline: 'Welcome to the Community!',
-        body: 'Congratulations! Your application to join OASIS ONE has been approved. You now have full access to explore mentors, collaborate on startup projects, and attend private community events.',
+        body: 'Congratulations! Your application to join OASIS has been approved. You now have full access to explore mentors, collaborate on startup projects, and attend private community events.',
         actionText: 'Access Your Dashboard',
         actionUrl: `${this.frontendUrl}/dashboard`,
       });
@@ -528,9 +597,9 @@ export class AdminService {
 
       this.mail.sendMail({
         to: app.user.email,
-        subject: 'OASIS ONE Application Status Update',
+        subject: 'OASIS Application Status Update',
         headline: 'Application Decision',
-        body: `Thank you for your interest in OASIS ONE. After review, we are unable to approve your application at this time.\n\nReason:\n${dto.reason || 'Criteria not met.'}\n\nYou will be eligible to reapply on ${canReapplyAt.toLocaleDateString()}.`,
+        body: `Thank you for your interest in OASIS. After review, we are unable to approve your application at this time.\n\nReason:\n${dto.reason || 'Criteria not met.'}\n\nYou will be eligible to reapply on ${canReapplyAt.toLocaleDateString()}.`,
       });
     } else if (dto.decision === 'request_info') {
       const reasonText = dto.reason?.trim() || 'Additional information requested by Admissions Committee.';
@@ -573,7 +642,7 @@ export class AdminService {
 
       this.mail.sendMail({
         to: app.user.email,
-        subject: 'Action Required: More Information Needed for OASIS ONE Application',
+        subject: 'Action Required: More Information Needed for OASIS Application',
         headline: 'Information Requested',
         body: `Our reviewers need a little more context regarding your application:\n\n"${reasonText}"\n\nPlease log into your application portal and respond in the thread.`,
         actionText: 'View Application Thread',
@@ -874,9 +943,9 @@ export class AdminService {
         const inviteUrl = `${this.frontendUrl}/invite/${rawToken}`;
         this.mail.sendMail({
           to: email,
-          subject: 'You are Invited to OASIS ONE — Claim Your Pre-Approved Membership',
+          subject: 'You are Invited to OASIS — Claim Your Pre-Approved Membership',
           headline: `Hello ${name || 'Founder'},`,
-          body: `As a recognized member of the Odisha startup ecosystem, you have been pre-approved for full access to OASIS ONE.\n\nClick the link below to set your password and activate your membership immediately.`,
+          body: `As a recognized member of the Odisha startup ecosystem, you have been pre-approved for full access to OASIS.\n\nClick the link below to set your password and activate your membership immediately.`,
           actionText: 'Claim Your Invite',
           actionUrl: inviteUrl,
         });
@@ -906,28 +975,32 @@ export class AdminService {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
-        registrations: {
-          include: {
-            user: {
-              include: { profile: true },
-            },
-          },
-        },
+        registrations: true,
       },
     });
 
     if (!event) throw new HttpException({ code: 'NOT_FOUND', message: 'Event not found' }, HttpStatus.NOT_FOUND);
 
-    const rows = event.registrations.map((r) => [
-      sanitizeCsvCell(r.id),
-      sanitizeCsvCell(r.user.profile?.name || 'Unknown'),
-      sanitizeCsvCell(r.user.email),
-      sanitizeCsvCell(r.user.phone || ''),
-      sanitizeCsvCell(r.status),
-      sanitizeCsvCell(r.waitlistPosition || ''),
-      sanitizeCsvCell(r.checkedInAt ? r.checkedInAt.toISOString() : ''),
-      sanitizeCsvCell(r.registeredAt.toISOString()),
-    ]);
+    const userIds = Array.from(new Set(event.registrations.map((r) => r.userId)));
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      include: { profile: true },
+    });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    const rows = event.registrations.map((r) => {
+      const u = userMap.get(r.userId);
+      return [
+        sanitizeCsvCell(r.id),
+        sanitizeCsvCell(u?.profile?.name || 'Former Member'),
+        sanitizeCsvCell(u?.email || 'N/A'),
+        sanitizeCsvCell(u?.phone || ''),
+        sanitizeCsvCell(r.status),
+        sanitizeCsvCell(r.waitlistPosition != null ? String(r.waitlistPosition) : ''),
+        sanitizeCsvCell(r.checkedInAt ? r.checkedInAt.toISOString() : ''),
+        sanitizeCsvCell(r.registeredAt.toISOString()),
+      ];
+    });
 
     const csvOutput = stringify([
       ['Registration ID', 'Name', 'Email', 'Phone', 'Status', 'Waitlist Pos', 'Checked In At', 'Registered At'],
@@ -943,6 +1016,41 @@ export class AdminService {
     });
 
     return csvOutput;
+  }
+
+  async deleteEvent(eventId: string, adminId: string, ipAddress?: string) {
+    const existing = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      select: { id: true, title: true },
+    });
+    if (!existing) {
+      throw new HttpException(
+        { code: 'NOT_FOUND', message: 'Event not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.eventFormField.deleteMany({ where: { eventId } }),
+      this.prisma.eventRegistration.deleteMany({ where: { eventId } }),
+      this.prisma.eventTag.deleteMany({ where: { eventId } }),
+      this.prisma.eventInvitee.deleteMany({ where: { eventId } }),
+      this.prisma.event.delete({ where: { id: eventId } }),
+    ]);
+
+    await this.audit.log({
+      actorId: adminId,
+      action: 'admin.event.delete',
+      targetType: 'event',
+      targetId: eventId,
+      ipAddress,
+      metadata: { title: existing.title },
+    });
+
+    this.realtime.emit(`event:${eventId}`, 'event.deleted', { eventId });
+    this.realtime.emitToMembers('event.deleted', { eventId });
+
+    return { ok: true, deletedId: eventId };
   }
 
   // ----------------------------------------------------

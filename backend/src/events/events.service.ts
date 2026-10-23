@@ -58,6 +58,7 @@ export class EventsService {
       startAt: e.startAt,
       endAt: e.endAt,
       venueOrLink: e.venueOrLink,
+      meetingLink: e.meetingLink,
       capacity: e.capacity,
       waitlistEnabled: e.waitlistEnabled,
       registrationDeadline: e.registrationDeadline,
@@ -280,7 +281,7 @@ export class EventsService {
       location: event.venueOrLink || 'Online',
       url: event.meetingLink || undefined,
       status: 'CONFIRMED',
-      organizer: { name: 'OASIS ONE', email: 'events@oasis.community' },
+      organizer: { name: 'OASIS', email: 'events@oasis.community' },
     };
 
     return new Promise((resolve, reject) => {

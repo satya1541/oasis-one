@@ -136,7 +136,7 @@ export default function SuspendedAccountPage() {
                   Account Access Restricted
                 </h1>
                 <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
-                  Your OASIS ONE membership account has been placed under administrative review by the Admissions & Safety Committee.
+                  Your OASIS membership account has been placed under administrative review by the Admissions & Safety Committee.
                 </p>
               </div>
 

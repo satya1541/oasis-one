@@ -133,7 +133,7 @@ export function UnlockMomentAnimation({
             <h2 className="font-display text-3xl sm:text-4xl font-light text-[var(--brand-cream)] tracking-tight">
               You&apos;re in, {userName}.
               <br />
-              <span className="text-[var(--brand-gold)]">Welcome to OASIS ONE.</span>
+              <span className="text-[var(--brand-gold)]">Welcome to OASIS.</span>
             </h2>
             <p className="text-xs text-[var(--brand-cream)]/75 max-w-sm mx-auto">
               Click anywhere to explore your dashboard and get started.

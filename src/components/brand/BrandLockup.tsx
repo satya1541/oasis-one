@@ -3,12 +3,17 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export interface BrandLockupProps {
-  variant?: "full" | "mark" | "wordmark" | "horizontal";
+  variant?: "full" | "mark" | "wordmark" | "horizontal" | "pill";
   className?: string;
   priority?: boolean;
   href?: string;
 }
 
+/**
+ * BrandLockup — The official OASIS company lockup.
+ * Uses the authentic champagne-gold Astrolabe Star Compass Wheel mark
+ * on Midnight Navy with geometric typography and Odisha Startup Community identifier.
+ */
 export function BrandLockup({
   variant = "horizontal",
   className,
@@ -22,59 +27,50 @@ export function BrandLockup({
           <div className={cn("relative flex items-center justify-center shrink-0", className)}>
             <Image
               src="/brand/oasis-mark.png"
-              alt="OASIS Star Compass Mark"
-              width={36}
-              height={36}
+              alt="OASIS Official Logo"
+              width={40}
+              height={40}
               priority={priority}
-              className="h-9 w-9 object-contain"
+              className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow-[0_2px_10px_rgba(243,211,162,0.25)]"
             />
           </div>
         );
 
       case "wordmark":
         return (
-          <div className={cn("flex items-center gap-2.5", className)}>
+          <div className={cn("flex items-center gap-2.5 select-none", className)}>
             <Image
               src="/brand/oasis-mark.png"
-              alt="OASIS Star Compass Mark"
-              width={32}
-              height={32}
+              alt="OASIS Official Logo"
+              width={36}
+              height={36}
               priority={priority}
-              className="h-8 w-8 object-contain shrink-0"
+              className="h-8 w-8 sm:h-9 sm:w-9 object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(243,211,162,0.2)]"
             />
-            <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-display text-lg sm:text-xl font-normal tracking-[0.18em] text-[var(--brand-cream)] uppercase">
-                OASIS
-              </span>
-              <span className="rounded bg-[var(--brand-gold)] px-1.5 py-0.5 font-display text-[10px] font-semibold tracking-wider text-[var(--brand-navy)] uppercase">
-                ONE
-              </span>
-            </div>
+            <span className="font-display text-lg sm:text-xl font-normal tracking-[0.22em] text-[var(--brand-cream)] uppercase">
+              OASIS
+            </span>
           </div>
         );
 
       case "horizontal":
+      case "pill":
         return (
           <div className={cn("flex items-center gap-3 select-none", className)}>
             <div className="relative flex items-center justify-center shrink-0">
               <Image
                 src="/brand/oasis-mark.png"
-                alt="OASIS Star Compass Mark"
-                width={38}
-                height={38}
+                alt="OASIS Official Logo"
+                width={42}
+                height={42}
                 priority={priority}
-                className="h-9 w-9 sm:h-10 sm:w-10 object-contain"
+                className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow-[0_2px_12px_rgba(243,211,162,0.25)]"
               />
             </div>
             <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 leading-none">
-                <span className="font-display text-lg sm:text-xl font-normal tracking-[0.18em] text-[var(--brand-cream)] uppercase">
-                  OASIS
-                </span>
-                <span className="rounded bg-[var(--brand-gold)] px-1.5 py-0.5 font-display text-[10px] font-semibold tracking-wider text-[var(--brand-navy)] uppercase">
-                  ONE
-                </span>
-              </div>
+              <span className="font-display text-lg sm:text-xl font-normal tracking-[0.22em] text-[var(--brand-cream)] uppercase leading-none">
+                OASIS
+              </span>
               <span className="text-[9px] font-medium tracking-[0.2em] text-[var(--brand-gold)]/80 uppercase leading-none mt-1 font-display">
                 Odisha · Startup Community
               </span>
@@ -86,14 +82,13 @@ export function BrandLockup({
       default:
         return (
           <div className={cn("relative flex items-center justify-center", className)}>
-            {/* The full lockup sits strictly on navy */}
             <Image
               src="/brand/oasis-logo.png"
               alt="OASIS — Odisha · Startup Community"
-              width={240}
-              height={240}
+              width={260}
+              height={260}
               priority={priority}
-              className="h-auto max-h-[140px] w-auto max-w-[200px] object-contain"
+              className="h-auto max-h-[140px] w-auto max-w-[200px] object-contain drop-shadow-[0_4px_16px_rgba(243,211,162,0.2)]"
             />
           </div>
         );

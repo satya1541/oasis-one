@@ -73,7 +73,7 @@ async function cleanAndBootstrap() {
     { key: 'support_email', value: 'support@oasis.community' },
     { key: 'grievance_email', value: 'grievance@oasis.community' },
     { key: 'oversight_email', value: 'oversight@oasis.community' },
-    { key: 'app_name', value: 'OASIS ONE' },
+    { key: 'app_name', value: 'OASIS' },
   ];
 
   for (const s of defaultSettings) {
@@ -147,7 +147,7 @@ async function cleanAndBootstrap() {
       type: LegalDocType.privacy_notice,
       version: '1.0',
       title: 'Privacy Notice (DPDP Act Compliance)',
-      body: `## OASIS ONE Privacy Notice (v1.0)\nOfficial data protection notice for the OASIS Odisha startup community network.`,
+      body: `## OASIS Privacy Notice (v1.0)\nOfficial data protection notice for the OASIS Odisha startup community network.`,
       isCurrent: true,
       publishedAt: new Date(),
     },
@@ -165,7 +165,7 @@ async function cleanAndBootstrap() {
       type: LegalDocType.community_guidelines,
       version: '1.0',
       title: 'Community Guidelines & Standards',
-      body: `## OASIS ONE Community Guidelines (v1.0)\nStandards and governance rules for accredited founders and mentors in Odisha.`,
+      body: `## OASIS Community Guidelines (v1.0)\nStandards and governance rules for accredited founders and mentors in Odisha.`,
       isCurrent: true,
       publishedAt: new Date(),
     },

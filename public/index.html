@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#03080B">
-  <title>OASIS ONE — One Community. Infinite Possibilities.</title>
+  <title>OASIS — One Community. Infinite Possibilities.</title>
   <style>
     @font-face {
       font-family: "RV Display";
@@ -149,64 +149,59 @@
 
     /* Top Left Logo Pill */
     .logo-pill {
-      min-width: calc(104 * var(--u));
+      min-width: calc(112 * var(--u));
       height: calc(46 * var(--u));
       border-radius: calc(23 * var(--u));
-      background: rgba(150, 220, 130, 0.035);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(18, 19, 31, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(243, 211, 162, 0.18);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
       text-decoration: none;
       overflow: hidden;
-      padding-right: calc(12 * var(--u));
-      transition: border-color 0.25s ease;
+      padding-right: calc(16 * var(--u));
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+    .logo-pill:hover {
+      border-color: rgba(243, 211, 162, 0.4);
+      background: rgba(18, 19, 31, 0.65);
     }
 
     .logo-disc {
       width: calc(46 * var(--u));
       height: calc(46 * var(--u));
       border-radius: 50%;
-      background-color: var(--color-logo-disc);
+      background-color: #03080B;
+      border: 1px solid rgba(243, 211, 162, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      overflow: hidden;
     }
 
-    .logo-tree {
-      width: calc(46 * var(--u));
-      height: calc(46 * var(--u));
+    .logo-official-mark {
+      width: calc(32 * var(--u));
+      height: calc(32 * var(--u));
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(243, 211, 162, 0.35));
     }
 
     .logo-brand-wrap {
       display: flex;
       align-items: center;
-      gap: calc(5 * var(--u));
-      padding-left: calc(8 * var(--u));
+      padding-left: calc(10 * var(--u));
       user-select: none;
     }
 
     .logo-brand-text {
       font-family: "RV Brand", "Urbanist", "Helvetica Neue", Arial, sans-serif;
       font-weight: 600;
-      font-size: calc(13 * var(--u));
-      letter-spacing: 0.16em;
+      font-size: calc(13.5 * var(--u));
+      letter-spacing: 0.22em;
       color: var(--color-ink);
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .logo-brand-badge {
-      font-family: "RV Brand", "Urbanist", "Helvetica Neue", Arial, sans-serif;
-      font-weight: 700;
-      font-size: calc(9 * var(--u));
-      letter-spacing: 0.08em;
-      background-color: var(--color-gold);
-      color: #12131F;
-      padding: calc(2 * var(--u)) calc(5 * var(--u));
-      border-radius: calc(4 * var(--u));
       text-transform: uppercase;
       line-height: 1;
     }
@@ -683,21 +678,12 @@
     <!-- Header -->
     <header class="site-header">
       <!-- Top Left Logo Pill -->
-      <a href="/" class="logo-pill" aria-label="OASIS ONE home">
+      <a href="/" class="logo-pill" aria-label="OASIS home">
         <div class="logo-disc">
-          <svg class="logo-tree" viewBox="0 0 46 46" fill="none" stroke="#7CC6B5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path class="tree-stroke" d="M24.2 37V24" />
-            <path class="tree-stroke" d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
-            <path class="tree-stroke" d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
-            <path class="tree-stroke" d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
-            <path class="tree-stroke" d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
-            <path class="tree-stroke" d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
-            <path class="tree-stroke" d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
-          </svg>
+          <img src="/brand/oasis-mark.png" alt="OASIS Official Logo" class="logo-official-mark" />
         </div>
         <div class="logo-brand-wrap">
           <span class="logo-brand-text">OASIS</span>
-          <span class="logo-brand-badge">ONE</span>
         </div>
       </a>
 
@@ -798,7 +784,7 @@
 
       // Select animated elements
       const logoEl = document.querySelector('.logo-pill');
-      const treePaths = document.querySelectorAll('.tree-stroke');
+      const logoMarkEl = document.querySelector('.logo-official-mark');
       const brandMarkEl = document.querySelector('.logo-brand-wrap');
       const navEl = document.querySelector('.nav-pill');
       const menuBtn = document.querySelector('.menu-btn');
@@ -846,28 +832,18 @@
           );
         }
 
-        // Tree strokes: draw on with stroke-dashoffset, 80ms plus 45ms per path, 820ms, grow ease cubic-bezier(0.45, 0, 0.2, 1)
-        treePaths.forEach(function (path, i) {
-          const len = path.getTotalLength() || 40;
-          path.style.strokeDasharray = len + 'px';
-          const anim = path.animate(
-            [
-              { strokeDashoffset: len + 'px' },
-              { strokeDashoffset: '0px' }
-            ],
-            {
-              duration: 820,
-              delay: 80 + i * 45,
-              easing: 'cubic-bezier(0.45, 0, 0.2, 1)',
-              fill: 'backwards'
-            }
+        // Official logo mark: smooth subtle rotate & scale in
+        if (logoMarkEl) {
+          animations.push(
+            logoMarkEl.animate(
+              [
+                { opacity: 0, transform: 'scale(0.85) rotate(-10deg)' },
+                { opacity: 1, transform: 'scale(1) rotate(0deg)' }
+              ],
+              { duration: 750, delay: 100, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }
+            )
           );
-          anim.onfinish = function () {
-            path.style.strokeDasharray = '';
-            path.style.strokeDashoffset = '';
-          };
-          animations.push(anim);
-        });
+        }
 
         // Brand wordmark badge: fades and scales from 0.92 at 420ms for 650ms, expo cubic-bezier(0.16, 1, 0.3, 1)
         if (brandMarkEl) {

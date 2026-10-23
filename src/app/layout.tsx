@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://oasisodisha.in"),
-  title: "OASIS ONE — One Community. Infinite Possibilities.",
+  title: "OASIS — One Community. Infinite Possibilities.",
   description:
     "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. Find the right people, ask better questions, meet in person. 650+ verified members.",
   icons: {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
-    title: "OASIS ONE — One Community. Infinite Possibilities.",
+    title: "OASIS — One Community. Infinite Possibilities.",
     description:
       "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. 650+ verified members.",
     images: [
@@ -56,14 +56,14 @@ export const metadata: Metadata = {
         url: "/brand/og-image.png",
         width: 1200,
         height: 630,
-        alt: "OASIS ONE — Odisha Startup Community",
+        alt: "OASIS — Odisha Startup Community",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OASIS ONE — One Community. Infinite Possibilities.",
+    title: "OASIS — One Community. Infinite Possibilities.",
     description:
       "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. 650+ verified members.",
     images: ["/brand/og-image.png"],

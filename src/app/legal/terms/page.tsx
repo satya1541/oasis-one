@@ -2,8 +2,8 @@ import Link from "next/link";
 import { FileText, Clock, ShieldCheck, AlertCircle, CheckCircle2, ChevronRight, Scale } from "lucide-react";
 
 export const metadata = {
-  title: "Terms of Service & Membership Agreement · OASIS ONE",
-  description: "Binding contract under Indian Contract Act 1872 covering membership vetting, age gate, account security, and explicit non-financial disclaimers for OASIS ONE.",
+  title: "Terms of Service & Membership Agreement · OASIS",
+  description: "Binding contract under Indian Contract Act 1872 covering membership vetting, age gate, account security, and explicit non-financial disclaimers for OASIS.",
 };
 
 export default function TermsOfServicePage() {
@@ -22,10 +22,10 @@ export default function TermsOfServicePage() {
           </span>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS ONE — Terms of Service & Membership Agreement
+          OASIS — Terms of Service & Membership Agreement
         </h1>
         <p className="text-sm text-[var(--muted)] leading-relaxed">
-          The binding legal agreement governing vetted membership, acceptable participation, community standards, and data protection on the OASIS ONE platform in Odisha.
+          The binding legal agreement governing vetted membership, acceptable participation, community standards, and data protection on the OASIS platform in Odisha.
         </p>
 
         {/* Quick Identity Box */}
@@ -49,7 +49,7 @@ export default function TermsOfServicePage() {
           <div className="space-y-3 text-xs sm:text-sm">
             <h3 className="font-semibold text-[var(--text)]">1.1 Binding Contractual Agreement</h3>
             <p>
-              These Terms of Service and Membership Agreement (&ldquo;Terms&rdquo;) constitute a legally binding contract under the provisions of the <strong>Indian Contract Act, 1872</strong>, between you (&ldquo;Applicant,&rdquo; &ldquo;Member,&rdquo; or &ldquo;User&rdquo;) and <strong>OASIS</strong>, having its principal office at Plot No.: 2762, Brahmeswar Patna, Bhubaneswar, Odisha, India, 751018 (&ldquo;OASIS,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;). These Terms govern your registration for, access to, and use of the <strong>OASIS ONE</strong> digital entrepreneur community portal, Progressive Web Application (PWA), application programming interfaces (<code className="font-mono text-xs">/api/v1</code>), real-time WebSocket channels (<code className="font-mono text-xs">/ws</code>), events, and associated services (collectively, the &ldquo;Platform&rdquo;).
+              These Terms of Service and Membership Agreement (&ldquo;Terms&rdquo;) constitute a legally binding contract under the provisions of the <strong>Indian Contract Act, 1872</strong>, between you (&ldquo;Applicant,&rdquo; &ldquo;Member,&rdquo; or &ldquo;User&rdquo;) and <strong>OASIS</strong>, having its principal office at Plot No.: 2762, Brahmeswar Patna, Bhubaneswar, Odisha, India, 751018 (&ldquo;OASIS,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;). These Terms govern your registration for, access to, and use of the <strong>OASIS</strong> digital entrepreneur community portal, Progressive Web Application (PWA), application programming interfaces (<code className="font-mono text-xs">/api/v1</code>), real-time WebSocket channels (<code className="font-mono text-xs">/ws</code>), events, and associated services (collectively, the &ldquo;Platform&rdquo;).
             </p>
 
             <h3 className="font-semibold text-[var(--text)] pt-2">1.2 Electronic Record under Indian Law</h3>
@@ -60,7 +60,7 @@ export default function TermsOfServicePage() {
             <h3 className="font-semibold text-[var(--text)] pt-2">1.3 Versioned Consent Recording &amp; Mandatory Re-Acceptance Gate</h3>
             <ul className="list-disc pl-5 space-y-1.5 text-[var(--muted)]">
               <li>
-                <strong className="text-[var(--text)]">Initial Consent Capture:</strong> When registering on OASIS ONE, you must explicitly accept these Terms, our Privacy Notice (<code className="font-mono text-xs">privacy_notice</code>), and Community Guidelines (<code className="font-mono text-xs">community_guidelines</code>). Acceptance is permanently immutably logged in the Platform&rsquo;s <code className="font-mono text-xs">ConsentRecord</code> ledger with document type, version, timestamp (UTC), and IP address.
+                <strong className="text-[var(--text)]">Initial Consent Capture:</strong> When registering on OASIS, you must explicitly accept these Terms, our Privacy Notice (<code className="font-mono text-xs">privacy_notice</code>), and Community Guidelines (<code className="font-mono text-xs">community_guidelines</code>). Acceptance is permanently immutably logged in the Platform&rsquo;s <code className="font-mono text-xs">ConsentRecord</code> ledger with document type, version, timestamp (UTC), and IP address.
               </li>
               <li>
                 <strong className="text-[var(--text)]">Updates and Re-Acceptance Gate:</strong> When updated terms are published (<code className="font-mono text-xs">POST /admin/legal</code>), a real-time notification flags <code className="font-mono text-xs">pendingConsents</code> on your account. Continued access to member features requires accepting updated versions via the in-app consent modal.
@@ -78,7 +78,7 @@ export default function TermsOfServicePage() {
           <div className="space-y-3 text-xs sm:text-sm">
             <h3 className="font-semibold text-[var(--text)]">2.1 Digital Home for Odisha&rsquo;s Entrepreneur Community</h3>
             <p>
-              OASIS ONE (&ldquo;One Community. Infinite Possibilities.&rdquo;) is an admin-approved, role-aware digital workspace designed for 650+ aspiring entrepreneurs, startup founders, co-founders, mentors, and advisors across Odisha and beyond.
+              OASIS (&ldquo;One Community. Infinite Possibilities.&rdquo;) is an admin-approved, role-aware digital workspace designed for 650+ aspiring entrepreneurs, startup founders, co-founders, mentors, and advisors across Odisha and beyond.
             </p>
 
             <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-[var(--text)] space-y-2">
@@ -88,7 +88,7 @@ export default function TermsOfServicePage() {
               </div>
               <ul className="list-disc pl-5 space-y-1 text-[var(--muted)]">
                 <li><strong className="text-[var(--text)]">No Investment Brokerage:</strong> OASIS is <strong>not</strong> a stock exchange, crowdfunding platform, venture capital fund, investment bank, or SEBI-registered broker-dealer.</li>
-                <li><strong className="text-[var(--text)]">No Transaction Processing:</strong> OASIS ONE does not process investment money, hold escrow funds, or broker equity agreements.</li>
+                <li><strong className="text-[var(--text)]">No Transaction Processing:</strong> OASIS does not process investment money, hold escrow funds, or broker equity agreements.</li>
                 <li><strong className="text-[var(--text)]">Informational Guidance Only:</strong> All advice, discussions, and mentorship feedback on the platform are provided solely for peer-learning and do not constitute formal legal, financial, or tax counsel.</li>
               </ul>
             </div>
@@ -104,7 +104,7 @@ export default function TermsOfServicePage() {
           <div className="space-y-3 text-xs sm:text-sm">
             <h3 className="font-semibold text-[var(--text)]">3.1 Mandatory Minimum Age (18+ Years)</h3>
             <p>
-              Access to and membership in OASIS ONE is strictly restricted to natural persons who are <strong>18 years of age or older</strong> and legally competent to enter into a contract under Section 11 of the Indian Contract Act, 1872. Accounts registered by individuals under 18 will be immediately terminated.
+              Access to and membership in OASIS is strictly restricted to natural persons who are <strong>18 years of age or older</strong> and legally competent to enter into a contract under Section 11 of the Indian Contract Act, 1872. Accounts registered by individuals under 18 will be immediately terminated.
             </p>
 
             <h3 className="font-semibold text-[var(--text)] pt-2">3.2 Primary Role Selection</h3>
@@ -139,7 +139,7 @@ export default function TermsOfServicePage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              OASIS ONE is a vetted community. Completing registration places your account in a <strong>Locked State</strong> (<code className="font-mono text-xs">pending_approval</code>).
+              OASIS is a vetted community. Completing registration places your account in a <strong>Locked State</strong> (<code className="font-mono text-xs">pending_approval</code>).
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-[var(--muted)]">
               <li>While locked, you can view your application timeline, copy your reference UUID, and message reviewing admins. All member directories, posts, and event links return HTTP 403.</li>
@@ -266,7 +266,7 @@ export default function TermsOfServicePage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              These Terms are governed by and construed in accordance with the laws of the <strong>Republic of India</strong>. All disputes arising from or related to OASIS ONE are subject to the exclusive jurisdiction of the competent courts in <strong>Bhubaneswar, Odisha, India</strong>.
+              These Terms are governed by and construed in accordance with the laws of the <strong>Republic of India</strong>. All disputes arising from or related to OASIS are subject to the exclusive jurisdiction of the competent courts in <strong>Bhubaneswar, Odisha, India</strong>.
             </p>
           </div>
         </section>

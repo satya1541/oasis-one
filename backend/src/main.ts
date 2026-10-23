@@ -78,7 +78,7 @@ async function bootstrap() {
   // Swagger OpenAPI (Disabled in production)
   if (!isProd) {
     const config = new DocumentBuilder()
-      .setTitle('OASIS ONE API')
+      .setTitle('OASIS API')
       .setDescription('Admin-approved portal for Odisha entrepreneur community (650+ members)')
       .setVersion('1.0')
       .addCookieAuth('oasis_sid')
@@ -89,7 +89,7 @@ async function bootstrap() {
   }
 
   await app.listen(port);
-  logger.log(`OASIS ONE Backend API running on http://localhost:${port}/api/v1`);
+  logger.log(`OASIS Backend API running on http://localhost:${port}/api/v1`);
 }
 
 bootstrap().catch((err) => {

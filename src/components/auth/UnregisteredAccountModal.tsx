@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { X, ShieldCheck } from "lucide-react";
 
 interface UnregisteredAccountModalProps {
@@ -64,17 +65,15 @@ export function UnregisteredAccountModal({
         {/* Top Brand Mark / Astrolabe Emblem */}
         <div className="flex justify-center items-center pt-1">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-[#88DECC]/20 blur-xl" />
-            <div className="w-13 h-13 rounded-2xl bg-[#030909] border border-[#88DECC]/30 flex items-center justify-center shadow-[0_0_20px_rgba(136,222,204,0.2)] relative p-2">
-              <svg viewBox="0 0 46 46" width="34" height="34" fill="none" stroke="#7CC6B5" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M24.2 37V24" />
-                <path d="M19.8 39.3c1.2-1.9 2.8-2.7 4.4-2.7s3.2.8 4.4 2.7" />
-                <path d="M23.8 30.2c-2.8-.6-5.5-2.6-7.2-5-2-1.8-5.2-2-7-4.2-1.4-1.8-1.4-4.2 0-6 2-3 5.8-5.2 8.8-6.2 1.4-.5 2.8-1 4.2-1.3" />
-                <path d="M14.8 23V13.2c0-1.4.8-2.6 2.4-3.4" />
-                <path d="M24 24.2c-1.8-1.8-3.2-3.8-3.7-6.4-.5-2.6-.6-5.2-.3-7.2" />
-                <path d="M24.3 23.2c1.5-3 3.5-6.4 4.3-10.2.4-2.6 1.2-4.1 2.8-4.3H35" />
-                <path d="M24.6 25.7c3-.7 5.8-2.1 7.4-4.5 1.2-1.8 1.4-3.8 2.8-5.2 1.4-1.4 3.2-2.1 5.2-2.4" />
-              </svg>
+            <div className="absolute inset-0 rounded-full bg-[#F3D3A2]/20 blur-xl" />
+            <div className="w-13 h-13 rounded-2xl bg-[#030909] border border-[#F3D3A2]/30 flex items-center justify-center shadow-[0_0_20px_rgba(243,211,162,0.2)] relative p-2 overflow-hidden">
+              <Image
+                src="/brand/oasis-mark.png"
+                alt="OASIS Official Logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(243,211,162,0.4)]"
+              />
             </div>
           </div>
         </div>

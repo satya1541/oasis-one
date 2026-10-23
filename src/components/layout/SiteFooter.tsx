@@ -25,7 +25,7 @@ export function SiteFooter() {
           <div className="lg:col-span-4 space-y-4">
             <BrandLockup variant="full" href="/" />
             <p className="text-xs sm:text-sm text-[#FCF6E3]/70 leading-relaxed max-w-sm pt-1">
-              OASIS ONE is the admin-approved, role-aware digital sanctuary for 650+ aspiring entrepreneurs, startup founders, and mentors across Odisha.
+              OASIS is the admin-approved, role-aware digital sanctuary for 650+ aspiring entrepreneurs, startup founders, and mentors across Odisha.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-2">
@@ -104,7 +104,7 @@ export function SiteFooter() {
               <li>
                 <Link href="/legal/privacy" className="hover:text-[#D4AF37] transition-colors inline-flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-[#D4AF37]/70" />
-                  <span>Privacy Notice (DPDP Act)</span>
+                  <span>Privacy Policy &amp; DPDP Notice</span>
                 </Link>
               </li>
               <li>
@@ -171,7 +171,7 @@ export function SiteFooter() {
         {/* ── Sub-Footer Bar ───────────────────────────────────────── */}
         <div className="pt-8 border-t border-[#D4AF37]/15 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#FCF6E3]/50">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-center md:text-left text-[11px]">
-            <span>© 2026 OASIS ONE. All rights reserved.</span>
+            <span>© 2026 OASIS. All rights reserved.</span>
             <span className="hidden sm:inline">·</span>
             <span>Digital Personal Data Protection Act, 2023 (DPDP Act) Compliant</span>
             <span className="hidden sm:inline">·</span>

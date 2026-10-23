@@ -133,7 +133,7 @@ function PersonProfileContent({
       <MemberShell>
         <div className="max-w-2xl mx-auto py-12 text-center space-y-4">
           <h2 className="font-display text-xl text-[var(--text)]">Profile Not Found</h2>
-          <p className="text-xs text-[var(--muted)]">The requested member profile could not be located in OASIS ONE.</p>
+          <p className="text-xs text-[var(--muted)]">The requested member profile could not be located in OASIS.</p>
           <Link href="/people">
             <Button size="sm" variant="outline">
               ← Return to Directory

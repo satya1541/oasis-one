@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Cookie, Clock, ShieldCheck, Zap, Lock, Database, CheckCircle2, ShieldAlert } from "lucide-react";
 
 export const metadata = {
-  title: "Platform Operations, Backup & Cookie Policy · OASIS ONE",
-  description: "Strictly necessary cookie schedule, zero third-party ad tracking, server rate limits, and file security standards for OASIS ONE.",
+  title: "Platform Operations, Backup & Cookie Policy · OASIS",
+  description: "Strictly necessary cookie schedule, zero third-party ad tracking, server rate limits, and file security standards for OASIS.",
 };
 
 const COOKIE_SCHEDULE = [
@@ -71,10 +71,10 @@ export default function OperationsAndCookiePolicyPage() {
           </span>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS ONE — Platform Operations, Backup &amp; Cookie Policy
+          OASIS — Platform Operations, Backup &amp; Cookie Policy
         </h1>
         <p className="text-sm text-[var(--muted)] leading-relaxed">
-          Operational specifications, strictly necessary cookie schedules, server rate limits, and ClamAV antivirus file security standards for the OASIS ONE infrastructure.
+          Operational specifications, strictly necessary cookie schedules, server rate limits, and ClamAV antivirus file security standards for the OASIS infrastructure.
         </p>
       </div>
 
@@ -85,7 +85,7 @@ export default function OperationsAndCookiePolicyPage() {
           <span>Strict Zero-Tracking Commitment</span>
         </div>
         <p className="text-[var(--text)]/90 leading-relaxed">
-          OASIS ONE uses <strong>only strictly necessary first-party cookies</strong> required to securely authenticate your session and prevent CSRF forgery. We do not use third-party advertising cookies, cross-site tracking pixels, or marketing analytics scripts, and we never store session credentials in browser <code className="font-mono text-[11px]">localStorage</code>.
+          OASIS uses <strong>only strictly necessary first-party cookies</strong> required to securely authenticate your session and prevent CSRF forgery. We do not use third-party advertising cookies, cross-site tracking pixels, or marketing analytics scripts, and we never store session credentials in browser <code className="font-mono text-[11px]">localStorage</code>.
         </p>
       </div>
 
@@ -124,7 +124,7 @@ export default function OperationsAndCookiePolicyPage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              To protect the community against brute-force attacks, directory scraping, and API abuse, OASIS ONE enforces automated rate limits returning HTTP 429 Too Many Requests:
+              To protect the community against brute-force attacks, directory scraping, and API abuse, OASIS enforces automated rate limits returning HTTP 429 Too Many Requests:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
               {RATE_LIMITS.map((rl, i) => (
@@ -146,7 +146,7 @@ export default function OperationsAndCookiePolicyPage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              Every file uploaded to OASIS ONE is validated against MIME types and binary magic bytes, scanned by ClamAV antivirus, and stored in private S3 buckets with server-side encryption (AES256):
+              Every file uploaded to OASIS is validated against MIME types and binary magic bytes, scanned by ClamAV antivirus, and stored in private S3 buckets with server-side encryption (AES256):
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">

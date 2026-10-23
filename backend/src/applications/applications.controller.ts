@@ -38,6 +38,14 @@ export class ApplicationsController {
     return this.applicationsService.sendMyMessage(userId, body?.body || '', body?.attachments);
   }
 
+  @Post('documents')
+  async uploadMyDocument(
+    @CurrentUser('id') userId: string,
+    @Body('fileId') fileId: string,
+  ) {
+    return this.applicationsService.attachDocument(userId, fileId);
+  }
+
   @Post('withdraw')
   async withdrawMyApplication(@CurrentUser('id') userId: string) {
     return this.applicationsService.withdrawMyApplication(userId);

@@ -4,8 +4,8 @@ import { HelpCircle, ArrowLeft, MessageCircle, ShieldCheck, Lock, Users, Sparkle
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export const metadata = {
-  title: "Frequently Asked Questions & Member Migration FAQ · OASIS ONE",
-  description: "Official questions, answers, and WhatsApp pre-launch member migration guide for Odisha's 650+ startup founders and mentors on OASIS ONE.",
+  title: "Frequently Asked Questions & Member Migration FAQ · OASIS",
+  description: "Official questions, answers, and WhatsApp pre-launch member migration guide for Odisha's 650+ startup founders and mentors on OASIS.",
 };
 
 const FAQ_SECTIONS = [
@@ -14,8 +14,8 @@ const FAQ_SECTIONS = [
     icon: Users,
     items: [
       {
-        q: "Who is eligible to join OASIS ONE?",
-        a: "OASIS ONE welcomes natural persons who are 18 years of age or older and actively participating in or supporting Odisha's entrepreneurial ecosystem as an Aspiring Entrepreneur, Startup Founder / Co-Founder, or Mentor / Advisor. Every application is reviewed by our administration team to maintain high trust and peer relevance.",
+        q: "Who is eligible to join OASIS?",
+        a: "OASIS welcomes natural persons who are 18 years of age or older and actively participating in or supporting Odisha's entrepreneurial ecosystem as an Aspiring Entrepreneur, Startup Founder / Co-Founder, or Mentor / Advisor. Every application is reviewed by our administration team to maintain high trust and peer relevance.",
       },
       {
         q: "Why is my dashboard locked immediately after signing up?",
@@ -36,12 +36,12 @@ const FAQ_SECTIONS = [
     icon: MessageCircle,
     items: [
       {
-        q: "Why did OASIS launch OASIS ONE, and are our WhatsApp groups closing?",
-        a: "No, our WhatsApp groups are not closing! WhatsApp remains a great space for quick, informal chat. However, with 650+ members, important questions, mentor introductions, startup profiles, and event RSVPs quickly get lost in chat scroll. OASIS ONE is our permanent, searchable home for member profiles, structured Q&A, mentor connections, event registrations, and 24-hour achievements.",
+        q: "Why did OASIS launch OASIS, and are our WhatsApp groups closing?",
+        a: "No, our WhatsApp groups are not closing! WhatsApp remains a great space for quick, informal chat. However, with 650+ members, important questions, mentor introductions, startup profiles, and event RSVPs quickly get lost in chat scroll. OASIS is our permanent, searchable home for member profiles, structured Q&A, mentor connections, event registrations, and 24-hour achievements.",
       },
       {
         q: "I am already in the OASIS WhatsApp community. How do I join without waiting for approval?",
-        a: "We have imported our pre-launch member list into OASIS ONE. Check your email for an invitation from OASIS ONE containing your personal /invite/[token] link (valid for 14 days). Clicking that link opens a pre-filled form and activates your account immediately—no approval wait required. If your 14-day link has expired, simply sign up at /join using the same email address, and our system will automatically flag your application for Expedited 24-Hour Approval.",
+        a: "We have imported our pre-launch member list into OASIS. Check your email for an invitation from OASIS containing your personal /invite/[token] link (valid for 14 days). Clicking that link opens a pre-filled form and activates your account immediately—no approval wait required. If your 14-day link has expired, simply sign up at /join using the same email address, and our system will automatically flag your application for Expedited 24-Hour Approval.",
       },
     ],
   },
@@ -105,7 +105,7 @@ export default function FaqPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-sm text-[var(--muted)] leading-relaxed max-w-2xl">
-            Everything you need to know about joining OASIS ONE, our WhatsApp pre-launch member migration,
+            Everything you need to know about joining OASIS, our WhatsApp pre-launch member migration,
             privacy guarantees, mentor requests, and community governance.
           </p>
         </div>

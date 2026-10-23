@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Users, Clock, ShieldAlert, CheckCircle2, AlertOctagon, HelpCircle, DollarSign, Ban } from "lucide-react";
 
 export const metadata = {
-  title: "Community Guidelines & Content Policy · OASIS ONE",
-  description: "Code of conduct, content policies, 24h achievement rules, and mandatory zero-tolerance policy against fraudulent fundraising for OASIS ONE.",
+  title: "Community Guidelines & Content Policy · OASIS",
+  description: "Code of conduct, content policies, 24h achievement rules, and mandatory zero-tolerance policy against fraudulent fundraising for OASIS.",
 };
 
 export default function CommunityGuidelinesPage() {
@@ -22,7 +22,7 @@ export default function CommunityGuidelinesPage() {
           </span>
         </div>
         <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS ONE — Community Guidelines &amp; Content Policy
+          OASIS — Community Guidelines &amp; Content Policy
         </h1>
         <p className="text-sm text-[var(--muted)] leading-relaxed">
           The code of conduct, discussion standards, and mandatory content &amp; investor solicitation rules (PRD §21.2) for Odisha&rsquo;s 650+ startup builders.
@@ -30,7 +30,7 @@ export default function CommunityGuidelinesPage() {
 
         {/* Quick Identity Box */}
         <div className="mt-4 p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs grid grid-cols-1 sm:grid-cols-2 gap-2 text-[var(--muted)]">
-          <div><strong className="text-[var(--text)]">Platform:</strong> OASIS ONE</div>
+          <div><strong className="text-[var(--text)]">Platform:</strong> OASIS</div>
           <div><strong className="text-[var(--text)]">Community Size:</strong> 650+ Vetted Builders</div>
           <div><strong className="text-[var(--text)]">Contact:</strong> Info@oasisodisha.in</div>
           <div><strong className="text-[var(--text)]">Phone:</strong> +91-904-01-98-628</div>
@@ -48,7 +48,7 @@ export default function CommunityGuidelinesPage() {
           </h2>
           <div className="space-y-3 text-xs sm:text-sm">
             <p>
-              OASIS ONE is designed as a sanctuary for builders. Our culture is defined by authentic curiosity, generosity of knowledge, and mutual respect among founders, researchers, and mentors across Odisha (Bhubaneswar, Cuttack, Rourkela, Sambalpur, Berhampur).
+              OASIS is designed as a sanctuary for builders. Our culture is defined by authentic curiosity, generosity of knowledge, and mutual respect among founders, researchers, and mentors across Odisha (Bhubaneswar, Cuttack, Rourkela, Sambalpur, Berhampur).
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
@@ -166,7 +166,7 @@ export default function CommunityGuidelinesPage() {
               <span>Mandatory Zero-Tolerance Financial Fraud Policy</span>
             </div>
             <p className="text-[var(--text)]/90 leading-relaxed">
-              Because entrepreneurs frequently seek capital and grants on OASIS ONE, we enforce a strict <strong>zero-tolerance policy</strong> against fraudulent funding schemes, improper solicitation, and deceptive financial promotions:
+              Because entrepreneurs frequently seek capital and grants on OASIS, we enforce a strict <strong>zero-tolerance policy</strong> against fraudulent funding schemes, improper solicitation, and deceptive financial promotions:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-[var(--muted)]">
               <li><strong className="text-[var(--text)]">No Guaranteed Returns or Crypto Schemes:</strong> Members must never solicit investments offering guaranteed yields, unregistered equity crowdfunding, or speculative token offerings.</li>

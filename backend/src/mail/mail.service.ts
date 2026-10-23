@@ -26,7 +26,7 @@ export class MailService {
   ) {
     const transport = this.configService.get<string>('mail.transport') || 'console';
     this.isConsole = transport === 'console';
-    this.from = this.configService.get<string>('mail.from') || 'OASIS ONE <no-reply@oasisodisha.in>';
+    this.from = this.configService.get<string>('mail.from') || 'OASIS <no-reply@oasisodisha.in>';
     this.logoUrl = this.configService.get<string>('mail.logoUrl') || 'https://oasisodisha.in/brand/oasis-logo-email.png';
 
     if (!this.isConsole) {
@@ -141,7 +141,7 @@ ${text}
               <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td>
-                    <span style="color: #E9C68C; font-size: 20px; font-weight: 700; letter-spacing: 0.05em; font-family: 'Jost', sans-serif;">OASIS ONE</span>
+                    <span style="color: #E9C68C; font-size: 20px; font-weight: 700; letter-spacing: 0.05em; font-family: 'Jost', sans-serif;">OASIS</span>
                   </td>
                   <td align="right">
                     <span style="color: #9DA3B4; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">Community Portal</span>
@@ -175,7 +175,7 @@ ${text}
           <tr>
             <td bgcolor="#F5F0E4" style="padding: 20px 32px; text-align: center; color: #686B82; font-size: 12px;">
               <p style="margin: 0 0 4px 0; font-weight: 600; color: #1E1F33;">Odisha · Startup Community</p>
-              <p style="margin: 0;">OASIS ONE Portal · Private Network for Founders & Mentors</p>
+              <p style="margin: 0;">OASIS Portal · Private Network for Founders & Mentors</p>
             </td>
           </tr>
         </table>
@@ -192,7 +192,7 @@ ${text}
     if (options.actionUrl && options.actionText) {
       text += `${options.actionText}: ${options.actionUrl}\n\n`;
     }
-    text += `Odisha · Startup Community\nOASIS ONE Portal`;
+    text += `Odisha · Startup Community\nOASIS Portal`;
     return text;
   }
 }

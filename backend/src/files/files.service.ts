@@ -83,19 +83,19 @@ export class FilesService {
   async uploadFile(
     file: Express.Multer.File,
     purpose: FilePurpose,
-    userId: string,
+    userId: string | null,
   ): Promise<UploadedFile> {
     const { detectedExt, detectedMime } = this.validateBuffer(file.buffer, purpose);
     const sha256 = crypto.createHash('sha256').update(file.buffer).digest('hex');
     const fileId = uuidv4();
-    const storageKey = `uploads/${purpose}/${userId}/${fileId}.${detectedExt}`;
+    const storageKey = `uploads/${purpose}/${userId || 'unregistered'}/${fileId}.${detectedExt}`;
 
     await this.storage.putObject(storageKey, file.buffer, detectedMime);
 
     return this.prisma.uploadedFile.create({
       data: {
         id: fileId,
-        ownerId: userId,
+        ownerId: userId || null,
         purpose,
         filename: file.originalname,
         storageKey,
