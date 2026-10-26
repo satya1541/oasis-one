@@ -690,16 +690,16 @@
       <!-- Desktop Nav Pill (Top Right of Center) -->
       <nav class="nav-pill" aria-label="Main Navigation">
         <ul class="nav-links">
-          <li><a href="#membership" class="nav-link">Who it's for</a></li>
+          <li><a href="/who-its-for" class="nav-link">Who it's for</a></li>
           <li>
-            <a href="#how-it-works" class="nav-link current" aria-current="page">
+            <a href="/admission" class="nav-link">
               <span>Admission</span>
               <svg class="nav-chevron" viewBox="0 0 11 6" fill="none" stroke-width="1.4">
                 <path d="M.7.7 5.5 5.3 10.3.7" />
               </svg>
             </a>
           </li>
-          <li><a href="#sanctuary" class="nav-link">Experience</a></li>
+          <li><a href="/experience" class="nav-link">Experience</a></li>
           <li><a href="/login" class="nav-link">Log in</a></li>
         </ul>
         <a href="/join" class="partner-pill">
@@ -728,9 +728,9 @@
     <!-- Mobile Navigation Panel -->
     <div class="mobile-nav-panel" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
       <ul class="mobile-links">
-        <li><a href="#membership">Who it's for</a></li>
-        <li><a href="#how-it-works" class="current">Admission Protocol</a></li>
-        <li><a href="#sanctuary">Sanctuary Experience</a></li>
+        <li><a href="/who-its-for">Who it's for</a></li>
+        <li><a href="/admission">Admission Protocol</a></li>
+        <li><a href="/experience">Sanctuary Experience</a></li>
         <li><a href="/login">Member Portal Sign In</a></li>
         <li><a href="/join">Apply to Join</a></li>
       </ul>
@@ -1038,6 +1038,16 @@
           });
         });
       }
+
+      // Seamless redirect for users landing on or clicking legacy hash URLs
+      function handleHashRouting() {
+        var hash = window.location.hash;
+        if (hash === '#membership') window.location.href = '/who-its-for';
+        else if (hash === '#how-it-works') window.location.href = '/admission';
+        else if (hash === '#sanctuary') window.location.href = '/experience';
+      }
+      handleHashRouting();
+      window.addEventListener('hashchange', handleHashRouting);
     })();
   </script>
 </body>

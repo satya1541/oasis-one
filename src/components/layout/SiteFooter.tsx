@@ -50,29 +50,29 @@ export function SiteFooter() {
             </h4>
             <ul className="space-y-2.5 text-xs text-[#FCF6E3]/75">
               <li>
-                <Link href="/join" className="hover:text-[#D4AF37] transition-colors inline-flex items-center gap-1">
+                <Link href="/who-its-for" className="hover:text-[#D4AF37] transition-colors">
+                  Who it's for
+                </Link>
+              </li>
+              <li>
+                <Link href="/experience" className="hover:text-[#D4AF37] transition-colors">
+                  Sanctuary Experience
+                </Link>
+              </li>
+              <li>
+                <Link href="/admission" className="hover:text-[#D4AF37] transition-colors">
+                  Admission Protocol
+                </Link>
+              </li>
+              <li>
+                <Link href="/join" className="hover:text-[#D4AF37] transition-colors inline-flex items-center gap-1 font-medium text-[#D4AF37]">
                   <span>Apply to Join</span>
-                  <ArrowUpRight className="w-3 h-3 text-[#D4AF37]/60" />
+                  <ArrowUpRight className="w-3 h-3 text-[#D4AF37]" />
                 </Link>
               </li>
               <li>
                 <Link href="/login" className="hover:text-[#D4AF37] transition-colors">
                   Member Sign In
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-[#D4AF37] transition-colors">
-                  Community Portal
-                </Link>
-              </li>
-              <li>
-                <Link href="/people" className="hover:text-[#D4AF37] transition-colors">
-                  Founders &amp; Mentors
-                </Link>
-              </li>
-              <li>
-                <Link href="/events" className="hover:text-[#D4AF37] transition-colors">
-                  Events &amp; Roundtables
                 </Link>
               </li>
               <li>

@@ -54,28 +54,28 @@ export default function LandingPage() {
           {/* Desktop & Tablet Navigation */}
           <nav className="hidden md:flex items-center gap-5 lg:gap-7">
             <Link
-              href="#membership"
+              href="/who-its-for"
               className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Who it's for
             </Link>
             <Link
-              href="#features"
-              className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
-            >
-              Platform Features
-            </Link>
-            <Link
-              href="#sanctuary"
+              href="/experience"
               className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Experience
             </Link>
             <Link
-              href="#how-it-works"
+              href="/admission"
               className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
             >
               Admission
+            </Link>
+            <Link
+              href="/faq"
+              className="text-xs uppercase tracking-[0.16em] font-medium text-[var(--brand-cream)]/70 hover:text-[var(--brand-gold)] transition-colors duration-200"
+            >
+              FAQ
             </Link>
             <Link
               href="#data-transparency"
@@ -147,32 +147,32 @@ export default function LandingPage() {
 
           <div className="flex flex-col space-y-3 py-6 text-sm font-medium">
             <Link
-              href="#membership"
+              href="/who-its-for"
               onClick={() => setMobileMenuOpen(false)}
               className="p-2.5 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
             >
               Who it's for
             </Link>
             <Link
-              href="#features"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2.5 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
-            >
-              Platform Features &amp; Capabilities
-            </Link>
-            <Link
-              href="#sanctuary"
+              href="/experience"
               onClick={() => setMobileMenuOpen(false)}
               className="p-2.5 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
             >
               Sanctuary Experience
             </Link>
             <Link
-              href="#how-it-works"
+              href="/admission"
               onClick={() => setMobileMenuOpen(false)}
               className="p-2.5 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
             >
               Admission Protocol
+            </Link>
+            <Link
+              href="/faq"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2.5 rounded-xl hover:bg-white/5 text-[var(--brand-cream)]/90"
+            >
+              Frequently Asked Questions
             </Link>
             <Link
               href="#data-transparency"

@@ -9,6 +9,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: [
           "/",
+          "/who-its-for",
+          "/experience",
+          "/admission",
           "/faq",
           "/contact",
           "/legal",
@@ -46,12 +49,12 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: "GPTBot",
-        allow: ["/", "/faq", "/legal", "/legal/*", "/join"],
+        allow: ["/", "/who-its-for", "/experience", "/admission", "/faq", "/legal", "/legal/*", "/join"],
         disallow: ["/admin/*", "/api/*", "/dashboard/*", "/community/*", "/people/*"],
       },
       {
         userAgent: "PerplexityBot",
-        allow: ["/", "/faq", "/legal", "/legal/*", "/join"],
+        allow: ["/", "/who-its-for", "/experience", "/admission", "/faq", "/legal", "/legal/*", "/join"],
         disallow: ["/admin/*", "/api/*", "/dashboard/*", "/community/*", "/people/*"],
       },
     ],
