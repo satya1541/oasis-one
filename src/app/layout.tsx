@@ -23,6 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+import { JsonLd } from "@/components/seo/JsonLd";
+
 export const viewport: Viewport = {
   themeColor: "#1E1F33",
   width: "device-width",
@@ -33,9 +35,34 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://oasisodisha.in"),
-  title: "OASIS — One Community. Infinite Possibilities.",
+  title: {
+    default: "OASIS — Odisha's Premier Startup & Entrepreneurship Community",
+    template: "%s | OASIS Odisha",
+  },
   description:
-    "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. Find the right people, ask better questions, meet in person. 650+ verified members.",
+    "A vetted, members-only ecosystem connecting 650+ aspiring entrepreneurs, startup founders, and mentors in Odisha. Find co-founders, get mentored, and scale your venture.",
+  applicationName: "OASIS",
+  keywords: [
+    "OASIS Odisha",
+    "Odisha Startups",
+    "Bhubaneswar Startup Founders",
+    "Odisha Entrepreneurship Network",
+    "Startup Mentorship Odisha",
+    "Startup Odisha Policy Grants",
+    "Angel Investors Odisha",
+    "Odisha Tech Founders",
+    "Make in Odisha Startups",
+    "Cuttack Rourkela Entrepreneurs",
+    "Odisha Angel Network",
+    "Early Stage Founders India",
+  ],
+  authors: [{ name: "OASIS Community", url: "https://oasisodisha.in" }],
+  creator: "OASIS Community Foundation",
+  publisher: "OASIS",
+  category: "technology",
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: [
       { url: "/brand/favicon-16.png", sizes: "16x16", type: "image/png" },
@@ -48,9 +75,13 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   openGraph: {
-    title: "OASIS — One Community. Infinite Possibilities.",
+    type: "website",
+    locale: "en_IN",
+    url: "https://oasisodisha.in",
+    siteName: "OASIS — Odisha Startup Network",
+    title: "OASIS — Odisha's Premier Startup & Entrepreneurship Community",
     description:
-      "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. 650+ verified members.",
+      "A vetted, members-only ecosystem connecting 650+ aspiring entrepreneurs, startup founders, and mentors in Odisha.",
     images: [
       {
         url: "/brand/og-image.png",
@@ -59,14 +90,26 @@ export const metadata: Metadata = {
         alt: "OASIS — Odisha Startup Community",
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OASIS — One Community. Infinite Possibilities.",
+    site: "@oasisodisha",
+    creator: "@oasisodisha",
+    title: "OASIS — Odisha's Premier Startup & Entrepreneurship Community",
     description:
-      "A members-only home for Odisha's aspiring entrepreneurs, founders and mentors. 650+ verified members.",
+      "A vetted, members-only ecosystem connecting 650+ aspiring entrepreneurs, startup founders, and mentors in Odisha.",
     images: ["/brand/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -80,6 +123,9 @@ export default function RootLayout({
       lang="en"
       className={`${jost.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <JsonLd />
+      </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--bg)] text-[var(--text)]">
         {children}
       </body>

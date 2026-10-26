@@ -4,8 +4,27 @@ import { HelpCircle, ArrowLeft, MessageCircle, ShieldCheck, Lock, Users, Sparkle
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export const metadata = {
-  title: "Frequently Asked Questions & Member Migration FAQ · OASIS",
-  description: "Official questions, answers, and WhatsApp pre-launch member migration guide for Odisha's 650+ startup founders and mentors on OASIS.",
+  title: "Frequently Asked Questions & Member Migration FAQ",
+  description:
+    "Official questions, answers, and WhatsApp pre-launch member migration guide for Odisha's 650+ startup founders and mentors on OASIS.",
+  alternates: {
+    canonical: "/faq",
+  },
+  keywords: [
+    "OASIS FAQ",
+    "Odisha Startup FAQ",
+    "Join OASIS Odisha",
+    "Odisha Founder Community",
+    "Startup Odisha Mentorship",
+    "WhatsApp community migration OASIS",
+  ],
+  openGraph: {
+    title: "Frequently Asked Questions & Member Migration FAQ · OASIS",
+    description:
+      "Official questions, answers, and WhatsApp pre-launch member migration guide for Odisha's 650+ startup founders and mentors on OASIS.",
+    url: "https://oasisodisha.in/faq",
+    type: "website",
+  },
 };
 
 const FAQ_SECTIONS = [
@@ -96,6 +115,27 @@ export default function FaqPage() {
 
       {/* ── Document Body ─────────────────────────────────────── */}
       <main className="flex-1 w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 space-y-12">
+        {/* ── Schema.org FAQPage Structured Data ── */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ_SECTIONS.flatMap((sec) =>
+                sec.items.map((item) => ({
+                  "@type": "Question",
+                  name: item.q,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: item.a,
+                  },
+                }))
+              ),
+            }),
+          }}
+        />
+
         <div className="space-y-4 pb-8 border-b border-[var(--border)]">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-[var(--brand-gold)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--border)]">
             <HelpCircle className="w-3.5 h-3.5" />

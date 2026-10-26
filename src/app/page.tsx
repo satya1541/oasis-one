@@ -267,6 +267,7 @@ export default function LandingPage() {
               <span className="font-normal text-gold-gradient drop-shadow-[0_2px_12px_rgba(243,211,162,0.2)]">
                 Infinite Possibilities.
               </span>
+              <span className="sr-only"> — Odisha's Premier Startup, Founder &amp; Mentorship Community in Bhubaneswar</span>
             </h1>
 
             {/* Cinematic Subtitle describing the brand & purpose */}
