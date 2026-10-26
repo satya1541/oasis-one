@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import {
   Shield,
   ShieldCheck,
@@ -16,7 +15,6 @@ import {
   UserX,
   X,
   Lock,
-  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,18 +35,12 @@ export default function AdminUsersPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserLevel, setCurrentUserLevel] = useState<string | null>(null);
 
-  // Invite / Promote Modal State
+  // Provision Modal State (Super Admin Only)
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
-  const [inviteRole, setInviteRole] = useState<"super_admin" | "moderator">("moderator");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-
-  // Edit / Revoke Modal State
-  const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
-  const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
-  const [newRole, setNewRole] = useState<"super_admin" | "moderator">("moderator");
 
   const fetchAdminsAndMe = async () => {
     try {
@@ -97,7 +89,7 @@ export default function AdminUsersPage() {
         body: JSON.stringify({
           email: inviteEmail.trim().toLowerCase(),
           name: inviteName.trim(),
-          adminLevel: inviteRole,
+          adminLevel: "super_admin",
         }),
       });
 
@@ -105,53 +97,50 @@ export default function AdminUsersPage() {
       if (!res.ok) {
         setFeedback({
           type: "error",
-          message: json.error?.message || "Failed to grant admin privileges",
+          message: json.error?.message || "Failed to grant Super Administrator privileges",
         });
         return;
       }
 
       setFeedback({
         type: "success",
-        message: `Administrative credentials generated for ${inviteEmail}. Setup link dispatched with mandatory MFA enrollment.`,
+        message: `Super Administrator credentials generated for ${inviteEmail}. Setup link dispatched with mandatory MFA enrollment.`,
       });
       setInviteModalOpen(false);
       setInviteEmail("");
       setInviteName("");
-      setInviteRole("moderator");
       await fetchAdminsAndMe();
       setTimeout(() => setFeedback(null), 7000);
     } catch (err: any) {
-      setFeedback({ type: "error", message: err.message || "Failed to grant administrator access" });
+      setFeedback({ type: "error", message: err.message || "Failed to grant Super Administrator access" });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleUpdateRole = async (targetAdmin: AdminUser, role: "super_admin" | "moderator") => {
+  const handlePromoteToSuperAdmin = async (targetAdmin: AdminUser) => {
     try {
       setSubmitting(true);
       const res = await fetch(`/api/v1/admin/admins/${targetAdmin.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminLevel: role }),
+        body: JSON.stringify({ adminLevel: "super_admin" }),
       });
 
       const json = await res.json();
       if (!res.ok) {
-        alert(json.error?.message || "Failed to update admin role");
+        alert(json.error?.message || "Failed to promote admin to Super Administrator");
         return;
       }
 
       setFeedback({
         type: "success",
-        message: `Updated role for ${targetAdmin.email} to ${role.replace("_", " ")}.`,
+        message: `Promoted ${targetAdmin.email} to Super Administrator.`,
       });
-      setRoleChangeModalOpen(false);
-      setSelectedAdmin(null);
       await fetchAdminsAndMe();
       setTimeout(() => setFeedback(null), 6000);
     } catch (err: any) {
-      alert(err.message || "Failed to update role");
+      alert(err.message || "Failed to promote role");
     } finally {
       setSubmitting(false);
     }
@@ -218,16 +207,16 @@ export default function AdminUsersPage() {
             </span>
           </div>
           <p className="text-xs text-[#A9A7C4] mt-1">
-            Provision console access, delegate moderation roles, and enforce security policies.
+            Provision console access, manage Super Administrator credentials, and enforce security policies.
           </p>
         </div>
 
         <Button
           onClick={() => setInviteModalOpen(true)}
-          className="bg-[#D4AF37] hover:bg-[#c29f30] text-[#12131F] font-semibold text-xs flex items-center gap-2 rounded-xl"
+          className="bg-[#D4AF37] hover:bg-[#c29f30] text-[#12131F] font-semibold text-xs flex items-center gap-2 rounded-xl cursor-pointer shadow-md"
         >
           <UserPlus className="w-4 h-4" />
-          <span>Provision Administrator</span>
+          <span>Provision Super Administrator</span>
         </Button>
       </div>
 
@@ -241,39 +230,27 @@ export default function AdminUsersPage() {
           )}
         >
           {feedback.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
           ) : (
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
           )}
           <span>{feedback.message}</span>
         </div>
       )}
 
-      {/* Role Comparison Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4 bg-[#1E1F33] border-white/10">
-          <div className="flex items-center gap-2 text-[#F3D3A2] mb-1">
-            <ShieldCheck className="w-4 h-4" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Super Administrator</h3>
-          </div>
-          <p className="text-[11px] text-[#A9A7C4] leading-relaxed">
-            Full root authority. Manages legal document versions, committee users, settings, tag merges, member role overrides, account revocations/blacklists, and accesses raw immutable audit logs.
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-[#1E1F33] border-white/10">
-          <div className="flex items-center gap-2 text-indigo-300 mb-1">
-            <Shield className="w-4 h-4" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Moderator</h3>
-          </div>
-          <p className="text-[11px] text-[#A9A7C4] leading-relaxed">
-            Day-to-day operations. Reviews applications, moderates posts, replies, and achievements, issues initial member warnings and suspensions, manages community events, and reviews member profile change requests.
-          </p>
-        </Card>
-      </div>
+      {/* Role Authority Card */}
+      <Card className="p-4 bg-[#1E1F33] border-white/10 shadow-lg">
+        <div className="flex items-center gap-2 text-[#F3D3A2] mb-1">
+          <ShieldCheck className="w-4 h-4" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Super Administrator Authority</h3>
+        </div>
+        <p className="text-[11px] text-[#A9A7C4] leading-relaxed">
+          Full root authority. Manages legal document versions, committee users, admissions, system settings, tag merges, member role overrides, account revocations, and accesses raw immutable audit logs with mandatory hardware/TOTP MFA enforcement.
+        </p>
+      </Card>
 
       {/* Admins Table */}
-      <Card className="border-white/10 bg-[#1E1F33] overflow-hidden">
+      <Card className="border-white/10 bg-[#1E1F33] overflow-hidden shadow-lg">
         {loading ? (
           <div className="flex items-center justify-center p-16 text-xs text-[#A9A7C4] gap-2">
             <RotateCw className="w-4 h-4 animate-spin text-[#F3D3A2]" />
@@ -330,7 +307,7 @@ export default function AdminUsersPage() {
                               : "bg-indigo-950/60 text-indigo-300 border-indigo-800"
                           )}
                         >
-                          {isSuper ? <ShieldCheck className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                          <ShieldCheck className="w-3 h-3 text-[#F3D3A2]" />
                           <span>{admin.adminLevel.replace("_", " ")}</span>
                         </span>
                       </td>
@@ -359,24 +336,22 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedAdmin(admin);
-                              setNewRole(admin.adminLevel);
-                              setRoleChangeModalOpen(true);
-                            }}
-                            className="border-white/15 text-white hover:bg-white/5 text-[11px] h-8"
-                          >
-                            Change Role
-                          </Button>
+                          {!isSuper && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handlePromoteToSuperAdmin(admin)}
+                              className="border-[#D4AF37]/40 text-[#F3D3A2] hover:bg-[#D4AF37]/10 text-[11px] h-8 cursor-pointer"
+                            >
+                              Promote to Super Admin
+                            </Button>
+                          )}
                           {!isSelf && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleRevokeAdmin(admin)}
-                              className="border-rose-500/30 text-rose-300 hover:bg-rose-500/10 text-[11px] h-8"
+                              className="border-rose-500/30 text-rose-300 hover:bg-rose-500/10 text-[11px] h-8 cursor-pointer"
                             >
                               Revoke
                             </Button>
@@ -392,14 +367,14 @@ export default function AdminUsersPage() {
         )}
       </Card>
 
-      {/* ── Provision / Promote Admin Modal ── */}
+      {/* ── Provision Super Administrator Modal ── */}
       {inviteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
           <div className="w-full max-w-md bg-[#1E1F33] border border-white/15 rounded-2xl p-6 shadow-2xl relative text-left">
             <button
               type="button"
               onClick={() => setInviteModalOpen(false)}
-              className="absolute right-4 top-4 text-[#A9A7C4] hover:text-white"
+              className="absolute right-4 top-4 text-[#A9A7C4] hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -409,9 +384,9 @@ export default function AdminUsersPage() {
                 <UserPlus className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-display text-lg font-light text-white">Provision Administrator</h3>
+                <h3 className="font-display text-lg font-light text-white">Provision Super Administrator</h3>
                 <p className="text-[11px] text-[#A9A7C4]">
-                  Grants administrative authority and triggers mandatory MFA onboarding.
+                  Grants full Super Administrator root authority and triggers mandatory MFA onboarding.
                 </p>
               </div>
             </div>
@@ -452,34 +427,17 @@ export default function AdminUsersPage() {
                 <label className="block text-[11px] font-mono uppercase text-[#A9A7C4] mb-1">
                   Administrative Tier
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setInviteRole("moderator")}
-                    className={cn(
-                      "p-3 rounded-xl border text-left text-xs transition-colors",
-                      inviteRole === "moderator"
-                        ? "bg-indigo-950/60 border-indigo-500 text-white font-medium"
-                        : "bg-[#141522] border-white/10 text-[#A9A7C4] hover:text-white"
-                    )}
-                  >
-                    <div className="font-semibold text-indigo-300">Moderator</div>
-                    <div className="text-[10px] opacity-80 mt-0.5">Reviews queue &amp; posts</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setInviteRole("super_admin")}
-                    className={cn(
-                      "p-3 rounded-xl border text-left text-xs transition-colors",
-                      inviteRole === "super_admin"
-                        ? "bg-[#D4AF37]/20 border-[#D4AF37] text-white font-medium"
-                        : "bg-[#141522] border-white/10 text-[#A9A7C4] hover:text-white"
-                    )}
-                  >
-                    <div className="font-semibold text-[#F3D3A2]">Super Admin</div>
-                    <div className="text-[10px] opacity-80 mt-0.5">Full governance &amp; root</div>
-                  </button>
+                <div className="p-3.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-[#F3D3A2] shrink-0" />
+                    <div>
+                      <div className="font-semibold text-xs text-[#F3D3A2]">Super Administrator</div>
+                      <div className="text-[10px] text-[#A9A7C4] mt-0.5">Full root governance, committee credentialing, &amp; audit access</div>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-[#D4AF37]/20 text-[#F3D3A2] border border-[#D4AF37]/30 font-semibold shrink-0">
+                    Super Admin
+                  </span>
                 </div>
               </div>
 
@@ -488,80 +446,19 @@ export default function AdminUsersPage() {
                   type="button"
                   variant="outline"
                   onClick={() => setInviteModalOpen(false)}
-                  className="border-white/15 text-white hover:bg-white/5 text-xs"
+                  className="border-white/15 text-white hover:bg-white/5 text-xs cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#D4AF37] hover:bg-[#c29f30] text-[#12131F] font-semibold text-xs"
+                  className="bg-[#D4AF37] hover:bg-[#c29f30] text-[#12131F] font-semibold text-xs cursor-pointer"
                 >
-                  {submitting ? "Dispatching..." : "Send Admin Invitation"}
+                  {submitting ? "Dispatching..." : "Send Super Admin Invitation"}
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* ── Role Change Modal ── */}
-      {roleChangeModalOpen && selectedAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-sm bg-[#1E1F33] border border-white/15 rounded-2xl p-6 shadow-2xl relative text-left">
-            <button
-              type="button"
-              onClick={() => {
-                setRoleChangeModalOpen(false);
-                setSelectedAdmin(null);
-              }}
-              className="absolute right-4 top-4 text-[#A9A7C4] hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-display text-base font-light text-white mb-1">
-              Modify Administrative Role
-            </h3>
-            <p className="text-xs text-[#A9A7C4] mb-4">
-              Updating permissions for <strong className="text-white">{selectedAdmin.email}</strong>.
-            </p>
-
-            <div className="space-y-3">
-              <label className="block text-[11px] font-mono uppercase text-[#A9A7C4]">
-                Select New Role
-              </label>
-              <select
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value as any)}
-                className="w-full h-10 px-3 text-xs bg-[#141522] border border-white/15 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-              >
-                <option value="moderator">Moderator</option>
-                <option value="super_admin">Super Administrator</option>
-              </select>
-
-              <div className="pt-3 flex items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setRoleChangeModalOpen(false);
-                    setSelectedAdmin(null);
-                  }}
-                  className="border-white/15 text-white hover:bg-white/5 text-xs"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  disabled={submitting}
-                  onClick={() => handleUpdateRole(selectedAdmin, newRole)}
-                  className="bg-[#D4AF37] hover:bg-[#c29f30] text-[#12131F] font-semibold text-xs"
-                >
-                  {submitting ? "Updating..." : "Save Role"}
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       )}

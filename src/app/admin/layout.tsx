@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import Link from "next/link";
 import { GlassLogoPill } from "@/components/brand/GlassLogoPill";
 import { usePathname, useRouter } from "next/navigation";
 import { AstrolabeStar } from "@/components/brand/AstrolabeStar";
+import { subscribeToAdminCounts } from "@/lib/socket";
 import {
   LayoutDashboard,
   FileCheck2,
@@ -52,14 +53,48 @@ function AdminNavLinks({ adminLevel }: { adminLevel: string | null }) {
   const pathname = usePathname();
   const [counts, setCounts] = useState<Record<string, number>>({});
 
-  useEffect(() => {
-    fetch("/api/v1/admin/overview")
+  const refreshCounts = useCallback(() => {
+    fetch(`/api/v1/admin/overview?_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
         if (json?.data) setCounts(json.data);
       })
       .catch(() => {});
   }, []);
+
+  // Refresh counts on route change
+  useEffect(() => {
+    refreshCounts();
+  }, [pathname, refreshCounts]);
+
+  // Synchronize counts with real-time socket updates, custom DOM events, window focus & polling
+  useEffect(() => {
+    const unsubscribeSocket = subscribeToAdminCounts((payload) => {
+      setCounts((prev) => ({ ...prev, ...payload }));
+    });
+
+    const handleCustomUpdate = (e: any) => {
+      if (e?.detail) {
+        setCounts((prev) => ({ ...prev, ...e.detail }));
+      } else {
+        refreshCounts();
+      }
+    };
+
+    window.addEventListener("admin-counts-update", handleCustomUpdate);
+    window.addEventListener("focus", refreshCounts);
+    const interval = setInterval(refreshCounts, 10000);
+
+    return () => {
+      unsubscribeSocket();
+      window.removeEventListener("admin-counts-update", handleCustomUpdate);
+      window.removeEventListener("focus", refreshCounts);
+      clearInterval(interval);
+    };
+  }, [refreshCounts]);
 
   const visibleNav = adminNav.filter((item) => {
     if (item.superAdminOnly && adminLevel !== "super_admin") {
@@ -224,10 +259,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Desktop Admin Sidebar (Obsidian Glass) ─────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 min-h-screen sticky top-0">
-        <div>
+      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 h-screen h-[100dvh] max-h-screen sticky top-0 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-40">
+        <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-white/10 space-y-3">
+          <div className="p-4 border-b border-white/10 space-y-3 shrink-0">
             <GlassLogoPill href="/admin" badge="ADMIN" />
 
             <div className="flex items-center justify-between text-[10px] font-mono pt-1">
@@ -254,13 +289,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Navigation Items wrapped in Suspense */}
-          <Suspense fallback={<div className="p-3 space-y-1 h-64" />}>
-            <AdminNavLinks adminLevel={adminLevel} />
-          </Suspense>
+          <div className="flex-1 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <Suspense fallback={<div className="p-3 space-y-1 h-64" />}>
+              <AdminNavLinks adminLevel={adminLevel} />
+            </Suspense>
+          </div>
         </div>
 
         {/* System & Session Status with Sign Out */}
-        <div className="p-3.5 border-t border-white/10 space-y-2.5">
+        <div className="p-3.5 border-t border-white/10 space-y-2.5 shrink-0 sticky bottom-0 bg-[#070D12]/95 backdrop-blur-2xl z-10 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between text-[11px] text-[#ECF1EF]/70">
             <span className="font-medium text-xs">OASIS Governance</span>
             <span className="inline-flex items-center gap-1 text-[10px] text-[#88DECC] font-mono">

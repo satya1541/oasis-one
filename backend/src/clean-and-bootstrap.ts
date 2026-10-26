@@ -216,6 +216,25 @@ async function cleanAndBootstrap() {
   console.log('Backup Code: OASIS-ADMIN-2026');
   console.log('User ID:', superAdmin.id);
 
+  // Seed standard platform announcements
+  const now = new Date();
+  await prisma.announcement.create({
+    data: {
+      title: 'Odisha DeepTech Innovation Seed Grants 2026',
+      body: 'Applications are officially open for early-stage Odisha startups in Agritech, Clean Energy, and MedTech. Access matching grants up to ₹25 Lakhs.',
+      expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+      createdBy: superAdmin.id,
+    },
+  });
+  await prisma.announcement.create({
+    data: {
+      title: 'Welcome to Oasis One Cohort Alpha',
+      body: 'Founder directory and mentor networking are now fully live for all admitted community members.',
+      expiresAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+      createdBy: superAdmin.id,
+    },
+  });
+
   console.log('--- 6. VERIFYING ZERO FAKE ENTRIES IN DATABASE ---');
   const counts = {
     users: await prisma.user.count(),

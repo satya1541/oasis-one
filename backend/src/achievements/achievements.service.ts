@@ -14,13 +14,13 @@ export class AchievementsService {
 
   async getActiveAchievements() {
     const now = new Date();
-    // Read-time filtering: status = 'approved' and expiresAt > now
+    // Read-time filtering: status = 'approved' and (expiresAt > now or expiresAt is null)
     const achievements = await this.prisma.achievement.findMany({
       where: {
         status: AchievementStatus.approved,
-        expiresAt: { gt: now },
+        OR: [{ expiresAt: { gt: now } }, { expiresAt: null }],
       },
-      orderBy: { approvedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         author: {
           select: {
@@ -84,6 +84,9 @@ export class AchievementsService {
       mediaType = file.mimetype;
     }
 
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days active
+
     const achievement = await this.prisma.achievement.create({
       data: {
         authorId: userId,
@@ -91,7 +94,9 @@ export class AchievementsService {
         description: description.trim(),
         mediaUrl,
         mediaType,
-        status: AchievementStatus.pending_review,
+        status: AchievementStatus.approved, // Auto-approved immediately, no approval required
+        approvedAt: now,
+        expiresAt,
       },
     });
 

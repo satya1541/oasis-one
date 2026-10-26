@@ -24,14 +24,15 @@ export class EventsController {
     @Query('status') status?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @CurrentUser() user?: any,
+    @CurrentUser('id') viewerId?: string,
+    @CurrentUser('primaryRole') viewerRole?: string,
   ) {
     return this.eventsService.getEvents({
       status,
       page: page ? parseInt(page, 10) : 1,
       pageSize: pageSize ? parseInt(pageSize, 10) : 20,
-      viewerId: user.id,
-      viewerRole: user.primaryRole || 'none',
+      viewerId: viewerId || '',
+      viewerRole: viewerRole || 'none',
     });
   }
 

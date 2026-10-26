@@ -33,7 +33,7 @@ export function Badge({
         variant === "mentor" &&
           "bg-[var(--surface-2)] text-[var(--accent)] border border-[var(--accent)]/30",
         variant === "verified-mentor" &&
-          "bg-[var(--accent-fill)] text-[var(--brand-navy)] font-semibold shadow-2xs",
+          "bg-[#88DECC]/15 text-[#88DECC] border border-[#88DECC]/35 font-semibold shadow-[0_0_12px_rgba(136,222,204,0.2)]",
         variant === "primary" &&
           "bg-[var(--brand-gold)]/20 text-[var(--brand-gold)] border border-[var(--brand-gold)]/40 font-medium",
         // Semantic variants
@@ -60,7 +60,11 @@ export function Badge({
         />
       )}
       {variant === "verified-mentor" && (
-        <ShieldCheck className="w-3.5 h-3.5 text-[var(--brand-navy)]" />
+        <img
+          src="/verified.gif"
+          alt="Verified"
+          className="w-3.5 h-3.5 object-contain shrink-0 inline-block"
+        />
       )}
       {children}
     </span>

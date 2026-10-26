@@ -4,6 +4,7 @@ import { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
 import { MemberShell } from "@/components/layout/MemberShell";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import {
   ArrowLeft,
   Shield,
@@ -16,28 +17,41 @@ import {
   AlertCircle,
   Briefcase,
   RotateCw,
+  Mail,
+  Phone,
+  ExternalLink,
 } from "lucide-react";
 
 interface PersonDetail {
   id: string;
   name: string;
-  role: string;
+  role?: string;
+  primaryRole?: string;
   headline?: string;
   bio?: string;
   city?: string;
   state?: string;
+  profilePhotoUrl?: string | null;
   mentorVerified?: boolean;
   mentorAvailability?: string;
   email?: string;
   phone?: string;
   linkedinUrl?: string;
+  twitterUrl?: string;
   githubUrl?: string;
+  websiteUrl?: string;
   startup?: {
     name: string;
     industry?: string;
     stage?: string;
     productSummary?: string;
     website?: string;
+  };
+  viewer?: {
+    canConnect: boolean;
+    connectionStatus: "none" | "pending_out" | "pending_in" | "connected";
+    connectionId?: string | null;
+    isBlocked?: boolean;
   };
 }
 
@@ -58,31 +72,37 @@ function PersonProfileContent({
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [responding, setResponding] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    async function loadPerson() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch(`/api/v1/profiles/${personId}`);
-        if (!res.ok) {
-          throw new Error("Profile not found");
-        }
-        const json = await res.json();
-        if (isMounted) {
-          setPerson(json.data);
-        }
-      } catch (err: any) {
-        if (isMounted) setError(err.message || "Failed to load profile");
-      } finally {
-        if (isMounted) setLoading(false);
+    fetch("/api/v1/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.data?.id) setCurrentUserId(json.data.id);
+      })
+      .catch(() => {});
+  }, []);
+
+  const loadPerson = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`/api/v1/profiles/${personId}`);
+      if (!res.ok) {
+        throw new Error("Profile not found");
       }
+      const json = await res.json();
+      setPerson(json.data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load profile");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadPerson();
-    return () => {
-      isMounted = false;
-    };
   }, [personId]);
 
   const handleSendRequest = async (e: React.FormEvent) => {
@@ -103,15 +123,36 @@ function PersonProfileContent({
 
       if (!res.ok) {
         const errJson = await res.json();
-        throw new Error(errJson.error?.message || "Failed to send connection request");
+        throw new Error(errJson.error?.message || errJson.message || "Failed to send connection request");
       }
 
       setRequestSent(true);
       setDialogOpen(false);
+      // Reload profile to reflect new connection state
+      await loadPerson();
     } catch (err: any) {
       setRequestError(err.message || "Connection request failed");
     } finally {
       setSubmittingRequest(false);
+    }
+  };
+
+  const handleRespond = async (action: "accept" | "decline") => {
+    if (!person?.viewer?.connectionId) return;
+    try {
+      setResponding(true);
+      const res = await fetch(`/api/v1/connections/${person.viewer.connectionId}/${action}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const errJson = await res.json();
+        throw new Error(errJson.error?.message || errJson.message || `Failed to ${action} request`);
+      }
+      await loadPerson();
+    } catch (err: any) {
+      alert(err.message || `Failed to ${action} request`);
+    } finally {
+      setResponding(false);
     }
   };
 
@@ -174,8 +215,16 @@ function PersonProfileContent({
         <div className="p-8 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[var(--surface-2)] text-[var(--accent)] font-display font-medium text-xl flex items-center justify-center border-2 border-[var(--brand-gold)] shrink-0">
-                {initials}
+              <div className="w-16 h-16 rounded-full bg-[var(--surface-2)] text-[var(--accent)] font-display font-medium text-xl flex items-center justify-center border-2 border-[var(--brand-gold)] shrink-0 overflow-hidden">
+                {person.profilePhotoUrl ? (
+                  <img
+                    src={person.profilePhotoUrl}
+                    alt={person.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -183,10 +232,7 @@ function PersonProfileContent({
                     {person.name}
                   </h1>
                   {person.mentorVerified && (
-                    <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--brand-navy)] bg-[var(--brand-gold)] px-2 py-0.5 rounded-full">
-                      <Shield className="w-3 h-3" />
-                      Verified Mentor
-                    </span>
+                    <Badge variant="verified-mentor">Verified Mentor</Badge>
                   )}
                 </div>
                 <p className="text-xs sm:text-sm text-[var(--text)] font-medium mt-1">
@@ -198,21 +244,76 @@ function PersonProfileContent({
                     {person.city || "Odisha"}, {person.state || "India"}
                   </span>
                   <span>•</span>
-                  <span className="capitalize">{person.role.replace("_", " ")}</span>
+                  <span className="capitalize">
+                    {(person.primaryRole || person.role || "Member").replace(/_/g, " ")}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <Button
-              size="md"
-              variant="primary"
-              disabled={requestSent}
-              onClick={() => setDialogOpen(true)}
-              className="gap-2 shrink-0 cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-              {requestSent ? "Request Pending" : "Request Connection"}
-            </Button>
+            {person.id === currentUserId ? (
+              <Link href="/profile">
+                <Button size="md" variant="secondary" className="gap-2 shrink-0 cursor-pointer">
+                  Edit Your Profile
+                </Button>
+              </Link>
+            ) : person.viewer?.connectionStatus === "connected" ? (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shadow-xs shrink-0">
+                <CheckCircle2 className="w-4 h-4" />
+                Connected Member
+              </div>
+            ) : person.viewer?.connectionStatus === "pending_out" || requestSent ? (
+              <Button
+                size="md"
+                variant="secondary"
+                disabled
+                className="gap-2 shrink-0 opacity-80 cursor-not-allowed bg-[var(--surface-2)] text-amber-400 border border-amber-400/20"
+              >
+                <Clock className="w-4 h-4 text-amber-400" />
+                Request Pending
+              </Button>
+            ) : person.viewer?.connectionStatus === "pending_in" ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  size="md"
+                  variant="primary"
+                  disabled={responding}
+                  onClick={() => handleRespond("accept")}
+                  className="gap-1.5 cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white"
+                >
+                  {responding ? <RotateCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  Accept Request
+                </Button>
+                <Button
+                  size="md"
+                  variant="secondary"
+                  disabled={responding}
+                  onClick={() => handleRespond("decline")}
+                  className="gap-1.5 cursor-pointer text-rose-400 hover:text-rose-300"
+                >
+                  Decline
+                </Button>
+              </div>
+            ) : person.mentorAvailability === "paused" ? (
+              <Button
+                size="md"
+                variant="secondary"
+                disabled
+                className="gap-2 shrink-0 opacity-60 cursor-not-allowed"
+              >
+                Mentorship Paused
+              </Button>
+            ) : (
+              <Button
+                size="md"
+                variant="primary"
+                onClick={() => setDialogOpen(true)}
+                className="gap-2 shrink-0 cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                Request Connection
+              </Button>
+            )}
           </div>
 
           {/* Bio */}
@@ -251,13 +352,57 @@ function PersonProfileContent({
             </div>
           )}
 
-          {/* Privacy Note */}
-          <div className="p-3.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)] flex items-center gap-2.5 text-xs text-[var(--muted)]">
-            <Lock className="w-4 h-4 text-[var(--accent)] shrink-0" />
-            <span>
-              Direct contact details are protected under India DPDP Act and only shared once both members accept a connection request.
-            </span>
-          </div>
+          {/* Contact Coordinates / DPDP Privacy Note */}
+          {person.viewer?.connectionStatus === "connected" ? (
+            <div className="p-5 rounded-2xl bg-[#061814] border border-emerald-500/30 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Direct Contact Details Unlocked (India DPDP Act Mutual Consent)</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                {person.email ? (
+                  <a
+                    href={`mailto:${person.email}`}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-[var(--accent)] hover:border-[var(--accent)] transition-colors font-mono"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <span>{person.email}</span>
+                  </a>
+                ) : (
+                  <div className="px-3.5 py-2 rounded-xl bg-[var(--surface-2)] text-[var(--muted)] text-xs border border-[var(--border)]">
+                    Email withheld by member preferences
+                  </div>
+                )}
+                {person.phone && (
+                  <a
+                    href={`tel:${person.phone}`}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-[var(--accent)] hover:border-[var(--accent)] transition-colors font-mono"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <span>{person.phone}</span>
+                  </a>
+                )}
+                {person.linkedinUrl && (
+                  <a
+                    href={person.linkedinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] hover:text-[var(--accent)] transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--muted)]" />
+                    <span>LinkedIn Profile</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="p-3.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)] flex items-center gap-2.5 text-xs text-[var(--muted)]">
+              <Lock className="w-4 h-4 text-[var(--accent)] shrink-0" />
+              <span>
+                Direct contact details are protected under India DPDP Act and only shared once both members accept a connection request.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Modal: Request Connection */}

@@ -20,14 +20,6 @@ interface Prediction {
   secondaryText: string;
 }
 
-const QUICK_HUBS = [
-  "Bhubaneswar, Odisha",
-  "Cuttack, Odisha",
-  "Rourkela, Odisha",
-  "Sambalpur, Odisha",
-  "Berhampur, Odisha",
-  "Global Odia Diaspora",
-];
 
 export function LocationAutocomplete({
   value,
@@ -213,30 +205,6 @@ export function LocationAutocomplete({
         </div>
       )}
 
-      {/* Quick Location Shortcuts */}
-      <div className="pt-1 flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] uppercase font-mono text-[var(--muted)] mr-1">
-          Quick select:
-        </span>
-        {QUICK_HUBS.map((hub) => {
-          const isCurrent = value.toLowerCase().includes(hub.split(",")[0].toLowerCase());
-          return (
-            <button
-              key={hub}
-              type="button"
-              onClick={() => handleSelect(hub)}
-              className={cn(
-                "px-2.5 py-1 rounded-lg text-xs border transition-all cursor-pointer",
-                isCurrent
-                  ? "bg-[var(--brand-navy)] text-[var(--brand-gold)] border-[var(--brand-gold)]/40 shadow-xs"
-                  : "bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--text)] border-[var(--border)] hover:border-[var(--border-strong)]"
-              )}
-            >
-              {hub.split(",")[0]}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }

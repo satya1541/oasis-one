@@ -136,6 +136,10 @@ export function MapPickerModal({
   const mapInstanceRef = useRef<any>(null);
   const markerInstanceRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const searchWrapperRef = useRef<HTMLDivElement | null>(null);
+  const currentCoordsRef = useRef<{ lat: number; lng: number }>(
+    initialLocation || DEFAULT_CENTER
+  );
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -162,13 +166,14 @@ export function MapPickerModal({
   // Sync state whenever modal opens or props change
   useEffect(() => {
     if (isOpen) {
+      const loc = initialLocation || DEFAULT_CENTER;
+      setCurrentCoords(loc);
+      currentCoordsRef.current = loc;
       if (initialLocation) {
-        setCurrentCoords(initialLocation);
         setGoogleMapsUrl(
           `https://www.google.com/maps/search/?api=1&query=${initialLocation.lat},${initialLocation.lng}`
         );
       } else {
-        setCurrentCoords(DEFAULT_CENTER);
         setGoogleMapsUrl("");
       }
       setPlaceName(initialPlaceName || "");
@@ -178,6 +183,20 @@ export function MapPickerModal({
       setShowDropdown(false);
     }
   }, [isOpen, initialLocation, initialPlaceName, initialAddress, initialQuery]);
+
+  // Click outside search dropdown to close
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Reverse geocode a lat/lng coordinate
   const reverseGeocode = useCallback(async (lat: number, lng: number) => {
@@ -197,10 +216,16 @@ export function MapPickerModal({
     }
   }, []);
 
+  const reverseGeocodeRef = useRef(reverseGeocode);
+  useEffect(() => {
+    reverseGeocodeRef.current = reverseGeocode;
+  }, [reverseGeocode]);
+
   // Center & Pin marker
   const moveMapToLocation = useCallback(
     (lat: number, lng: number, title?: string, address?: string, url?: string) => {
       setCurrentCoords({ lat, lng });
+      currentCoordsRef.current = { lat, lng };
       if (title) setPlaceName(title);
       if (address) setFormattedAddress(address);
       if (url) {
@@ -210,6 +235,7 @@ export function MapPickerModal({
       }
 
       if (mapInstanceRef.current) {
+        mapInstanceRef.current.setCenter({ lat, lng });
         mapInstanceRef.current.panTo({ lat, lng });
         mapInstanceRef.current.setZoom(16);
       }
@@ -217,16 +243,134 @@ export function MapPickerModal({
       if (markerInstanceRef.current) {
         markerInstanceRef.current.setPosition({ lat, lng });
         markerInstanceRef.current.setVisible(true);
+        if (title) {
+          markerInstanceRef.current.setTitle(title);
+        }
+        if (typeof (window as any).google !== "undefined" && (window as any).google.maps?.Animation) {
+          markerInstanceRef.current.setAnimation((window as any).google.maps.Animation.DROP);
+        }
+      } else if (mapInstanceRef.current && typeof (window as any).google !== "undefined") {
+        const marker = new (window as any).google.maps.Marker({
+          position: { lat, lng },
+          map: mapInstanceRef.current,
+          draggable: true,
+          title: title || "Selected Venue",
+          animation: (window as any).google.maps.Animation.DROP,
+          visible: true,
+        });
+        markerInstanceRef.current = marker;
+        marker.addListener("dragend", async () => {
+          const pos = marker.getPosition();
+          if (pos) {
+            const nlat = pos.lat();
+            const nlng = pos.lng();
+            setCurrentCoords({ lat: nlat, lng: nlng });
+            currentCoordsRef.current = { lat: nlat, lng: nlng };
+            if (reverseGeocodeRef.current) {
+              await reverseGeocodeRef.current(nlat, nlng);
+            }
+          }
+        });
       }
     },
     []
   );
 
-  // Initialize Google Maps instance
+  // Initialize Google Maps instance - strictly on modal open
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      mapInstanceRef.current = null;
+      markerInstanceRef.current = null;
+      setMapLoaded(false);
+      return;
+    }
 
     let isMounted = true;
+
+    const initMap = () => {
+      if (!mapContainerRef.current || !isMounted) return;
+
+      // Avoid re-initialization if already created on this container
+      if (mapInstanceRef.current) {
+        const target = currentCoordsRef.current || initialLocation || DEFAULT_CENTER;
+        mapInstanceRef.current.setCenter(target);
+        mapInstanceRef.current.panTo(target);
+        return;
+      }
+
+      const center = currentCoordsRef.current || initialLocation || DEFAULT_CENTER;
+
+      try {
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center,
+          zoom: 15,
+          styles: DARK_MAP_STYLE,
+          mapTypeId: mapType === "satellite" ? "hybrid" : "roadmap",
+          disableDefaultUI: false,
+          zoomControl: true,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+        });
+
+        mapInstanceRef.current = map;
+
+        // Custom pin marker
+        const hasInitial = Boolean(initialLocation || currentCoordsRef.current || placeName);
+        const marker = new google.maps.Marker({
+          position: center,
+          map,
+          draggable: true,
+          title: placeName || "Selected Venue",
+          animation: google.maps.Animation.DROP,
+          visible: hasInitial,
+        });
+
+        markerInstanceRef.current = marker;
+
+        // Drag marker to pick new coordinates
+        marker.addListener("dragend", async () => {
+          const pos = marker.getPosition();
+          if (pos) {
+            const lat = pos.lat();
+            const lng = pos.lng();
+            setCurrentCoords({ lat, lng });
+            currentCoordsRef.current = { lat, lng };
+            if (reverseGeocodeRef.current) {
+              await reverseGeocodeRef.current(lat, lng);
+            }
+          }
+        });
+
+        // Click on map to place pin
+        map.addListener("click", async (e: any) => {
+          if (e.latLng) {
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            marker.setPosition({ lat, lng });
+            marker.setVisible(true);
+            setCurrentCoords({ lat, lng });
+            currentCoordsRef.current = { lat, lng };
+            if (reverseGeocodeRef.current) {
+              await reverseGeocodeRef.current(lat, lng);
+            }
+          }
+        });
+
+        setMapLoaded(true);
+
+        // Ensure canvas resize triggers properly in modal layout
+        setTimeout(() => {
+          if (isMounted && mapInstanceRef.current && (window as any).google?.maps) {
+            (window as any).google.maps.event.trigger(mapInstanceRef.current, "resize");
+            mapInstanceRef.current.setCenter(center);
+          }
+        }, 150);
+      } catch (err) {
+        console.error("Map initialization error:", err);
+        setLoadError(true);
+      }
+    };
 
     const loadGoogleMapsScript = () => {
       if (typeof window !== "undefined" && (window as any).google?.maps) {
@@ -258,75 +402,27 @@ export function MapPickerModal({
       document.head.appendChild(script);
     };
 
-    const initMap = () => {
-      if (!mapContainerRef.current || !isMounted) return;
-
-      const center = initialLocation || DEFAULT_CENTER;
-
-      try {
-        const map = new google.maps.Map(mapContainerRef.current, {
-          center,
-          zoom: 15,
-          styles: DARK_MAP_STYLE,
-          mapTypeId: mapType === "satellite" ? "hybrid" : "roadmap",
-          disableDefaultUI: false,
-          zoomControl: true,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-        });
-
-        mapInstanceRef.current = map;
-
-        // Custom pin marker
-        const hasInitial = Boolean(initialLocation && (initialPlaceName || placeName));
-        const marker = new google.maps.Marker({
-          position: center,
-          map,
-          draggable: true,
-          title: placeName || "Selected Venue",
-          animation: google.maps.Animation.DROP,
-          visible: hasInitial,
-        });
-
-        markerInstanceRef.current = marker;
-
-        // Drag marker to pick new coordinates
-        marker.addListener("dragend", async () => {
-          const pos = marker.getPosition();
-          if (pos) {
-            const lat = pos.lat();
-            const lng = pos.lng();
-            setCurrentCoords({ lat, lng });
-            await reverseGeocode(lat, lng);
-          }
-        });
-
-        // Click on map to place pin
-        map.addListener("click", async (e: any) => {
-          if (e.latLng) {
-            const lat = e.latLng.lat();
-            const lng = e.latLng.lng();
-            marker.setPosition({ lat, lng });
-            marker.setVisible(true);
-            setCurrentCoords({ lat, lng });
-            await reverseGeocode(lat, lng);
-          }
-        });
-
-        setMapLoaded(true);
-      } catch (err) {
-        console.error("Map initialization error:", err);
-        setLoadError(true);
-      }
-    };
-
     loadGoogleMapsScript();
 
     return () => {
       isMounted = false;
     };
-  }, [isOpen, initialLocation, reverseGeocode, mapType, placeName]);
+  }, [isOpen]);
+
+  // Handle initialLocation changes if updated while open
+  useEffect(() => {
+    if (isOpen && initialLocation) {
+      currentCoordsRef.current = initialLocation;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.setCenter(initialLocation);
+        mapInstanceRef.current.panTo(initialLocation);
+      }
+      if (markerInstanceRef.current) {
+        markerInstanceRef.current.setPosition(initialLocation);
+        markerInstanceRef.current.setVisible(true);
+      }
+    }
+  }, [isOpen, initialLocation]);
 
   // Handle map type toggle (Roadmap vs Satellite)
   const toggleMapType = () => {
@@ -369,12 +465,18 @@ export function MapPickerModal({
   // Select place from autocomplete
   const handleSelectPrediction = async (p: PlacePrediction) => {
     setShowDropdown(false);
+    setSearchQuery(p.mainText || p.description);
+    setPredictions([]);
     setIsSearching(true);
     try {
       const res = await fetch(`/api/location/details?placeId=${encodeURIComponent(p.placeId)}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.location) {
+        if (
+          data.location &&
+          typeof data.location.lat === "number" &&
+          typeof data.location.lng === "number"
+        ) {
           moveMapToLocation(
             data.location.lat,
             data.location.lng,
@@ -443,7 +545,7 @@ export function MapPickerModal({
           </div>
 
           {/* Autocomplete Search Input directly in the modal */}
-          <div className="relative w-full sm:w-96">
+          <div ref={searchWrapperRef} className="relative w-full sm:w-96">
             <Search className="w-4 h-4 text-[#88DECC] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               ref={inputRef}

@@ -958,6 +958,7 @@ export class AuthService {
       emailVerified: fullUser.emailVerified,
       name: fullUser.profile?.name || 'Member',
       avatarUrl: fullUser.profile?.profilePhotoUrl || null,
+      profilePhotoUrl: fullUser.profile?.profilePhotoUrl || null,
       primaryRole: fullUser.primaryRole,
       accountStatus: fullUser.accountStatus,
       applicationStatus: appStatus,

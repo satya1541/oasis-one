@@ -704,14 +704,25 @@ export class AdminService {
     const pageSize = Math.min(50, Math.max(1, Number(params.pageSize) || 20));
     const skip = (page - 1) * pageSize;
 
-    const where: any = {};
+    const where: any = {
+      AND: [
+        {
+          OR: [
+            { adminLevel: null },
+            { adminLevel: { not: 'super_admin' } },
+          ],
+        },
+      ],
+    };
     if (params.role) where.primaryRole = params.role as UserRole;
     if (params.status) where.accountStatus = params.status as AccountStatus;
     if (params.q) {
-      where.OR = [
-        { email: { contains: params.q } },
-        { profile: { name: { contains: params.q } } },
-      ];
+      where.AND.push({
+        OR: [
+          { email: { contains: params.q } },
+          { profile: { name: { contains: params.q } } },
+        ],
+      });
     }
 
     const [total, users] = await Promise.all([
@@ -734,6 +745,7 @@ export class AdminService {
       name: u.profile?.name || 'Member',
       role: u.primaryRole,
       status: u.accountStatus,
+      adminLevel: u.adminLevel,
       mentorVerified: u.profile?.mentorVerified,
       activeRestrictions: u.restrictions.map((r) => r.type),
       createdAt: u.createdAt,
@@ -750,6 +762,18 @@ export class AdminService {
         applications: { orderBy: { createdAt: 'desc' } },
         restrictions: { orderBy: { issuedAt: 'desc' } },
         consentRecords: true,
+        uploadedFiles: {
+          where: { status: { not: 'deleted' } },
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            filename: true,
+            mimeType: true,
+            sizeBytes: true,
+            purpose: true,
+            createdAt: true,
+          },
+        },
       },
     });
 
@@ -757,7 +781,36 @@ export class AdminService {
       throw new HttpException({ code: 'NOT_FOUND', message: 'Member not found' }, HttpStatus.NOT_FOUND);
     }
 
-    return user;
+    return {
+      ...user,
+      documents: (user as any).uploadedFiles?.map((f: any) => ({
+        ...f,
+        downloadUrl: `/api/v1/files/attachment/${f.id}`,
+      })) || [],
+    };
+  }
+
+  async getMemberDocuments(memberId: string) {
+    const files = await this.prisma.uploadedFile.findMany({
+      where: {
+        ownerId: memberId,
+        status: { not: 'deleted' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        purpose: true,
+        createdAt: true,
+      },
+    });
+
+    return files.map((f) => ({
+      ...f,
+      downloadUrl: `/api/v1/files/attachment/${f.id}`,
+    }));
   }
 
   async changeMemberRole(memberId: string, newRole: UserRole, adminId: string, ipAddress?: string) {

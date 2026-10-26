@@ -29,12 +29,16 @@ export class ConnectionsService {
       },
     });
     const excluded = new Set(blocks.map((b) => (b.blockerId === params.viewerId ? b.blockedId : b.blockerId)));
+    if (params.viewerId) {
+      excluded.add(params.viewerId);
+    }
 
     const where: any = {
       mentorAvailability: 'active',
       user: {
         primaryRole: UserRole.mentor,
         accountStatus: 'active',
+        adminLevel: null,
         id: { notIn: Array.from(excluded) },
       },
     };
@@ -126,38 +130,44 @@ export class ConnectionsService {
       throw new HttpException({ code: 'FORBIDDEN', message: 'Unable to send request to this member' }, HttpStatus.FORBIDDEN);
     }
 
-    // 3. Verify recipient is an active mentor with availability != paused
+    // 3. Verify recipient is an active member
     const recipient = await this.prisma.user.findUnique({
       where: { id: recipientId },
       include: { profile: true },
     });
 
-    if (!recipient || recipient.accountStatus !== 'active' || recipient.primaryRole !== 'mentor') {
+    if (!recipient || recipient.accountStatus !== 'active') {
       throw new HttpException(
-        { code: 'FORBIDDEN', message: 'Recipient must be an active mentor' },
+        { code: 'FORBIDDEN', message: 'Recipient is not active' },
         HttpStatus.FORBIDDEN,
       );
     }
 
-    if (recipient.profile?.mentorAvailability === 'paused') {
+    if (recipient.primaryRole === 'mentor' && recipient.profile?.mentorAvailability === 'paused') {
       throw new HttpException(
         { code: 'FORBIDDEN', message: 'This mentor has temporarily paused accepting new connections' },
         HttpStatus.FORBIDDEN,
       );
     }
 
-    // 4. Check duplicate pending request
+    // 4. Check duplicate pending or existing accepted request
     const existing = await this.prisma.connectionRequest.findFirst({
       where: {
-        senderId,
-        recipientId,
-        status: 'pending',
-        expiresAt: { gt: new Date() },
+        OR: [
+          { senderId, recipientId, status: { in: ['pending', 'accepted'] } },
+          { senderId: recipientId, recipientId: senderId, status: { in: ['pending', 'accepted'] } },
+        ],
       },
     });
     if (existing) {
+      if (existing.status === 'accepted') {
+        throw new HttpException(
+          { code: 'CONFLICT', message: 'You are already connected with this member' },
+          HttpStatus.CONFLICT,
+        );
+      }
       throw new HttpException(
-        { code: 'CONFLICT', message: 'A pending connection request has already been sent to this member' },
+        { code: 'CONFLICT', message: 'A pending connection request already exists between you and this member' },
         HttpStatus.CONFLICT,
       );
     }
@@ -174,10 +184,15 @@ export class ConnectionsService {
     });
 
     // In-app notification to recipient
+    const notifTitle =
+      recipient.primaryRole === 'mentor'
+        ? 'New Mentorship Connection Request'
+        : 'New Connection Request';
+
     const notif = await this.prisma.notification.create({
       data: {
         type: 'connection_request',
-        title: 'New Mentorship Connection Request',
+        title: notifTitle,
         body: `You received a new connection request.`,
         metadata: { connectionId: connection.id, senderId },
       },
@@ -224,6 +239,7 @@ export class ConnectionsService {
           select: {
             id: true,
             email: true,
+            phone: true,
             primaryRole: true,
             profile: {
               select: {
@@ -231,6 +247,7 @@ export class ConnectionsService {
                 headline: true,
                 profilePhotoUrl: true,
                 city: true,
+                contactPreferences: true,
               },
             },
           },
@@ -239,6 +256,7 @@ export class ConnectionsService {
           select: {
             id: true,
             email: true,
+            phone: true,
             primaryRole: true,
             profile: {
               select: {
@@ -246,6 +264,7 @@ export class ConnectionsService {
                 headline: true,
                 profilePhotoUrl: true,
                 city: true,
+                contactPreferences: true,
               },
             },
           },
@@ -255,12 +274,19 @@ export class ConnectionsService {
 
     return connections.map((c) => {
       const otherUser = c.senderId === userId ? c.recipient : c.sender;
+      const isAccepted = c.status === 'accepted';
+      const prefs = (otherUser.profile?.contactPreferences as any) || {};
+      const shareEmail = isAccepted && prefs.shareEmailOnConnect !== false;
+      const sharePhone = isAccepted && !!prefs.sharePhoneOnConnect;
+
       return {
         id: c.id,
         status: c.status,
         message: c.message,
         createdAt: c.createdAt,
         expiresAt: c.expiresAt,
+        senderId: c.senderId,
+        recipientId: c.recipientId,
         otherUser: {
           id: otherUser.id,
           name: otherUser.profile?.name || 'Member',
@@ -268,6 +294,8 @@ export class ConnectionsService {
           avatarUrl: otherUser.profile?.profilePhotoUrl,
           city: otherUser.profile?.city,
           role: otherUser.primaryRole,
+          email: shareEmail ? otherUser.email : undefined,
+          phone: sharePhone ? otherUser.phone : undefined,
         },
       };
     });
@@ -280,6 +308,13 @@ export class ConnectionsService {
 
     if (!conn) {
       throw new HttpException({ code: 'NOT_FOUND', message: 'Connection request not found' }, HttpStatus.NOT_FOUND);
+    }
+
+    if (conn.status !== 'pending') {
+      throw new HttpException(
+        { code: 'CONFLICT', message: `Connection request is already ${conn.status}` },
+        HttpStatus.CONFLICT,
+      );
     }
 
     if (action === 'cancel') {

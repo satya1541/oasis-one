@@ -37,10 +37,14 @@ export class ProfilesService {
     const excludedUserIds = new Set(
       blockedRecords.map((b) => (b.blockerId === params.viewerId ? b.blockedId : b.blockerId)),
     );
+    if (params.viewerId) {
+      excludedUserIds.add(params.viewerId);
+    }
 
     const where: any = {
       user: {
         accountStatus: 'active',
+        adminLevel: null,
         id: { notIn: Array.from(excludedUserIds) },
       },
     };
@@ -135,6 +139,7 @@ export class ProfilesService {
             phone: true,
             primaryRole: true,
             accountStatus: true,
+            adminLevel: true,
             timeZone: true,
           },
         },
@@ -146,6 +151,10 @@ export class ProfilesService {
 
     if (!profile) {
       throw new HttpException({ code: 'NOT_FOUND', message: 'Profile not found' }, HttpStatus.NOT_FOUND);
+    }
+
+    if (profile.user?.adminLevel && !isAdmin && viewerId !== targetUserId) {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Profile unavailable' }, HttpStatus.NOT_FOUND);
     }
 
     // Determine viewer context
@@ -185,7 +194,9 @@ export class ProfilesService {
           { senderId: viewerId, recipientId: targetUserId },
           { senderId: targetUserId, recipientId: viewerId },
         ],
+        status: { in: ['accepted', 'pending'] },
       },
+      orderBy: { createdAt: 'desc' },
     });
 
     let connectionStatus = 'none';
@@ -200,8 +211,7 @@ export class ProfilesService {
     const isPaused = profile.mentorAvailability === 'paused';
     const canConnect =
       viewerId !== targetUserId &&
-      isMentor &&
-      !isPaused &&
+      (!isMentor || !isPaused) &&
       !block &&
       connectionStatus === 'none';
 
@@ -210,6 +220,7 @@ export class ProfilesService {
       viewer: {
         canConnect,
         connectionStatus,
+        connectionId: connection ? connection.id : null,
         isBlocked: !!block,
       },
     };
@@ -319,7 +330,7 @@ export class ProfilesService {
 
   async uploadPhoto(userId: string, file: Express.Multer.File) {
     const uploaded = await this.filesService.uploadFile(file, FilePurpose.profile_photo, userId);
-    const photoUrl = `/api/v1/files/${this.filesService.generateSignedDownloadToken(uploaded.id, userId, 86400 * 30)}`;
+    const photoUrl = `/api/v1/files/attachment/${uploaded.id}`;
 
     await this.prisma.profile.update({
       where: { userId },
@@ -330,6 +341,79 @@ export class ProfilesService {
     });
 
     return { photoUrl, photoFileId: uploaded.id };
+  }
+
+  async getMyDocuments(userId: string) {
+    const files = await this.prisma.uploadedFile.findMany({
+      where: {
+        ownerId: userId,
+        status: { not: 'deleted' },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        sizeBytes: true,
+        purpose: true,
+        createdAt: true,
+      },
+    });
+
+    return files.map((f) => ({
+      ...f,
+      downloadUrl: `/api/v1/files/attachment/${f.id}`,
+    }));
+  }
+
+  async uploadDocument(userId: string, file: Express.Multer.File, category?: string) {
+    if (!file) {
+      throw new HttpException(
+        { code: 'VALIDATION_FAILED', message: 'No file provided' },
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const uploaded = await this.filesService.uploadFile(
+      file,
+      FilePurpose.verification_evidence,
+      userId,
+    );
+
+    await this.prisma.uploadedFile.update({
+      where: { id: uploaded.id },
+      data: { status: 'attached' },
+    });
+
+    return {
+      id: uploaded.id,
+      filename: uploaded.filename,
+      mimeType: uploaded.mimeType,
+      sizeBytes: uploaded.sizeBytes,
+      purpose: uploaded.purpose,
+      createdAt: uploaded.createdAt,
+      downloadUrl: `/api/v1/files/attachment/${uploaded.id}`,
+    };
+  }
+
+  async deleteDocument(userId: string, fileId: string) {
+    const file = await this.prisma.uploadedFile.findFirst({
+      where: { id: fileId, ownerId: userId },
+    });
+
+    if (!file) {
+      throw new HttpException(
+        { code: 'NOT_FOUND', message: 'Document not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.prisma.uploadedFile.update({
+      where: { id: fileId },
+      data: { status: 'deleted' },
+    });
+
+    return { ok: true, message: 'Document deleted' };
   }
 
   private serializeProfile(profile: any, context: ViewerContext, viewerId: string) {
@@ -346,6 +430,7 @@ export class ProfilesService {
       country: profile.country,
       profilePhotoUrl: profile.profilePhotoUrl,
       primaryRole: profile.user?.primaryRole,
+      role: profile.user?.primaryRole,
       mentorVerified: profile.mentorVerified,
       mentorAvailability: profile.mentorAvailability,
       preferredContactMethod: profile.preferredContactMethod,
@@ -369,10 +454,12 @@ export class ProfilesService {
     }
 
     if (context === 'connected') {
+      const shareEmail = contactPrefs.shareEmailOnConnect !== false;
+      const sharePhone = !!contactPrefs.sharePhoneOnConnect;
       return {
         ...base,
-        email: contactPrefs.shareEmailOnConnect ? profile.user?.email : undefined,
-        phone: contactPrefs.sharePhoneOnConnect ? profile.user?.phone : undefined,
+        email: shareEmail ? profile.user?.email : undefined,
+        phone: sharePhone ? profile.user?.phone : undefined,
         linkedinUrl: profile.linkedinUrl,
         twitterUrl: profile.twitterUrl,
         githubUrl: profile.githubUrl,
@@ -386,6 +473,22 @@ export class ProfilesService {
       linkedinUrl: visibility.linkedin === 'members' ? profile.linkedinUrl : undefined,
       email: visibility.email === 'members' ? profile.user?.email : undefined,
       phone: visibility.phone === 'members' ? profile.user?.phone : undefined,
+    };
+  }
+
+  async getCommunityStats() {
+    const [activeMembers, totalMembers] = await Promise.all([
+      this.prisma.user.count({
+        where: { accountStatus: 'active', adminLevel: null },
+      }),
+      this.prisma.user.count({
+        where: { adminLevel: null },
+      }),
+    ]);
+
+    return {
+      activeMembers,
+      totalMembers,
     };
   }
 }

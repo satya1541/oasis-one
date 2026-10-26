@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Post,
+  Delete,
   Param,
   Query,
   Body,
@@ -16,6 +17,7 @@ import { Request } from 'express';
 import { ProfilesService } from './profiles.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { MemberGuard } from '../common/guards/member.guard';
+import { Public } from '../common/decorators/public.decorator';
 
 @UseGuards(MemberGuard)
 @Controller()
@@ -43,6 +45,12 @@ export class ProfilesController {
       pageSize: pageSize ? parseInt(pageSize, 10) : 20,
       viewerId: viewerId!,
     });
+  }
+
+  @Public()
+  @Get('profiles/stats')
+  async getCommunityStats() {
+    return this.profilesService.getCommunityStats();
   }
 
   @Get('profiles/:id')
@@ -84,5 +92,28 @@ export class ProfilesController {
     @MulterFile() file: Express.Multer.File,
   ) {
     return this.profilesService.uploadPhoto(userId, file);
+  }
+
+  @Get('me/documents')
+  async getMyDocuments(@CurrentUser('id') userId: string) {
+    return this.profilesService.getMyDocuments(userId);
+  }
+
+  @Post('me/documents')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadDocument(
+    @CurrentUser('id') userId: string,
+    @MulterFile() file: Express.Multer.File,
+    @Body('category') category?: string,
+  ) {
+    return this.profilesService.uploadDocument(userId, file, category);
+  }
+
+  @Delete('me/documents/:id')
+  async deleteDocument(
+    @CurrentUser('id') userId: string,
+    @Param('id') fileId: string,
+  ) {
+    return this.profilesService.deleteDocument(userId, fileId);
   }
 }

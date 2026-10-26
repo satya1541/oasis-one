@@ -15,6 +15,8 @@ import {
   ShieldCheck,
   FileCheck2,
   FileText,
+  ChevronDown,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
@@ -387,12 +389,24 @@ function JoinDetailsForm() {
                 </div>
                 {govIdProvided && (
                   <div className="pt-1.5">
-                    <input
-                      type="file"
-                      accept=".pdf,.png,.jpg,.jpeg"
-                      onChange={(e) => handleFileUpload(e, "Government ID")}
-                      className="text-xs text-[#ECF1EF]/70 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-[#88DECC]/20 file:text-[#88DECC] hover:file:opacity-90 cursor-pointer"
-                    />
+                    <label className="flex items-center justify-between h-10 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/12 hover:border-[#88DECC]/50 cursor-pointer transition-colors group">
+                      <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+                        onChange={(e) => handleFileUpload(e, "Government ID")}
+                        className="sr-only"
+                      />
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-[#88DECC]/20 text-[#88DECC] shrink-0 group-hover:bg-[#88DECC]/30 transition-colors">
+                          Choose file
+                        </span>
+                        <span className="text-[11px] text-[#ECF1EF]/60 truncate">
+                          {uploadedEvidence ? uploadedEvidence.filename : "No file chosen"}
+                        </span>
+                      </div>
+                      <Upload className="w-3.5 h-3.5 text-[#ECF1EF]/40 group-hover:text-[#88DECC] shrink-0 ml-1.5 transition-colors" />
+                    </label>
                     {uploadingDoc && (
                       <div className="text-[10px] text-[#88DECC] mt-1 flex items-center gap-1">
                         <RotateCw className="w-3 h-3 animate-spin" /> Uploading securely...
@@ -563,25 +577,40 @@ function JoinDetailsForm() {
 
                 {isRegistered === "registered" ? (
                   <div className="space-y-2 pt-1 border-t border-white/10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <select
-                        value={selectedDocType}
-                        onChange={(e) => setSelectedDocType(e.target.value)}
-                        className="w-full h-9 px-2.5 rounded-lg bg-[#081318] border border-white/12 text-[11px] text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer"
-                      >
-                        {FOUNDER_DOC_TYPES.map((dt) => (
-                          <option key={dt} value={dt}>
-                            {dt}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                      <div className="relative">
+                        <select
+                          value={selectedDocType}
+                          onChange={(e) => setSelectedDocType(e.target.value)}
+                          className="w-full h-10 px-3 pr-8 rounded-xl bg-[#081318] border border-white/12 text-xs text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer appearance-none truncate"
+                        >
+                          {FOUNDER_DOC_TYPES.map((dt) => (
+                            <option key={dt} value={dt} className="bg-[#081318] text-[#F5FAF6]">
+                              {dt}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-[#ECF1EF]/50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
 
-                      <input
-                        type="file"
-                        accept=".pdf,.png,.jpg,.jpeg"
-                        onChange={(e) => handleFileUpload(e, selectedDocType)}
-                        className="text-[11px] text-[#ECF1EF]/60 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-[#88DECC]/20 file:text-[#88DECC] hover:file:opacity-90 cursor-pointer"
-                      />
+                      <label className="flex items-center justify-between h-10 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/12 hover:border-[#88DECC]/50 cursor-pointer transition-colors group">
+                        <input
+                          type="file"
+                          accept=".pdf,.png,.jpg,.jpeg"
+                          onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+                          onChange={(e) => handleFileUpload(e, selectedDocType)}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-[#88DECC]/20 text-[#88DECC] shrink-0 group-hover:bg-[#88DECC]/30 transition-colors">
+                            Choose file
+                          </span>
+                          <span className="text-[11px] text-[#ECF1EF]/60 truncate">
+                            {uploadedEvidence ? uploadedEvidence.filename : "No file chosen"}
+                          </span>
+                        </div>
+                        <Upload className="w-3.5 h-3.5 text-[#ECF1EF]/40 group-hover:text-[#88DECC] shrink-0 ml-1.5 transition-colors" />
+                      </label>
                     </div>
 
                     {uploadingDoc && (
@@ -724,25 +753,40 @@ function JoinDetailsForm() {
                   <span className="text-[10px] font-mono text-[#88DECC]">Verified Mentor Badge</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <select
-                    value={mentorDocType}
-                    onChange={(e) => setMentorDocType(e.target.value)}
-                    className="h-9 px-2.5 rounded-lg bg-[#081318] border border-white/12 text-[11px] text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer"
-                  >
-                    {MENTOR_DOC_TYPES.map((md) => (
-                      <option key={md} value={md}>
-                        {md}
-                      </option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                  <div className="relative">
+                    <select
+                      value={mentorDocType}
+                      onChange={(e) => setMentorDocType(e.target.value)}
+                      className="w-full h-10 px-3 pr-8 rounded-xl bg-[#081318] border border-white/12 text-xs text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer appearance-none truncate"
+                    >
+                      {MENTOR_DOC_TYPES.map((md) => (
+                        <option key={md} value={md} className="bg-[#081318] text-[#F5FAF6]">
+                          {md}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-[#ECF1EF]/50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
 
-                  <input
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={(e) => handleFileUpload(e, mentorDocType)}
-                    className="text-[11px] text-[#ECF1EF]/60 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-[#88DECC]/20 file:text-[#88DECC] hover:file:opacity-90 cursor-pointer"
-                  />
+                  <label className="flex items-center justify-between h-10 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/12 hover:border-[#88DECC]/50 cursor-pointer transition-colors group">
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+                      onChange={(e) => handleFileUpload(e, mentorDocType)}
+                      className="sr-only"
+                    />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-[#88DECC]/20 text-[#88DECC] shrink-0 group-hover:bg-[#88DECC]/30 transition-colors">
+                        Choose file
+                      </span>
+                      <span className="text-[11px] text-[#ECF1EF]/60 truncate">
+                        {uploadedEvidence ? uploadedEvidence.filename : "No file chosen"}
+                      </span>
+                    </div>
+                    <Upload className="w-3.5 h-3.5 text-[#ECF1EF]/40 group-hover:text-[#88DECC] shrink-0 ml-1.5 transition-colors" />
+                  </label>
                 </div>
 
                 {uploadingDoc && (

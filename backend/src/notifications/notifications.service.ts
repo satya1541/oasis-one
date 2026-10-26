@@ -19,17 +19,37 @@ export class NotificationsService {
       }),
     ]);
 
-    const items = deliveries.map((d) => ({
-      id: d.id,
-      notificationId: d.notificationId,
-      type: d.notification.type,
-      title: d.notification.title,
-      body: d.notification.body,
-      metadata: d.notification.metadata,
-      readAt: d.readAt,
-      isRead: !!d.readAt,
-      createdAt: d.notification.createdAt,
-    }));
+    const items = deliveries.map((d) => {
+      const metadata = (d.notification.metadata as any) || {};
+      const actionUrl =
+        d.notification.type === 'connection_request' || d.notification.type === 'connection_accepted'
+          ? '/people'
+          : metadata.actionUrl || null;
+
+      const notificationObj = {
+        id: d.notification.id,
+        type: d.notification.type,
+        title: d.notification.title,
+        body: d.notification.body,
+        actionUrl,
+        metadata: d.notification.metadata,
+        createdAt: d.notification.createdAt,
+      };
+
+      return {
+        id: d.id,
+        notificationId: d.notificationId,
+        type: d.notification.type,
+        title: d.notification.title,
+        body: d.notification.body,
+        actionUrl,
+        metadata: d.notification.metadata,
+        readAt: d.readAt,
+        isRead: !!d.readAt,
+        createdAt: d.notification.createdAt,
+        notification: notificationObj,
+      };
+    });
 
     return { items, total, page, pageSize };
   }

@@ -113,11 +113,13 @@ export default function AdminApplicationReviewPage() {
           ? json.data
           : json.data?.items || [];
         setApplications(list);
-        if (list.length > 0) {
-          if (!selectedAppId || !list.some((a) => a.id === selectedAppId)) {
-            const firstPending = list.find((a) => a.status === "pending" || a.status === "info_requested") || list[0];
-            setSelectedAppId(firstPending.id);
-          }
+        const pCount = list.filter((a) => a.status === "pending").length;
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("admin-counts-update", {
+              detail: { pendingApplications: pCount },
+            })
+          );
         }
       }
     } catch (err) {
@@ -131,9 +133,25 @@ export default function AdminApplicationReviewPage() {
     fetchApplications();
   }, []);
 
+  // Synchronize sidebar badge count with current application state
+  useEffect(() => {
+    if (!loadingList && typeof window !== "undefined") {
+      const pCount = applications.filter((a) => a.status === "pending").length;
+      window.dispatchEvent(
+        new CustomEvent("admin-counts-update", {
+          detail: { pendingApplications: pCount },
+        })
+      );
+    }
+  }, [applications, loadingList]);
+
+
   // 2. Fetch selected application detail
   useEffect(() => {
-    if (!selectedAppId) return;
+    if (!selectedAppId) {
+      setCurrentApp(null);
+      return;
+    }
 
     let isMounted = true;
     async function loadDetail() {
@@ -314,6 +332,23 @@ export default function AdminApplicationReviewPage() {
       return true;
     });
   }, [applications, statusFilter, roleFilter, searchQuery]);
+
+  // Keep selectedAppId synchronized with the active filtered list
+  useEffect(() => {
+    if (loadingList) return;
+
+    if (filteredApplications.length === 0) {
+      if (selectedAppId !== null) {
+        setSelectedAppId(null);
+        setCurrentApp(null);
+      }
+    } else {
+      const isSelectedInFiltered = filteredApplications.some((a) => a.id === selectedAppId);
+      if (!isSelectedInFiltered) {
+        setSelectedAppId(filteredApplications[0].id);
+      }
+    }
+  }, [filteredApplications, selectedAppId, loadingList]);
 
   // Counts
   const pendingCount = applications.filter((a) => a.status === "pending").length;
@@ -598,9 +633,27 @@ export default function AdminApplicationReviewPage() {
               <RotateCw className="w-6 h-6 animate-spin text-[#88DECC] mx-auto" />
               <p className="text-xs text-[#ECF1EF]/60 font-mono">Loading applicant dossier...</p>
             </div>
-          ) : !currentApp ? (
-            <div className="p-16 rounded-3xl bg-white/[0.02] border border-white/10 text-center text-xs text-[#ECF1EF]/50">
-              Select an applicant from the left to start review.
+          ) : !currentApp || filteredApplications.length === 0 ? (
+            <div className="p-16 sm:p-20 rounded-3xl bg-white/[0.02] border border-white/10 text-center space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto text-[#88DECC]">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="font-display text-lg font-light text-[#F5FAF6]">
+                  {statusFilter === "pending"
+                    ? "Pending Queue is Clear"
+                    : statusFilter === "info_requested"
+                    ? "No Applications Awaiting Info"
+                    : statusFilter === "rejected"
+                    ? "No Rejected Applications"
+                    : "No Applications to Display"}
+                </h3>
+                <p className="text-xs text-[#ECF1EF]/50 max-w-sm mx-auto">
+                  {statusFilter === "pending"
+                    ? "There are currently no new admissions pending review. Switch to Approved or All tabs to inspect processed applications."
+                    : "Select an application from the queue or adjust your status and search filters above."}
+                </p>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -721,15 +774,15 @@ export default function AdminApplicationReviewPage() {
                         type="button"
                         disabled={submittingDecision}
                         onClick={() => handleDecision("approve")}
-                        className="join-cta-pill group cursor-pointer disabled:opacity-40"
+                        className="inline-flex items-center gap-2.5 pl-4 pr-1.5 py-1 rounded-full bg-[#EEF1EA] hover:bg-white text-[#03080B] text-xs font-semibold shadow-xs hover:shadow-[0_0_15px_rgba(136,222,204,0.35)] transition-all cursor-pointer disabled:opacity-40 group shrink-0"
                       >
-                        <span className="font-semibold text-xs tracking-tight">
+                        <span className="tracking-tight">
                           {applicantRole === "mentor" && grantMentorVerified
                             ? "Approve & Award Verified Mentor"
                             : "Approve Admission"}
                         </span>
-                        <div className="join-cta-disc shrink-0">
-                          <Check className="w-4 h-4 text-emerald-300" />
+                        <div className="w-6 h-6 rounded-full bg-[#122B2A] group-hover:bg-[#26504D] flex items-center justify-center transition-colors shrink-0">
+                          <Check className="w-3.5 h-3.5 text-emerald-300" />
                         </div>
                       </button>
                     ) : (
@@ -739,7 +792,7 @@ export default function AdminApplicationReviewPage() {
                       </div>
                     )}
 
-                    {decisionState !== "rejected" && (
+                    {decisionState !== "approved" && decisionState !== "rejected" && (
                       <button
                         type="button"
                         disabled={submittingDecision}
@@ -751,15 +804,17 @@ export default function AdminApplicationReviewPage() {
                       </button>
                     )}
 
-                    <button
-                      type="button"
-                      disabled={submittingDecision}
-                      onClick={() => setShowInfoModal(true)}
-                      className="px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40"
-                    >
-                      <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Request More Info</span>
-                    </button>
+                    {decisionState !== "approved" && (
+                      <button
+                        type="button"
+                        disabled={submittingDecision}
+                        onClick={() => setShowInfoModal(true)}
+                        className="px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 hover:bg-amber-500/20 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40"
+                      >
+                        <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Request More Info</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Mentor distinction checkbox */}

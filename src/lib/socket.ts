@@ -83,3 +83,23 @@ export function subscribeToApplicationMessages(
     socket.off("application.message", handler);
   };
 }
+
+export function subscribeToAdminCounts(
+  callback: (payload: { pendingApplications?: number; openReports?: number; pendingAchievements?: number }) => void
+): () => void {
+  const socket = getSocket();
+  if (!socket) return () => {};
+
+  const handler = (data: any) => {
+    console.log("[OASIS Realtime] admin.counts received:", data);
+    callback(data);
+  };
+
+  socket.on("admin.counts", handler);
+
+  return () => {
+    socket.off("admin.counts", handler);
+  };
+}
+
+

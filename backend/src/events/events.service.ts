@@ -46,26 +46,37 @@ export class EventsService {
         orderBy: { startAt: 'asc' },
         include: {
           creator: { select: { id: true, profile: { select: { name: true } } } },
+          registrations: { where: { userId: params.viewerId } },
           _count: { select: { registrations: { where: { status: 'registered' } } } },
         },
       }),
     ]);
 
-    const items = events.map((e) => ({
-      id: e.id,
-      title: e.title,
-      description: e.description,
-      startAt: e.startAt,
-      endAt: e.endAt,
-      venueOrLink: e.venueOrLink,
-      meetingLink: e.meetingLink,
-      capacity: e.capacity,
-      waitlistEnabled: e.waitlistEnabled,
-      registrationDeadline: e.registrationDeadline,
-      visibility: e.visibility,
-      status: e.status,
-      registeredCount: e._count.registrations,
-    }));
+    const items = events.map((e) => {
+      const myReg = e.registrations?.[0];
+      const isRegistered = Boolean(
+        myReg && (myReg.status === 'registered' || myReg.status === 'promoted')
+      );
+      const isWaitlisted = Boolean(myReg && myReg.status === 'waitlisted');
+      return {
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        startAt: e.startAt,
+        endAt: e.endAt,
+        venueOrLink: e.venueOrLink,
+        meetingLink: isRegistered ? e.meetingLink : undefined,
+        capacity: e.capacity,
+        waitlistEnabled: e.waitlistEnabled,
+        registrationDeadline: e.registrationDeadline,
+        visibility: e.visibility,
+        status: e.status,
+        registeredCount: e._count.registrations,
+        isRegistered,
+        isWaitlisted,
+        registrationStatus: myReg?.status || null,
+      };
+    });
 
     return { items, total, page, pageSize };
   }

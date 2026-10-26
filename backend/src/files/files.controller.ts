@@ -95,10 +95,20 @@ export class FilesController {
     if (!file || file.status === 'deleted') {
       throw new HttpException({ code: 'NOT_FOUND', message: 'File not found' }, HttpStatus.NOT_FOUND);
     }
+    try {
+      const presignedUrl = await this.storage.getPresignedGetUrl(file.storageKey, 3600);
+      if (presignedUrl.startsWith('http://') || presignedUrl.startsWith('https://')) {
+        return res.redirect(302, presignedUrl);
+      }
+    } catch (_) {}
+
     const { buffer, contentType } = await this.storage.getObject(file.storageKey);
-    res.setHeader('Cache-Control', 'private, no-store');
-    res.setHeader('Content-Type', contentType);
-    if (!file.mimeType.startsWith('image/')) {
+    const correctMime = file.mimeType || contentType || 'application/octet-stream';
+    res.setHeader('Content-Type', correctMime);
+    if (file.mimeType.startsWith('image/')) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    } else {
+      res.setHeader('Cache-Control', 'private, no-store');
       res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
     }
     return res.send(buffer);

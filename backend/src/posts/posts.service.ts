@@ -38,7 +38,7 @@ export class PostsService {
       authorId: { notIn: Array.from(excludedUserIds) },
     };
 
-    if (params.category) {
+    if (params.category && params.category !== 'All') {
       where.category = params.category;
     }
 
@@ -102,6 +102,7 @@ export class PostsService {
         headline: p.author.profile?.headline,
         avatarUrl: p.author.profile?.profilePhotoUrl,
         city: p.author.profile?.city,
+        primaryRole: p.author.primaryRole,
         role: p.author.primaryRole,
       },
       tags: p.tags.map((t) => t.tag.name),
@@ -135,8 +136,9 @@ export class PostsService {
         authorId: userId,
         title: dto.title.trim(),
         body: dto.body.trim(),
-        category: dto.category || 'Question',
+        category: dto.category || 'Collaboration',
         type: dto.type || PostType.question,
+        status: PostStatus.published, // No approval required for posts
       },
     });
 
@@ -151,7 +153,49 @@ export class PostsService {
       }
     }
 
-    return post;
+    const fullPost = await this.prisma.post.findUnique({
+      where: { id: post.id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            primaryRole: true,
+            profile: {
+              select: {
+                name: true,
+                headline: true,
+                profilePhotoUrl: true,
+                city: true,
+              },
+            },
+          },
+        },
+        tags: { include: { tag: true } },
+      },
+    });
+
+    return {
+      id: fullPost!.id,
+      title: fullPost!.title,
+      body: fullPost!.body,
+      category: fullPost!.category,
+      type: fullPost!.type,
+      status: fullPost!.status,
+      isResolved: fullPost!.isResolved,
+      resolvedAnswerId: fullPost!.resolvedAnswerId,
+      createdAt: fullPost!.createdAt,
+      author: {
+        id: fullPost!.author.id,
+        name: fullPost!.author.profile?.name || 'Member',
+        headline: fullPost!.author.profile?.headline,
+        avatarUrl: fullPost!.author.profile?.profilePhotoUrl,
+        city: fullPost!.author.profile?.city,
+        primaryRole: fullPost!.author.primaryRole,
+        role: fullPost!.author.primaryRole,
+      },
+      tags: fullPost!.tags.map((t) => t.tag.name),
+      responseCount: 0,
+    };
   }
 
   async getPostById(postId: string, viewerId: string) {
@@ -185,6 +229,15 @@ export class PostsService {
       body: post.status === 'deleted' ? 'This post has been removed by its author.' : post.body,
       isOwner: post.authorId === viewerId,
       tags: post.tags.map((t) => t.tag.name),
+      author: {
+        id: post.author.id,
+        name: post.author.profile?.name || 'Member',
+        headline: post.author.profile?.headline,
+        avatarUrl: post.author.profile?.profilePhotoUrl,
+        city: post.author.profile?.city,
+        primaryRole: post.author.primaryRole,
+        role: post.author.primaryRole,
+      },
     };
   }
 
@@ -247,6 +300,7 @@ export class PostsService {
                 name: true,
                 headline: true,
                 profilePhotoUrl: true,
+                city: true,
               },
             },
           },
@@ -265,6 +319,8 @@ export class PostsService {
         name: r.author.profile?.name || 'Member',
         headline: r.author.profile?.headline,
         avatarUrl: r.author.profile?.profilePhotoUrl,
+        city: r.author.profile?.city,
+        primaryRole: r.author.primaryRole,
         role: r.author.primaryRole,
       },
     }));

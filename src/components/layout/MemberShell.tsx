@@ -17,7 +17,7 @@ import {
   Plus,
   Compass,
   LogOut,
-  Settings,
+  User,
   Shield,
   ShieldCheck,
   Menu,
@@ -210,6 +210,12 @@ export function MemberShell({ children }: MemberShellProps) {
 
   // Default to locked until authenticated user is confirmed to have active status
   const isLocked = loadingAuth || !user || user.accountStatus !== "active";
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [user?.profilePhotoUrl, user?.avatarUrl]);
 
   useEffect(() => {
     isHydrated = true;
@@ -222,6 +228,9 @@ export function MemberShell({ children }: MemberShellProps) {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === "object" && parsed.id) {
+            const photo = parsed.profilePhotoUrl || parsed.avatarUrl || null;
+            parsed.profilePhotoUrl = photo;
+            parsed.avatarUrl = photo;
             globalSessionUser = parsed;
             if (isMounted) {
               setUser(parsed);
@@ -247,6 +256,16 @@ export function MemberShell({ children }: MemberShellProps) {
       } catch (_) {}
     }
 
+    fetch("/api/v1/profiles/stats", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((json) => {
+        const count = json?.data?.activeMembers;
+        if (typeof count === "number" && isMounted) {
+          setMemberCount(count);
+        }
+      })
+      .catch(() => {});
+
     async function loadUser() {
       // Only show full loading screen if we have no cached session at all (cold initial visit)
       if (!globalSessionUser) {
@@ -268,6 +287,10 @@ export function MemberShell({ children }: MemberShellProps) {
               }
               return;
             }
+
+            const photo = u.profilePhotoUrl || u.avatarUrl || null;
+            u.profilePhotoUrl = photo;
+            u.avatarUrl = photo;
 
             setCachedSession(u);
             setUser(u);
@@ -353,9 +376,24 @@ export function MemberShell({ children }: MemberShellProps) {
     };
     window.addEventListener("oasis:account_unlocked", handleWindowUnlocked);
 
+    // Listen for instant profile photo / user updates
+    const handleUserUpdated = (e: any) => {
+      if (e.detail) {
+        setUser((prev: any) => {
+          if (!prev) return prev;
+          const merged = { ...prev, ...e.detail };
+          setCachedSession(merged);
+          return merged;
+        });
+        setAvatarLoadFailed(false);
+      }
+    };
+    window.addEventListener("oasis:user_updated", handleUserUpdated);
+
     return () => {
       unsubscribe();
       window.removeEventListener("oasis:account_unlocked", handleWindowUnlocked);
+      window.removeEventListener("oasis:user_updated", handleUserUpdated);
     };
   }, []);
 
@@ -481,24 +519,34 @@ export function MemberShell({ children }: MemberShellProps) {
   return (
     <div className="admin-portal dark min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg flex flex-col lg:flex-row relative selection:bg-[#88DECC]/30 selection:text-[#03080B]">
       {/* ── Left Sidebar (Desktop ≥1024px) ────────────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 min-h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-40">
-        <div>
+      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 h-screen h-[100dvh] max-h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
+        <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
           {/* Brand Header */}
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 border-b border-white/10 shrink-0">
             <GlassLogoPill href="/dashboard" />
           </div>
 
           {/* Five Core Destinations Navigation */}
-          <Suspense fallback={<div className="p-3.5 space-y-1.5 h-48" />}>
-            <DesktopNavLinks isLocked={isLocked} />
-          </Suspense>
+          <div className="flex-1 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <Suspense fallback={<div className="p-3.5 space-y-1.5 h-48" />}>
+              <DesktopNavLinks isLocked={isLocked} />
+            </Suspense>
+          </div>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/10 space-y-3">
+        {/* Sidebar Footer — Sticky at bottom so user never needs to scroll to access it */}
+        <div className="p-4 border-t border-white/10 space-y-3 shrink-0 sticky bottom-0 bg-[#070D12]/95 backdrop-blur-2xl z-10 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
           {/* Verified Membership Node Badge */}
           <div className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-[#88DECC] shrink-0" />
+            {isLocked ? (
+              <ShieldCheck className="w-5 h-5 text-[#88DECC]/50 shrink-0" />
+            ) : (
+              <img
+                src="/verified.gif"
+                alt="Verified Member"
+                className="w-5 h-5 object-contain shrink-0 select-none"
+              />
+            )}
             <div className="flex flex-col">
               <span className="text-[11px] font-medium text-[#F5FAF6] leading-tight">
                 {isLocked ? "Pending Verification" : `Verified ${userRole}`}
@@ -512,25 +560,32 @@ export function MemberShell({ children }: MemberShellProps) {
           {isLocked ? (
             <div
               className="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[#ECF1EF]/35 cursor-not-allowed select-none bg-white/[0.02]"
-              title="Settings locked — Pending Admin Approval"
+              title="Profile locked — Pending Admin Approval"
             >
               <div className="flex items-center gap-3">
-                <Settings className="w-4 h-4 text-[#ECF1EF]/30" />
-                <span>Settings & Privacy</span>
+                <User className="w-4 h-4 text-[#ECF1EF]/30" />
+                <span>My Profile</span>
               </div>
               <Lock className="w-3.5 h-3.5 text-[#88DECC]/40" />
             </div>
           ) : (
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-[#ECF1EF]/70 hover:bg-white/[0.04] hover:text-[#F5FAF6] transition-colors duration-200"
-            >
-              <Settings className="w-4 h-4 text-[#ECF1EF]/50" />
-              <span>Settings & Privacy</span>
-            </Link>
+            <div className="space-y-1">
+              <Link
+                href="/profile"
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-colors duration-200",
+                  pathname === "/profile"
+                    ? "bg-white/[0.08] text-[#F5FAF6] font-semibold shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] border-l-2 border-[#88DECC]"
+                    : "text-[#ECF1EF]/70 hover:bg-white/[0.04] hover:text-[#F5FAF6]"
+                )}
+              >
+                <User className="w-4 h-4 text-[#88DECC]" />
+                <span>My Profile</span>
+              </Link>
+            </div>
           )}
           <div className="px-3 text-[10px] text-[#ECF1EF]/40 font-mono tracking-wider">
-            650+ VERIFIED MEMBERS
+            {memberCount !== null ? `${memberCount} VERIFIED MEMBERS` : "VERIFIED MEMBERS"}
           </div>
         </div>
       </aside>
@@ -664,38 +719,61 @@ export function MemberShell({ children }: MemberShellProps) {
                 className="flex items-center gap-2 p-0.5 rounded-full border-2 border-[#88DECC]/40 hover:border-[#88DECC] transition-colors cursor-pointer shadow-[0_0_12px_rgba(136,222,204,0.2)]"
                 title={`${userName} (${userRole})`}
               >
-                <div className="w-8 h-8 rounded-full bg-[#122B2A] text-[#88DECC] text-xs font-semibold flex items-center justify-center font-display shadow-xs">
-                  {userInitials}
+                <div className="w-8 h-8 rounded-full bg-[#122B2A] text-[#88DECC] text-xs font-semibold flex items-center justify-center font-display shadow-xs overflow-hidden">
+                  {(user?.profilePhotoUrl || user?.avatarUrl) && !avatarLoadFailed ? (
+                    <img
+                      src={user?.profilePhotoUrl || user?.avatarUrl}
+                      alt={userName}
+                      className="w-full h-full object-cover"
+                      onError={() => setAvatarLoadFailed(true)}
+                    />
+                  ) : (
+                    userInitials
+                  )}
                 </div>
               </button>
 
               {userMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2.5 w-64 rounded-2xl join-glass-panel border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.85)] py-2 z-50 text-xs text-[#F5FAF6] animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 mt-2.5 w-64 rounded-2xl bg-[#091114] border border-white/15 shadow-[0_24px_60px_rgba(0,0,0,0.98)] py-2 z-50 text-xs text-[#F5FAF6] animate-in fade-in zoom-in-95 duration-100"
                   onClick={() => setUserMenuOpen(false)}
                 >
-                  <div className="px-4 py-3 border-b border-white/10">
-                    <div className="font-semibold text-sm text-[#F5FAF6]">{userName}</div>
-                    <div className="text-[11px] text-[#ECF1EF]/60 flex items-center gap-1.5 mt-1">
-                      <span
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          isLocked ? "bg-amber-400 animate-pulse" : "bg-[#88DECC]"
-                        )}
-                      />
-                      <span>Role: {userRole}</span>
-                      {isLocked && <span className="text-amber-400 font-medium">(Locked)</span>}
+                  <div className="px-4 py-3 border-b border-white/10 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#122B2A] text-[#88DECC] text-xs font-semibold flex items-center justify-center font-display shadow-xs overflow-hidden shrink-0 border border-white/10">
+                      {(user?.profilePhotoUrl || user?.avatarUrl) && !avatarLoadFailed ? (
+                        <img
+                          src={user?.profilePhotoUrl || user?.avatarUrl}
+                          alt={userName}
+                          className="w-full h-full object-cover"
+                          onError={() => setAvatarLoadFailed(true)}
+                        />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm text-[#F5FAF6] truncate">{userName}</div>
+                      <div className="text-[11px] text-[#ECF1EF]/60 flex items-center gap-1.5 mt-0.5">
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            isLocked ? "bg-amber-400 animate-pulse" : "bg-[#88DECC]"
+                          )}
+                        />
+                        <span>Role: {userRole}</span>
+                        {isLocked && <span className="text-amber-400 font-medium">(Locked)</span>}
+                      </div>
                     </div>
                   </div>
 
                   {!isLocked && (
                     <div className="p-1.5 space-y-0.5">
                       <Link
-                        href="/settings"
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/[0.06] text-[#F5FAF6] transition-colors"
+                        href="/profile"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/[0.08] text-[#88DECC] hover:text-white transition-colors"
                       >
-                        <Settings className="w-4 h-4 text-[#ECF1EF]/60" />
-                        Settings & Privacy
+                        <User className="w-4 h-4 text-[#88DECC]" />
+                        <span className="font-medium text-[#F5FAF6]">My Profile</span>
                       </Link>
                     </div>
                   )}
@@ -772,7 +850,7 @@ export function MemberShell({ children }: MemberShellProps) {
                       { href: "/people", name: "People & Verified Mentors" },
                       { href: "/events", name: "Events & Offline Meetups" },
                       { href: "/planner", name: "Planner & Milestone Calendar" },
-                      { href: "/settings", name: "Privacy & Account Settings" },
+                      { href: "/profile", name: "My Profile" },
                     ]
                       .filter((d) =>
                         d.name.toLowerCase().includes(commandSearch.toLowerCase())
@@ -836,8 +914,8 @@ export function MemberShell({ children }: MemberShellProps) {
             className="w-[280px] sm:w-[320px] bg-[#070D12]/95 backdrop-blur-2xl text-[#F5FAF6] flex flex-col justify-between h-full p-5 pt-[max(1.25rem,env(safe-area-inset-top,0px))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-r border-white/10 shadow-2xl animate-in slide-in-from-left duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 shrink-0">
                 <GlassLogoPill href="/dashboard" />
                 <button
                   type="button"
@@ -849,14 +927,22 @@ export function MemberShell({ children }: MemberShellProps) {
                 </button>
               </div>
 
-              <div className="pt-4" onClick={() => setMobileDrawerOpen(false)}>
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pt-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" onClick={() => setMobileDrawerOpen(false)}>
                 <DesktopNavLinks isLocked={isLocked} />
               </div>
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-white/10">
+            <div className="space-y-3 pt-4 border-t border-white/10 shrink-0 sticky bottom-0 bg-[#070D12]">
               <div className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-[#88DECC] shrink-0" />
+                {isLocked ? (
+                  <ShieldCheck className="w-5 h-5 text-[#88DECC]/50 shrink-0" />
+                ) : (
+                  <img
+                    src="/verified.gif"
+                    alt="Verified Member"
+                    className="w-5 h-5 object-contain shrink-0 select-none"
+                  />
+                )}
                 <div className="flex flex-col">
                   <span className="text-[11px] font-medium text-[#F5FAF6] leading-tight">
                     {isLocked ? "Pending Verification" : `Verified ${userRole}`}
@@ -869,12 +955,12 @@ export function MemberShell({ children }: MemberShellProps) {
 
               {!isLocked && (
                 <Link
-                  href="/settings"
+                  href="/profile"
                   onClick={() => setMobileDrawerOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-[#ECF1EF]/75 hover:bg-white/5 hover:text-white transition-colors"
                 >
-                  <Settings className="w-4 h-4 text-[#ECF1EF]/50" />
-                  <span>Settings & Privacy</span>
+                  <User className="w-4 h-4 text-[#88DECC]" />
+                  <span>My Profile</span>
                 </Link>
               )}
 

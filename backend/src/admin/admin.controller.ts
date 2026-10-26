@@ -166,6 +166,12 @@ export class AdminController {
     return this.adminService.getMemberById(id);
   }
 
+  @UseGuards(AdminGuard)
+  @Get('members/:id/documents')
+  async getMemberDocuments(@Param('id') id: string) {
+    return this.adminService.getMemberDocuments(id);
+  }
+
   @UseGuards(AdminGuard, AdminLevelGuard)
   @RequireAdminLevel(AdminLevel.super_admin)
   @Patch('members/:id/role')
@@ -625,6 +631,36 @@ export class AdminController {
     return ann;
   }
 
+  @UseGuards(AdminGuard)
+  @Patch('announcements/:id')
+  async updateAnnouncement(
+    @Param('id') id: string,
+    @Body() body: { title?: string; body?: string; targetRoles?: string[]; expiresAt?: string | null },
+  ) {
+    const data: any = {};
+    if (body.title !== undefined) data.title = body.title.trim();
+    if (body.body !== undefined) data.body = body.body.trim();
+    if (body.targetRoles !== undefined) data.targetRoles = body.targetRoles;
+    if (body.expiresAt !== undefined) {
+      data.expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+    }
+
+    const updated = await this.prisma.announcement.update({
+      where: { id },
+      data,
+    });
+    this.realtime.emitToMembers('announcement.updated', { announcementId: id });
+    return updated;
+  }
+
+  @UseGuards(AdminGuard)
+  @Delete('announcements/:id')
+  async deleteAnnouncement(@Param('id') id: string) {
+    await this.prisma.announcement.delete({ where: { id } });
+    this.realtime.emitToMembers('announcement.removed', { announcementId: id });
+    return { ok: true, message: 'Announcement deleted' };
+  }
+
   // 10. Taxonomy (Tags & Merge)
   @UseGuards(AdminGuard)
   @Post('taxonomy/tags')
@@ -842,13 +878,46 @@ export class AdminController {
   @RequireAdminLevel(AdminLevel.super_admin)
   @Get('settings')
   async getSettings() {
-    return this.prisma.setting.findMany();
+    let settings = await this.prisma.setting.findMany();
+    if (settings.length === 0) {
+      const defaults = [
+        { key: 'cooling_off_days', value: '30' },
+        { key: 'invite_expiry_days', value: '14' },
+        { key: 'inactivity_warning_months', value: '12' },
+        { key: 'inactivity_deactivate_months', value: '15' },
+        { key: 'application_retention_days', value: '90' },
+        { key: 'report_retention_days', value: '365' },
+        { key: 'audit_retention_days', value: '1095' },
+        { key: 'max_connection_requests_24h', value: '10' },
+        { key: 'connection_expiry_days', value: '14' },
+        { key: 'connection_cooldown_days', value: '7' },
+        { key: 'achievement_expiry_hours', value: '24' },
+        { key: 'min_age', value: '18' },
+        { key: 'support_email', value: 'support@oasis.community' },
+        { key: 'grievance_email', value: 'grievance@oasis.community' },
+        { key: 'oversight_email', value: 'oversight@oasis.community' },
+        { key: 'app_name', value: 'OASIS' },
+      ];
+      for (const d of defaults) {
+        await this.prisma.setting.upsert({
+          where: { key: d.key },
+          update: { value: d.value },
+          create: d,
+        });
+      }
+      settings = await this.prisma.setting.findMany();
+    }
+    return settings;
   }
 
   @UseGuards(AdminGuard, AdminLevelGuard)
   @RequireAdminLevel(AdminLevel.super_admin)
   @Put('settings')
-  async updateSettings(@Body() body: Record<string, string>) {
+  async updateSettings(
+    @CurrentUser('id') adminId: string,
+    @Body() body: Record<string, string>,
+    @Req() req: Request,
+  ) {
     for (const [key, value] of Object.entries(body)) {
       await this.prisma.setting.upsert({
         where: { key },
@@ -856,6 +925,18 @@ export class AdminController {
         create: { key, value: String(value) },
       });
     }
+
+    await this.prisma.auditLog.create({
+      data: {
+        actorId: adminId,
+        action: 'settings.update',
+        targetType: 'setting',
+        targetId: 'global',
+        metadata: body,
+        ipAddress: req.ip || req.socket?.remoteAddress || null,
+      },
+    }).catch(() => null);
+
     return this.prisma.setting.findMany();
   }
 

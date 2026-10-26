@@ -29,6 +29,9 @@ export class SearchService {
     const excludedUserIds = new Set(
       blocks.map((b) => (b.blockerId === params.viewerId ? b.blockedId : b.blockerId)),
     );
+    if (params.viewerId) {
+      excludedUserIds.add(params.viewerId);
+    }
 
     let peopleItems: any[] = [];
     let peopleTotal = 0;
@@ -45,6 +48,7 @@ export class SearchService {
       const wherePeople: any = {
         user: {
           accountStatus: 'active',
+          adminLevel: null,
           id: { notIn: Array.from(excludedUserIds) },
         },
       };

@@ -41,8 +41,8 @@ export default function AdminOverviewPage() {
     try {
       setLoading(true);
       const [overviewRes, appsRes] = await Promise.all([
-        fetch("/api/v1/admin/overview"),
-        fetch("/api/v1/admin/applications?status=pending&pageSize=1"),
+        fetch(`/api/v1/admin/overview?_t=${Date.now()}`, { cache: "no-store" }),
+        fetch("/api/v1/admin/applications?status=pending&pageSize=1", { cache: "no-store" }),
       ]);
 
       if (overviewRes.ok) {

@@ -20,12 +20,16 @@ interface NotificationDeliveryRecord {
   id: string;
   readAt: string | null;
   createdAt: string;
-  notification: {
-    id: string;
-    type: string;
-    title: string;
-    body: string;
-    actionUrl?: string;
+  type?: string;
+  title?: string;
+  body?: string;
+  actionUrl?: string | null;
+  notification?: {
+    id?: string;
+    type?: string;
+    title?: string;
+    body?: string;
+    actionUrl?: string | null;
   };
 }
 
@@ -136,6 +140,14 @@ export default function NotificationsPage() {
           <div className="divide-y divide-[#EAE1CF]/70 dark:divide-[#2C2E4A]/80 border border-[#EAE1CF] dark:border-[#2C2E4A]/90 rounded-3xl bg-[var(--surface)] backdrop-blur-md shadow-xs overflow-hidden">
             {notifications.map((item) => {
               const isUnread = !item.readAt;
+              const type = item.type || item.notification?.type || "general";
+              const title = item.title || item.notification?.title || "Notification";
+              const body = item.body || item.notification?.body;
+              const actionUrl =
+                item.actionUrl ||
+                item.notification?.actionUrl ||
+                (type.includes("connection") ? "/people" : undefined);
+
               return (
                 <div
                   key={item.id}
@@ -146,7 +158,7 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[#EAE1CF] dark:border-[#2C2E4A] flex items-center justify-center shrink-0 shadow-2xs">
-                    {getIcon(item.notification.type)}
+                    {getIcon(type)}
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-1.5">
@@ -158,7 +170,7 @@ export default function NotificationsPage() {
                             : "font-normal text-[var(--text)]"
                         }`}
                       >
-                        {item.notification.title}
+                        {title}
                       </p>
                       <span className="text-[10px] font-mono text-[var(--muted)] whitespace-nowrap">
                         {new Date(item.createdAt).toLocaleDateString("en-IN", {
@@ -168,16 +180,16 @@ export default function NotificationsPage() {
                       </span>
                     </div>
 
-                    {item.notification.body && (
+                    {body && (
                       <p className="text-xs text-[var(--muted)] leading-relaxed font-sans">
-                        {item.notification.body}
+                        {body}
                       </p>
                     )}
 
-                    {item.notification.actionUrl && (
+                    {actionUrl && (
                       <div className="pt-1">
                         <Link
-                          href={item.notification.actionUrl}
+                          href={actionUrl}
                           className="inline-flex items-center gap-1.5 text-xs font-medium text-[#86601F] dark:text-[#F3D3A2] hover:underline"
                         >
                           <span>Review Signal</span>
