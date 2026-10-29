@@ -40,9 +40,9 @@ function LinkedinIcon({ className }: { className?: string }) {
 
 interface MemberRecord {
   id: string;
-  name: string;
+  name?: string | null;
   email: string;
-  role: string;
+  role?: string | null;
   status: string;
   adminLevel?: string | null;
   mentorVerified?: boolean;
@@ -173,7 +173,7 @@ export default function AdminMembersPage() {
 
       setFeedback({
         type: "success",
-        message: `Successfully issued ${restrictionType} enforcement against ${selectedMember.name}.`,
+        message: `Successfully issued ${restrictionType} enforcement against ${selectedMember.name || "member"}.`,
       });
       setRestrictionDrawerOpen(false);
       setRestrictionReason("");
@@ -209,7 +209,7 @@ export default function AdminMembersPage() {
 
       setFeedback({
         type: "success",
-        message: `Successfully updated ${selectedMember.name}'s role to ${newRole.replace("_", " ")}.`,
+        message: `Successfully updated ${selectedMember.name || "member"}'s role to ${(newRole || "founder").replace(/_/g, " ")}.`,
       });
       setRoleChangeModalOpen(false);
       setSelectedMember(null);
@@ -244,8 +244,8 @@ export default function AdminMembersPage() {
       setFeedback({
         type: "success",
         message: nextStatus
-          ? `Granted Verified Mentor status to ${member.name}.`
-          : `Revoked Verified Mentor status for ${member.name}.`,
+          ? `Granted Verified Mentor status to ${member.name || "member"}.`
+          : `Revoked Verified Mentor status for ${member.name || "member"}.`,
       });
       await fetchData();
       setTimeout(() => setFeedback(null), 5000);
@@ -291,10 +291,13 @@ export default function AdminMembersPage() {
 
   const filteredMembers = members.filter((m) => {
     if (m.adminLevel === "super_admin") return false;
+    const nameStr = m.name || "";
+    const emailStr = m.email || "";
     const matchesSearch =
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.email.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleFilter === "all" || m.role === roleFilter;
+      nameStr.toLowerCase().includes(search.toLowerCase()) ||
+      emailStr.toLowerCase().includes(search.toLowerCase());
+    const memberRole = m.role || "member";
+    const matchesRole = roleFilter === "all" || memberRole === roleFilter;
     return matchesSearch && matchesRole;
   });
 
@@ -422,11 +425,11 @@ export default function AdminMembersPage() {
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full bg-[#141522] border border-white/10 flex items-center justify-center font-display font-medium text-xs text-[#F3D3A2]">
-                              {member.name.slice(0, 2).toUpperCase()}
+                              {(member.name || member.email || "Member").slice(0, 2).toUpperCase()}
                             </div>
                             <div>
                               <div className="font-medium text-white flex items-center gap-1.5">
-                                {member.name}
+                                {member.name || "Member"}
                                 {member.mentorVerified && (
                                   <span title="Verified Mentor">
                                     <ShieldCheck className="w-3.5 h-3.5 text-[#F3D3A2]" />
@@ -443,7 +446,7 @@ export default function AdminMembersPage() {
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
                             <span className="capitalize text-white">
-                              {member.role.replace("_", " ")}
+                              {(member.role || "member").replace(/_/g, " ")}
                             </span>
                             {member.role === "mentor" && (
                               <button
@@ -468,23 +471,25 @@ export default function AdminMembersPage() {
                           <span
                             className={cn(
                               "px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold",
-                              member.status === "active"
+                              (member.status || "active") === "active"
                                 ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800"
                                 : member.status === "warned"
                                 ? "bg-amber-950/60 text-amber-300 border border-amber-800"
                                 : "bg-rose-950/60 text-rose-400 border border-rose-800"
                             )}
                           >
-                            {member.status}
+                            {member.status || "active"}
                           </span>
                         </td>
 
                         <td className="py-3.5 px-4 font-mono text-[#A9A7C4]">
-                          {new Date(member.createdAt).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                          {member.createdAt
+                            ? new Date(member.createdAt).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "—"}
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
@@ -504,7 +509,7 @@ export default function AdminMembersPage() {
                                 variant="outline"
                                 onClick={() => {
                                   setSelectedMember(member);
-                                  setNewRole(member.role as any);
+                                  setNewRole((member.role as any) || "founder");
                                   setRoleChangeModalOpen(true);
                                 }}
                                 className="border-white/15 text-white hover:bg-white/5 text-[11px] h-7 gap-1"
@@ -643,7 +648,7 @@ export default function AdminMembersPage() {
               Reassign Member Role
             </h3>
             <p className="text-xs text-[#A9A7C4] mb-4">
-              Updating primary community standing for <strong className="text-white">{selectedMember.name}</strong>.
+              Updating primary community standing for <strong className="text-white">{selectedMember.name || selectedMember.email}</strong>.
             </p>
 
             <form onSubmit={handleChangeRole} className="space-y-4">
@@ -708,7 +713,7 @@ export default function AdminMembersPage() {
                   Issue Progressive Enforcement
                 </h3>
                 <p className="text-[11px] text-[#A9A7C4]">
-                  Enforce safety policy against <strong className="text-white">{selectedMember.name}</strong> ({selectedMember.email}).
+                  Enforce safety policy against <strong className="text-white">{selectedMember.name || selectedMember.email}</strong> ({selectedMember.email}).
                 </p>
               </div>
             </div>
@@ -809,16 +814,16 @@ export default function AdminMembersPage() {
                     {viewingMember?.profile?.profilePhotoUrl ? (
                       <img
                         src={viewingMember.profile.profilePhotoUrl}
-                        alt={selectedMember.name}
+                        alt={selectedMember.name || "Member"}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      selectedMember.name.slice(0, 2).toUpperCase()
+                      (selectedMember.name || selectedMember.email || "Member").slice(0, 2).toUpperCase()
                     )}
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-display text-lg sm:text-xl font-medium text-white flex items-center gap-2">
-                      {selectedMember.name}
+                      {selectedMember.name || "Member"}
                       {selectedMember.mentorVerified && (
                         <ShieldCheck className="w-4 h-4 text-[#F3D3A2]" />
                       )}
@@ -826,10 +831,10 @@ export default function AdminMembersPage() {
                     <p className="text-xs text-[#A9A7C4] font-mono mt-0.5">{selectedMember.email}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase bg-white/10 text-white font-semibold">
-                        {selectedMember.role.replace("_", " ")}
+                        {(selectedMember.role || "member").replace(/_/g, " ")}
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase bg-emerald-950/70 text-emerald-300 border border-emerald-800">
-                        {selectedMember.status}
+                        {selectedMember.status || "active"}
                       </span>
                     </div>
                   </div>

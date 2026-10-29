@@ -743,7 +743,7 @@ export class AdminService {
       id: u.id,
       email: u.email,
       name: u.profile?.name || 'Member',
-      role: u.primaryRole,
+      role: u.primaryRole || 'member',
       status: u.accountStatus,
       adminLevel: u.adminLevel,
       mentorVerified: u.profile?.mentorVerified,

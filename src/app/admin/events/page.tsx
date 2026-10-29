@@ -621,7 +621,7 @@ export default function AdminEventsPage() {
                         {evt.status}
                       </span>
                       <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-white/[0.04] text-[#ECF1EF]/60 border border-white/10">
-                        {evt.visibility.replace("_", " ")}
+                        {(evt.visibility || "").replace(/_/g, " ")}
                       </span>
                     </div>
 
@@ -1388,7 +1388,7 @@ export default function AdminEventsPage() {
                   Audience Scope
                 </span>
                 <span className="text-xs font-medium text-[#F3D3A2] capitalize mt-1 block truncate">
-                  {selectedEventForAttendees.visibility.replace(/_/g, " ")}
+                  {(selectedEventForAttendees.visibility || "").replace(/_/g, " ")}
                 </span>
               </div>
             </div>

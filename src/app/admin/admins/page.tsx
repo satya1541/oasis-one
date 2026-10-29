@@ -308,7 +308,7 @@ export default function AdminUsersPage() {
                           )}
                         >
                           <ShieldCheck className="w-3 h-3 text-[#F3D3A2]" />
-                          <span>{admin.adminLevel.replace("_", " ")}</span>
+                          <span>{(admin.adminLevel || "admin").replace(/_/g, " ")}</span>
                         </span>
                       </td>
                       <td className="py-3.5 px-4">

@@ -130,7 +130,7 @@ export default function AdminAchievementsPage() {
                           : "bg-amber-500/10 text-amber-300 border-amber-500/30"
                       }`}
                     >
-                      {item.status.replace("_", " ")}
+                      {(item.status || "pending").replace(/_/g, " ")}
                     </span>
                   </div>
                   <div className="text-xs font-mono text-[#ECF1EF]/60">
