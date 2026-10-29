@@ -1112,4 +1112,22 @@ export class AdminController {
     res.setHeader('Content-Disposition', `attachment; filename="oasis_audit_log_${Date.now()}.csv"`);
     res.send(csvData);
   }
+
+  @UseGuards(AdminGuard, AdminLevelGuard)
+  @RequireAdminLevel(AdminLevel.super_admin)
+  @Post('audit-logs/archive')
+  async triggerAuditArchive(
+    @CurrentUser('id') adminId: string,
+    @Body('retentionDays') retentionDays?: number,
+  ) {
+    const days = retentionDays && Number(retentionDays) > 0 ? Number(retentionDays) : 7;
+    return this.adminService.triggerAuditArchive(days, adminId);
+  }
+
+  @UseGuards(AdminGuard, AdminLevelGuard)
+  @RequireAdminLevel(AdminLevel.super_admin)
+  @Get('audit-logs/archives')
+  async getAuditArchives() {
+    return this.adminService.getAuditArchives();
+  }
 }

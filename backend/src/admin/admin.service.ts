@@ -1211,4 +1211,12 @@ export class AdminService {
 
     return csvOutput;
   }
+
+  async triggerAuditArchive(retentionDays: number, adminId: string) {
+    return this.audit.archiveOldLogsToS3(retentionDays, adminId);
+  }
+
+  async getAuditArchives() {
+    return this.audit.getArchivesList();
+  }
 }

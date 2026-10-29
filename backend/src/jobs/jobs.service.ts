@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { RealtimeService } from '../realtime/realtime.service';
+import { AuditService } from '../audit/audit.service';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface EnqueueJobOptions {
@@ -15,12 +16,14 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(JobsService.name);
   private isRunning = false;
   private workerInterval: NodeJS.Timeout | null = null;
+  private archiveInterval: NodeJS.Timeout | null = null;
   private readonly workerId = `worker-${uuidv4().slice(0, 8)}`;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
     private readonly realtimeService: RealtimeService,
+    private readonly auditService: AuditService,
   ) {}
 
   onModuleInit() {
@@ -50,6 +53,15 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
         this.logger.error(`Error in job processor loop: ${err.message}`);
       });
     }, 5000);
+
+    // Initial audit archival run 30s after startup, recurring every 24 hours
+    setTimeout(() => {
+      this.runAuditArchivalMaintenance();
+    }, 30000);
+
+    this.archiveInterval = setInterval(() => {
+      this.runAuditArchivalMaintenance();
+    }, 24 * 60 * 60 * 1000);
   }
 
   private stopWorker() {
@@ -57,7 +69,21 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
     if (this.workerInterval) {
       clearInterval(this.workerInterval);
     }
+    if (this.archiveInterval) {
+      clearInterval(this.archiveInterval);
+    }
     this.logger.log(`Background Job Worker stopped (${this.workerId})`);
+  }
+
+  private async runAuditArchivalMaintenance() {
+    if (!this.isRunning) return;
+    try {
+      this.logger.log('Executing automated 7-day audit log archival to S3...');
+      const result = await this.auditService.archiveOldLogsToS3(7, 'system.cron');
+      this.logger.log(`Automated S3 audit archival: ${result.message}`);
+    } catch (err: any) {
+      this.logger.error(`Automated S3 audit archival failed: ${err.message}`, err.stack);
+    }
   }
 
   private async processNextJobs() {
@@ -201,6 +227,13 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
             accountStatus: 'active',
           });
         }
+        break;
+
+      case 'audit_archive_s3':
+        await this.auditService.archiveOldLogsToS3(
+          payload.retentionDays || 7,
+          payload.triggeredBy || 'job_worker',
+        );
         break;
 
       default:
