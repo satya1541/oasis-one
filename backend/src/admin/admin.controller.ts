@@ -637,6 +637,11 @@ export class AdminController {
     @Param('id') id: string,
     @Body() body: { title?: string; body?: string; targetRoles?: string[]; expiresAt?: string | null },
   ) {
+    const existing = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!existing) {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Announcement not found' }, HttpStatus.NOT_FOUND);
+    }
+
     const data: any = {};
     if (body.title !== undefined) data.title = body.title.trim();
     if (body.body !== undefined) data.body = body.body.trim();
@@ -656,6 +661,11 @@ export class AdminController {
   @UseGuards(AdminGuard)
   @Delete('announcements/:id')
   async deleteAnnouncement(@Param('id') id: string) {
+    const existing = await this.prisma.announcement.findUnique({ where: { id } });
+    if (!existing) {
+      return { ok: true, message: 'Announcement already removed' };
+    }
+
     await this.prisma.announcement.delete({ where: { id } });
     this.realtime.emitToMembers('announcement.removed', { announcementId: id });
     return { ok: true, message: 'Announcement deleted' };

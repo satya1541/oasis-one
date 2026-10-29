@@ -201,9 +201,18 @@ export default function AdminAnnouncementsPage() {
           message: "Announcement expired and removed from member dashboards.",
         });
         setTimeout(() => setNotice(null), 3000);
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        setNotice({
+          type: "error",
+          message: errJson.error?.message || errJson.message || "Failed to expire announcement",
+        });
       }
-    } catch {
-      alert("Failed to expire announcement");
+    } catch (err: any) {
+      setNotice({
+        type: "error",
+        message: err.message || "Failed to expire announcement",
+      });
     }
   };
 
@@ -223,9 +232,18 @@ export default function AdminAnnouncementsPage() {
           message: "Announcement reactivated for 7 days on member dashboards.",
         });
         setTimeout(() => setNotice(null), 3000);
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        setNotice({
+          type: "error",
+          message: errJson.error?.message || errJson.message || "Failed to reactivate announcement",
+        });
       }
-    } catch {
-      alert("Failed to reactivate announcement");
+    } catch (err: any) {
+      setNotice({
+        type: "error",
+        message: err.message || "Failed to reactivate announcement",
+      });
     }
   };
 
@@ -267,10 +285,16 @@ export default function AdminAnnouncementsPage() {
         setTimeout(() => setNotice(null), 3000);
       } else {
         const errJson = await res.json().catch(() => ({}));
-        alert(errJson.error?.message || "Failed to update announcement");
+        setNotice({
+          type: "error",
+          message: errJson.error?.message || errJson.message || "Failed to update announcement",
+        });
       }
     } catch (err: any) {
-      alert(err.message || "Failed to update announcement");
+      setNotice({
+        type: "error",
+        message: err.message || "Failed to update announcement",
+      });
     } finally {
       setUpdating(false);
     }
@@ -293,10 +317,19 @@ export default function AdminAnnouncementsPage() {
         });
         setTimeout(() => setNotice(null), 3000);
       } else {
-        alert("Failed to delete announcement");
+        const errJson = await res.json().catch(() => ({}));
+        setNotice({
+          type: "error",
+          message: errJson.error?.message || errJson.message || `Failed to delete announcement (${res.status})`,
+        });
+        setDeletingId(null);
       }
-    } catch {
-      alert("Failed to delete announcement");
+    } catch (err: any) {
+      setNotice({
+        type: "error",
+        message: err.message || "Failed to delete announcement",
+      });
+      setDeletingId(null);
     } finally {
       setIsDeleting(false);
     }
