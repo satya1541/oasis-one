@@ -243,7 +243,7 @@ export class AdminService {
   // APPLICATIONS REVIEW & DECISIONS
   // ----------------------------------------------------
 
-  async getApplications(status?: string, page = 1, pageSize = 20) {
+  async getApplications(status?: string, page = 1, pageSize = 200) {
     const skip = (page - 1) * pageSize;
     const where: any = {
       user: {
@@ -254,40 +254,91 @@ export class AdminService {
       where.status = status as ApplicationStatus;
     }
 
-    const [total, applications] = await Promise.all([
-      this.prisma.application.count({ where }),
-      this.prisma.application.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy: [{ expedited: 'desc' }, { submittedAt: 'asc' }],
-        include: {
-          user: {
+    const applicationInclude = {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          primaryRole: true,
+          emailVerified: true,
+          createdAt: true,
+          profile: {
             select: {
-              id: true,
-              email: true,
-              primaryRole: true,
-              emailVerified: true,
-              createdAt: true,
-              profile: {
-                select: {
-                  name: true,
-                  city: true,
-                  state: true,
-                  headline: true,
-                },
-              },
-            },
-          },
-          claimant: {
-            select: {
-              id: true,
-              profile: { select: { name: true } },
+              name: true,
+              city: true,
+              state: true,
+              headline: true,
             },
           },
         },
+      },
+      claimant: {
+        select: {
+          id: true,
+          profile: { select: { name: true } },
+        },
+      },
+    };
+
+    let applications: any[] = [];
+    const [total, statusGroupCounts] = await Promise.all([
+      this.prisma.application.count({ where }),
+      this.prisma.application.groupBy({
+        by: ['status'],
+        where: { user: { id: { not: '' } } },
+        _count: { id: true },
       }),
     ]);
+
+    if (!status || status === 'all') {
+      // Prioritize actionable applications (pending & info_requested) so they are never truncated by older approved/rejected records
+      const [actionableApps, otherApps] = await Promise.all([
+        this.prisma.application.findMany({
+          where: { ...where, status: { in: ['pending', 'info_requested'] as ApplicationStatus[] } },
+          include: applicationInclude,
+          orderBy: [{ expedited: 'desc' }, { submittedAt: 'asc' }],
+        }),
+        this.prisma.application.findMany({
+          where: { ...where, status: { notIn: ['pending', 'info_requested'] as ApplicationStatus[] } },
+          skip,
+          take: pageSize,
+          include: applicationInclude,
+          orderBy: [{ submittedAt: 'desc' }],
+        }),
+      ]);
+      applications = [...actionableApps, ...otherApps];
+    } else {
+      applications = await this.prisma.application.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: status === 'pending'
+          ? [{ expedited: 'desc' }, { submittedAt: 'asc' }]
+          : [{ submittedAt: 'desc' }],
+        include: applicationInclude,
+      });
+    }
+
+    const statusCounts: Record<string, number> = {
+      pending: 0,
+      info_requested: 0,
+      approved: 0,
+      rejected: 0,
+      withdrawn: 0,
+      total: 0,
+    };
+    for (const g of statusGroupCounts) {
+      statusCounts[g.status] = g._count.id;
+      statusCounts.total += g._count.id;
+    }
+
+    const statusPriority: Record<string, number> = {
+      pending: 0,
+      info_requested: 1,
+      approved: 2,
+      rejected: 3,
+      withdrawn: 4,
+    };
 
     const items = applications
       .filter((a) => !!a.user)
@@ -305,9 +356,20 @@ export class AdminService {
         claimedById: a.claimedBy,
         claimedAt: a.claimedAt,
         submittedAt: a.submittedAt,
-      }));
+      }))
+      .sort((a, b) => {
+        if (!status || status === 'all') {
+          const prioA = statusPriority[a.status] ?? 99;
+          const prioB = statusPriority[b.status] ?? 99;
+          if (prioA !== prioB) return prioA - prioB;
+        }
+        if (a.expedited !== b.expedited) return a.expedited ? -1 : 1;
+        const timeA = new Date(a.submittedAt).getTime();
+        const timeB = new Date(b.submittedAt).getTime();
+        return timeA - timeB;
+      });
 
-    return { items, total, page, pageSize };
+    return { items, total, statusCounts, page, pageSize };
   }
 
   async getApplicationById(appId: string) {
@@ -701,7 +763,7 @@ export class AdminService {
     pageSize?: number;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
-    const pageSize = Math.min(50, Math.max(1, Number(params.pageSize) || 20));
+    const pageSize = Math.min(500, Math.max(1, Number(params.pageSize) || 200));
     const skip = (page - 1) * pageSize;
 
     const where: any = {

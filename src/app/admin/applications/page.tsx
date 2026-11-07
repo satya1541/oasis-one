@@ -69,6 +69,13 @@ const REQUEST_INFO_PRESETS = [
 
 export default function AdminApplicationReviewPage() {
   const [applications, setApplications] = useState<ApplicationListItem[]>([]);
+  const [statusCounts, setStatusCounts] = useState<{
+    pending: number;
+    info_requested: number;
+    approved: number;
+    rejected: number;
+    total: number;
+  }>({ pending: 0, info_requested: 0, approved: 0, rejected: 0, total: 0 });
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
   const [currentApp, setCurrentApp] = useState<any>(null);
   const [loadingList, setLoadingList] = useState(true);
@@ -106,14 +113,19 @@ export default function AdminApplicationReviewPage() {
   const fetchApplications = async () => {
     try {
       setLoadingList(true);
-      const res = await fetch("/api/v1/admin/applications");
+      const res = await fetch("/api/v1/admin/applications?pageSize=500");
       if (res.ok) {
         const json = await res.json();
         const list: ApplicationListItem[] = Array.isArray(json.data)
           ? json.data
           : json.data?.items || [];
         setApplications(list);
-        const pCount = list.filter((a) => a.status === "pending").length;
+        if (json.data?.statusCounts) {
+          setStatusCounts(json.data.statusCounts);
+        }
+        const pCount =
+          json.data?.statusCounts?.pending ??
+          list.filter((a) => a.status === "pending").length;
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("admin-counts-update", {
@@ -136,14 +148,16 @@ export default function AdminApplicationReviewPage() {
   // Synchronize sidebar badge count with current application state
   useEffect(() => {
     if (!loadingList && typeof window !== "undefined") {
-      const pCount = applications.filter((a) => a.status === "pending").length;
+      const pCount =
+        statusCounts.pending ||
+        applications.filter((a) => a.status === "pending").length;
       window.dispatchEvent(
         new CustomEvent("admin-counts-update", {
           detail: { pendingApplications: pCount },
         })
       );
     }
-  }, [applications, loadingList]);
+  }, [applications, statusCounts, loadingList]);
 
 
   // 2. Fetch selected application detail
@@ -351,10 +365,19 @@ export default function AdminApplicationReviewPage() {
   }, [filteredApplications, selectedAppId, loadingList]);
 
   // Counts
-  const pendingCount = applications.filter((a) => a.status === "pending").length;
-  const infoReqCount = applications.filter((a) => a.status === "info_requested").length;
-  const approvedCount = applications.filter((a) => a.status === "approved").length;
-  const rejectedCount = applications.filter((a) => a.status === "rejected").length;
+  const pendingCount =
+    statusCounts.pending ||
+    applications.filter((a) => a.status === "pending").length;
+  const infoReqCount =
+    statusCounts.info_requested ||
+    applications.filter((a) => a.status === "info_requested").length;
+  const approvedCount =
+    statusCounts.approved ||
+    applications.filter((a) => a.status === "approved").length;
+  const rejectedCount =
+    statusCounts.rejected ||
+    applications.filter((a) => a.status === "rejected").length;
+  const totalCount = statusCounts.total || applications.length;
 
   const getInitials = (nameStr?: string) => {
     if (!nameStr) return "AP";
@@ -466,7 +489,7 @@ export default function AdminApplicationReviewPage() {
                 : "text-[#ECF1EF]/60 hover:text-white"
             )}
           >
-            All ({applications.length})
+            All ({totalCount})
           </button>
         </div>
       </div>

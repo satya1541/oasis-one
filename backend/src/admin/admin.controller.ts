@@ -77,10 +77,11 @@ export class AdminController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
+    const size = pageSize ? Math.min(1000, Math.max(1, parseInt(pageSize, 10))) : 500;
     return this.adminService.getApplications(
       status,
       page ? parseInt(page, 10) : 1,
-      pageSize ? parseInt(pageSize, 10) : 20,
+      size,
     );
   }
 
@@ -151,12 +152,13 @@ export class AdminController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
+    const size = pageSize ? Math.min(500, Math.max(1, parseInt(pageSize, 10))) : 200;
     return this.adminService.getMembers({
       q,
       role,
       status,
       page: page ? parseInt(page, 10) : 1,
-      pageSize: pageSize ? parseInt(pageSize, 10) : 20,
+      pageSize: size,
     });
   }
 

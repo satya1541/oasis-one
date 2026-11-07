@@ -98,7 +98,7 @@ export default function AdminMembersPage() {
       setLoading(true);
       const [meRes, membersRes, changesRes] = await Promise.all([
         fetch("/api/v1/auth/me"),
-        fetch("/api/v1/admin/members"),
+        fetch("/api/v1/admin/members?pageSize=200"),
         fetch("/api/v1/admin/profile-changes"),
       ]);
 
