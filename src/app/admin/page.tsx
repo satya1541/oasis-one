@@ -103,7 +103,7 @@ export default function AdminOverviewPage() {
             Governance Console
           </h1>
           <p className="join-hero-subhead text-xs sm:text-sm text-[#ECF1EF]/70 font-sans max-w-2xl leading-relaxed font-normal">
-            Real-time applicant triage, audit trails, and ecosystem verification oversight for Odisha founders.
+            Real-time admissions review, audit trails, and ecosystem verification oversight for Odisha founders.
           </p>
         </div>
 
@@ -138,12 +138,15 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Triage Queue */}
-        <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#F3D3A2]/40 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+        {/* Card 2: Pending Applications */}
+        <Link
+          href="/admin/applications?status=pending"
+          className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#F3D3A2]/40 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)] cursor-pointer block"
+        >
           <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#F3D3A2]/20 to-transparent group-hover:via-[#F3D3A2]/50 transition-all duration-300" />
           <div className="flex items-center justify-between text-xs mb-3 font-mono">
-            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Triage Queue</span>
-            <div className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F3D3A2]">
+            <span className="uppercase tracking-wider text-[10.5px] text-[#ECF1EF]/60">Pending Applications</span>
+            <div className="w-8 h-8 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F3D3A2] group-hover:scale-105 transition-transform">
               <FileCheck2 className="w-4 h-4" />
             </div>
           </div>
@@ -154,7 +157,7 @@ export default function AdminOverviewPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             <span>{stats.pendingApplications > 0 ? "Pending committee decision" : "Review queue clear"}</span>
           </div>
-        </div>
+        </Link>
 
         {/* Card 3: Conclaves */}
         <div className="join-glass-panel rounded-2xl sm:rounded-3xl p-6 border border-white/10 hover:border-[#88DECC]/30 transition-all duration-300 relative overflow-hidden group shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
@@ -222,16 +225,16 @@ export default function AdminOverviewPage() {
                 <p className="text-xs text-[#ECF1EF]/60 font-sans leading-relaxed">
                   {oldestApp
                     ? `Earliest submission by ${oldestApp.name} on ${oldestApp.date}`
-                    : "No pending founder verification submissions in the triage queue."}
+                    : "No pending founder verification submissions."}
                 </p>
               </div>
             </div>
-            <Link href="/admin/applications" className="w-full sm:w-auto shrink-0">
+            <Link href="/admin/applications?status=pending" className="w-full sm:w-auto shrink-0">
               <button
                 type="button"
                 className="w-full sm:w-auto inline-flex items-center justify-between gap-3 px-4 py-2 rounded-full bg-[#EEF1EA] text-[#03080B] font-medium text-xs hover:bg-white hover:shadow-[0_0_20px_rgba(136,222,204,0.35)] transition-all cursor-pointer group"
               >
-                <span className="font-sans font-semibold">Open Queue</span>
+                <span className="font-sans font-semibold">Open Pending Applications</span>
                 <span className="w-6 h-6 rounded-full bg-[#03080B] flex items-center justify-center text-[#EEF1EA] group-hover:translate-x-0.5 transition-transform">
                   <ArrowRight className="w-3 h-3" />
                 </span>
@@ -312,14 +315,14 @@ export default function AdminOverviewPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            href="/admin/applications"
+            href="/admin/applications?status=pending"
             className="join-glass-panel rounded-2xl p-5 border border-white/10 hover:border-[#88DECC]/40 transition-all duration-300 group hover:-translate-y-0.5 shadow-sm"
           >
             <div className="w-9 h-9 rounded-xl bg-[#88DECC]/10 border border-[#88DECC]/25 flex items-center justify-center text-[#88DECC] mb-3 group-hover:scale-105 transition-transform">
               <FileCheck2 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-medium text-[#F5FAF6] group-hover:text-[#88DECC] transition-colors">
-              Application Triage
+              Pending Applications
             </h3>
             <p className="text-[11px] text-[#ECF1EF]/60 mt-1 font-sans leading-relaxed">
               Review founder dossiers, evaluate pitch decks &amp; issue admission invites.

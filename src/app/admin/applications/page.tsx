@@ -86,6 +86,26 @@ export default function AdminApplicationReviewPage() {
   const [roleFilter, setRoleFilter] = useState<"all" | "founder" | "mentor" | "aspiring_entrepreneur">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Read status from URL query if present (e.g. /admin/applications?status=pending)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("status");
+      if (s && ["pending", "info_requested", "approved", "rejected", "all"].includes(s)) {
+        setStatusFilter(s as any);
+      }
+    }
+  }, []);
+
+  const handleStatusFilterChange = (newStatus: "pending" | "info_requested" | "approved" | "rejected" | "all") => {
+    setStatusFilter(newStatus);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("status", newStatus);
+      window.history.replaceState(null, "", url.toString());
+    }
+  };
+
   // Tabs inside dossier: 'overview' | 'documents' | 'notes'
   const [activeTab, setActiveTab] = useState<"overview" | "documents" | "notes">("overview");
 
@@ -405,7 +425,7 @@ export default function AdminApplicationReviewPage() {
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-full bg-white/[0.03] border border-white/10 text-xs shrink-0">
           <button
             type="button"
-            onClick={() => setStatusFilter("pending")}
+            onClick={() => handleStatusFilterChange("pending")}
             className={cn(
               "px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer flex items-center gap-1.5",
               statusFilter === "pending"
@@ -428,7 +448,7 @@ export default function AdminApplicationReviewPage() {
 
           <button
             type="button"
-            onClick={() => setStatusFilter("info_requested")}
+            onClick={() => handleStatusFilterChange("info_requested")}
             className={cn(
               "px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer flex items-center gap-1.5",
               statusFilter === "info_requested"
@@ -453,7 +473,7 @@ export default function AdminApplicationReviewPage() {
 
           <button
             type="button"
-            onClick={() => setStatusFilter("approved")}
+            onClick={() => handleStatusFilterChange("approved")}
             className={cn(
               "px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer flex items-center gap-1.5",
               statusFilter === "approved"
@@ -467,7 +487,7 @@ export default function AdminApplicationReviewPage() {
 
           <button
             type="button"
-            onClick={() => setStatusFilter("rejected")}
+            onClick={() => handleStatusFilterChange("rejected")}
             className={cn(
               "px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer flex items-center gap-1.5",
               statusFilter === "rejected"
@@ -481,7 +501,7 @@ export default function AdminApplicationReviewPage() {
 
           <button
             type="button"
-            onClick={() => setStatusFilter("all")}
+            onClick={() => handleStatusFilterChange("all")}
             className={cn(
               "px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer",
               statusFilter === "all"
