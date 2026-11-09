@@ -86,13 +86,17 @@ export default function AdminApplicationReviewPage() {
   const [roleFilter, setRoleFilter] = useState<"all" | "founder" | "mentor" | "aspiring_entrepreneur">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Read status from URL query if present (e.g. /admin/applications?status=pending)
+  // Read status & search from URL query if present (e.g. /admin/applications?status=pending&search=name)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const s = params.get("status");
       if (s && ["pending", "info_requested", "approved", "rejected", "all"].includes(s)) {
         setStatusFilter(s as any);
+      }
+      const q = params.get("search") || params.get("q");
+      if (q) {
+        setSearchQuery(q);
       }
     }
   }, []);
@@ -367,6 +371,20 @@ export default function AdminApplicationReviewPage() {
     });
   }, [applications, statusFilter, roleFilter, searchQuery]);
 
+  // Cross-tab search matches when current tab has 0 results
+  const otherTabMatches = useMemo(() => {
+    if (!searchQuery.trim() || statusFilter === "all") return [];
+    const q = searchQuery.toLowerCase();
+    return applications.filter((item) => {
+      const matchName = item.name?.toLowerCase().includes(q);
+      const matchEmail = item.email?.toLowerCase().includes(q);
+      const matchLoc = item.location?.toLowerCase().includes(q);
+      const matchesSearch = matchName || matchEmail || matchLoc;
+      const matchesRole = roleFilter === "all" || item.role === roleFilter;
+      return matchesSearch && matchesRole && item.status !== statusFilter;
+    });
+  }, [applications, searchQuery, statusFilter, roleFilter]);
+
   // Keep selectedAppId synchronized with the active filtered list
   useEffect(() => {
     if (loadingList) return;
@@ -582,10 +600,55 @@ export default function AdminApplicationReviewPage() {
               <p className="text-xs text-[#ECF1EF]/50 font-mono">Loading applications...</p>
             </div>
           ) : filteredApplications.length === 0 ? (
-            <div className="p-12 rounded-2xl bg-white/[0.02] border border-white/10 border-dashed text-center text-xs text-[#ECF1EF]/50 space-y-1">
-              <p className="text-[#F5FAF6] font-medium">No matching applications</p>
-              <p className="text-[11px]">Try clearing search or changing the status filter.</p>
-            </div>
+            otherTabMatches.length > 0 ? (
+              <div className="p-4 rounded-2xl bg-[#F3D3A2]/10 border border-[#F3D3A2]/30 text-xs space-y-2.5">
+                <div className="flex items-center gap-1.5 text-[#F3D3A2] font-semibold text-xs">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#F3D3A2]" />
+                  <span>Found in another tab</span>
+                </div>
+                <p className="text-[11.5px] text-[#ECF1EF]/75 leading-relaxed">
+                  No applicants matching &ldquo;{searchQuery}&rdquo; in{" "}
+                  <span className="font-semibold text-white capitalize">{statusFilter === "info_requested" ? "Needs Info" : statusFilter}</span>.
+                  Found {otherTabMatches.length} match in:
+                </p>
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {Array.from(new Set(otherTabMatches.map((m) => m.status))).map((st) => {
+                    const count = otherTabMatches.filter((m) => m.status === st).length;
+                    const label =
+                      st === "info_requested"
+                        ? "Needs Info"
+                        : st === "approved"
+                        ? "Approved"
+                        : st === "rejected"
+                        ? "Rejected"
+                        : "Pending";
+                    return (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => handleStatusFilterChange(st as any)}
+                        className="w-full text-left px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-[#88DECC]/20 border border-white/10 hover:border-[#88DECC]/40 text-[#ECF1EF] hover:text-[#88DECC] text-xs font-medium transition-all flex items-center justify-between cursor-pointer"
+                      >
+                        <span>View in {label} tab ({count})</span>
+                        <span>&rarr;</span>
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => handleStatusFilterChange("all")}
+                    className="w-full text-center px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-[#ECF1EF]/60 hover:text-white text-[11px] transition-colors cursor-pointer"
+                  >
+                    View in All Applications ({applications.length})
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-12 rounded-2xl bg-white/[0.02] border border-white/10 border-dashed text-center text-xs text-[#ECF1EF]/50 space-y-1">
+                <p className="text-[#F5FAF6] font-medium">No matching applications</p>
+                <p className="text-[11px]">Try clearing search or changing the status filter.</p>
+              </div>
+            )
           ) : (
             <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto pr-1 auth-scrollbar">
               {filteredApplications.map((item) => {
@@ -683,7 +746,9 @@ export default function AdminApplicationReviewPage() {
               </div>
               <div className="space-y-1.5">
                 <h3 className="font-display text-lg font-light text-[#F5FAF6]">
-                  {statusFilter === "pending"
+                  {searchQuery.trim() && otherTabMatches.length > 0
+                    ? `Found ${otherTabMatches.length} matching applicant(s) in other tabs`
+                    : statusFilter === "pending"
                     ? "Pending Queue is Clear"
                     : statusFilter === "info_requested"
                     ? "No Applications Awaiting Info"
@@ -692,7 +757,9 @@ export default function AdminApplicationReviewPage() {
                     : "No Applications to Display"}
                 </h3>
                 <p className="text-xs text-[#ECF1EF]/50 max-w-sm mx-auto">
-                  {statusFilter === "pending"
+                  {searchQuery.trim() && otherTabMatches.length > 0
+                    ? `"${searchQuery}" is not in the active filter, but exists in another tab. Click any tab on the left or switch filters above to review their dossier.`
+                    : statusFilter === "pending"
                     ? "There are currently no new admissions pending review. Switch to Approved or All tabs to inspect processed applications."
                     : "Select an application from the queue or adjust your status and search filters above."}
                 </p>

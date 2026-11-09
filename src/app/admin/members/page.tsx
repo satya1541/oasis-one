@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -526,11 +527,14 @@ export default function AdminMembersPage() {
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                                 <span>Needs Info</span>
                               </span>
-                              <span className="text-[10px] text-amber-300/80 font-sans">
-                                In Applications &rarr; Needs Info tab
-                              </span>
+                              <Link
+                                href={`/admin/applications?status=info_requested&search=${encodeURIComponent(member.name || member.email)}`}
+                                className="text-[10px] text-amber-300/80 hover:text-amber-200 underline font-sans flex items-center gap-0.5"
+                              >
+                                In Applications &rarr; Needs Info tab &rarr;
+                              </Link>
                             </div>
-                          ) : member.status === "pending_approval" || (member.status === "pending_verification" && member.hasApplication) ? (
+                          ) : member.applicationStatus === "pending" ? (
                             <div className="flex flex-col gap-1 items-start">
                               <span
                                 title="Application submitted and pending committee decision"
@@ -539,9 +543,41 @@ export default function AdminMembersPage() {
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                                 <span>Pending Approval</span>
                               </span>
-                              <span className="text-[10px] text-cyan-300/70 font-sans">
-                                In Applications &rarr; Pending queue
+                              <Link
+                                href={`/admin/applications?status=pending&search=${encodeURIComponent(member.name || member.email)}`}
+                                className="text-[10px] text-cyan-300/80 hover:text-cyan-200 underline font-sans flex items-center gap-0.5"
+                              >
+                                In Applications &rarr; Pending queue &rarr;
+                              </Link>
+                            </div>
+                          ) : member.applicationStatus === "approved" ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                <span>Application Approved</span>
                               </span>
+                              <Link
+                                href={`/admin/applications?status=approved&search=${encodeURIComponent(member.name || member.email)}`}
+                                className="text-[10px] text-emerald-300/80 hover:text-emerald-200 underline font-sans flex items-center gap-0.5"
+                              >
+                                In Applications &rarr; Approved tab &rarr;
+                              </Link>
+                            </div>
+                          ) : member.status === "pending_approval" || member.status === "pending_verification" ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span
+                                title="Application dossier submitted for review"
+                                className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-cyan-950/60 text-cyan-300 border border-cyan-800 flex items-center gap-1.5"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                                <span>In Review</span>
+                              </span>
+                              <Link
+                                href={`/admin/applications?status=all&search=${encodeURIComponent(member.name || member.email)}`}
+                                className="text-[10px] text-cyan-300/80 hover:text-cyan-200 underline font-sans flex items-center gap-0.5"
+                              >
+                                In Applications &rarr; View Dossier &rarr;
+                              </Link>
                             </div>
                           ) : member.status === "warned" ? (
                             <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold bg-amber-950/60 text-amber-300 border border-amber-800 flex items-center gap-1.5 w-fit">
