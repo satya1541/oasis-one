@@ -44,6 +44,8 @@ interface MemberRecord {
   email: string;
   role?: string | null;
   status: string;
+  hasApplication?: boolean;
+  applicationStatus?: string | null;
   adminLevel?: string | null;
   mentorVerified?: boolean;
   createdAt: string;
@@ -72,6 +74,7 @@ export default function AdminMembersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentUserLevel, setCurrentUserLevel] = useState<string | null>(null);
 
   // Restriction Drawer State
@@ -298,7 +301,21 @@ export default function AdminMembersPage() {
       emailStr.toLowerCase().includes(search.toLowerCase());
     const memberRole = m.role || "member";
     const matchesRole = roleFilter === "all" || memberRole === roleFilter;
-    return matchesSearch && matchesRole;
+
+    let matchesStatus = true;
+    if (statusFilter === "active") {
+      matchesStatus = m.status === "active";
+    } else if (statusFilter === "no_application") {
+      matchesStatus = m.status === "pending_verification" && !m.hasApplication;
+    } else if (statusFilter === "needs_info") {
+      matchesStatus = m.applicationStatus === "info_requested";
+    } else if (statusFilter === "pending_approval") {
+      matchesStatus =
+        m.status === "pending_approval" ||
+        (m.status === "pending_verification" && !!m.hasApplication);
+    }
+
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   return (
@@ -381,8 +398,22 @@ export default function AdminMembersPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#A9A7C4]" />
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <Filter className="w-4 h-4 text-[#A9A7C4]" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="h-11 px-3 text-xs rounded-xl bg-[#1E1F33] border border-white/10 text-white focus:outline-none focus:ring-1 focus:ring-[#F3D3A2] cursor-pointer"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active Members</option>
+                  <option value="no_application">No Application (Incomplete)</option>
+                  <option value="needs_info">Needs Info</option>
+                  <option value="pending_approval">Pending Approval</option>
+                </select>
+              </div>
+
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
@@ -468,18 +499,61 @@ export default function AdminMembersPage() {
                         </td>
 
                         <td className="py-3.5 px-4">
-                          <span
-                            className={cn(
-                              "px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold",
-                              (member.status || "active") === "active"
-                                ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800"
-                                : member.status === "warned"
-                                ? "bg-amber-950/60 text-amber-300 border border-amber-800"
-                                : "bg-rose-950/60 text-rose-400 border border-rose-800"
-                            )}
-                          >
-                            {member.status || "active"}
-                          </span>
+                          {member.status === "active" ? (
+                            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800 flex items-center gap-1.5 w-fit">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                              <span>Active</span>
+                            </span>
+                          ) : member.status === "pending_verification" && !member.hasApplication ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span
+                                title="User created an account via Google/Email but has not completed and submitted an admissions application yet"
+                                className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-amber-950/60 text-amber-300 border border-amber-800 flex items-center gap-1.5"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                <span>No Application Submitted</span>
+                              </span>
+                              <span className="text-[10px] text-[#A9A7C4]/70 font-sans">
+                                Account created · Form incomplete
+                              </span>
+                            </div>
+                          ) : member.applicationStatus === "info_requested" ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span
+                                title="Committee requested additional verification documents from this applicant"
+                                className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-amber-950/60 text-amber-300 border border-amber-800 flex items-center gap-1.5"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                <span>Needs Info</span>
+                              </span>
+                              <span className="text-[10px] text-amber-300/80 font-sans">
+                                In Applications &rarr; Needs Info tab
+                              </span>
+                            </div>
+                          ) : member.status === "pending_approval" || (member.status === "pending_verification" && member.hasApplication) ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span
+                                title="Application submitted and pending committee decision"
+                                className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-cyan-950/60 text-cyan-300 border border-cyan-800 flex items-center gap-1.5"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                                <span>Pending Approval</span>
+                              </span>
+                              <span className="text-[10px] text-cyan-300/70 font-sans">
+                                In Applications &rarr; Pending queue
+                              </span>
+                            </div>
+                          ) : member.status === "warned" ? (
+                            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold bg-amber-950/60 text-amber-300 border border-amber-800 flex items-center gap-1.5 w-fit">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                              <span>Warned</span>
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold bg-rose-950/60 text-rose-400 border border-rose-800 flex items-center gap-1.5 w-fit">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                              <span className="capitalize">{member.status?.replace(/_/g, " ") || "Restricted"}</span>
+                            </span>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 font-mono text-[#A9A7C4]">

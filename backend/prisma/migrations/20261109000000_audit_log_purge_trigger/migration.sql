@@ -8,3 +8,4 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Audit logs are append-only. Deletes are forbidden.';
     END IF;
 END;
+

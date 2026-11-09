@@ -797,21 +797,31 @@ export class AdminService {
         include: {
           profile: true,
           restrictions: { where: { resolvedAt: null } },
+          applications: {
+            select: { id: true, status: true },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
         },
       }),
     ]);
 
-    const items = users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      name: u.profile?.name || 'Member',
-      role: u.primaryRole || 'member',
-      status: u.accountStatus,
-      adminLevel: u.adminLevel,
-      mentorVerified: u.profile?.mentorVerified,
-      activeRestrictions: u.restrictions.map((r) => r.type),
-      createdAt: u.createdAt,
-    }));
+    const items = users.map((u) => {
+      const latestApp = u.applications?.[0];
+      return {
+        id: u.id,
+        email: u.email,
+        name: u.profile?.name || 'Member',
+        role: u.primaryRole || 'member',
+        status: u.accountStatus,
+        hasApplication: !!latestApp,
+        applicationStatus: latestApp?.status || null,
+        adminLevel: u.adminLevel,
+        mentorVerified: u.profile?.mentorVerified,
+        activeRestrictions: u.restrictions.map((r) => r.type),
+        createdAt: u.createdAt,
+      };
+    });
 
     return { items, total, page, pageSize };
   }
