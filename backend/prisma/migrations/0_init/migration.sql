@@ -938,6 +938,8 @@ END;
 CREATE TRIGGER `audit_logs_no_delete` BEFORE DELETE ON `audit_logs`
 FOR EACH ROW
 BEGIN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Audit logs are append-only. Deletes are forbidden.';
+    IF @allow_audit_log_purge IS NULL OR @allow_audit_log_purge != 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Audit logs are append-only. Deletes are forbidden.';
+    END IF;
 END;
 

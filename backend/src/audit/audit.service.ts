@@ -97,19 +97,16 @@ export class AuditService {
     await this.storageService.putObject(s3Key, buffer, 'application/json');
     this.logger.log(`Uploaded ${oldLogs.length} audit logs to S3 [${s3Key}]`);
 
-    // 2. Drop the restrictive no-delete trigger if present so purging is permitted
-    try {
-      await this.prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS \`audit_logs_no_delete\`;`);
-    } catch (err: any) {
-      this.logger.warn(`Could not execute trigger drop on audit_logs: ${err.message}`);
-    }
-
-    // 3. Purge archived records from MySQL in batches of 500
+    // 2. Purge archived records from MySQL in batches of 500 using session variable bypass
     const ids = oldLogs.map((l) => l.id);
     for (let i = 0; i < ids.length; i += 500) {
       const batchIds = ids.slice(i, i + 500);
-      await this.prisma.auditLog.deleteMany({
-        where: { id: { in: batchIds } },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe('SET @allow_audit_log_purge = 1;');
+        await tx.auditLog.deleteMany({
+          where: { id: { in: batchIds } },
+        });
+        await tx.$executeRawUnsafe('SET @allow_audit_log_purge = 0;');
       });
     }
 
