@@ -1,25 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import {
-  Compass,
-  Rocket,
-  Award,
-  CheckCircle2,
-  ShieldCheck,
-  Users,
-  Sparkles,
-  ArrowRight,
-  MapPin,
-  Lock,
-  Building,
-  Target,
-  Layers,
-  HelpCircle,
-} from "lucide-react";
+import { Compass, Rocket, Award, CheckCircle2, ArrowRight } from "lucide-react";
+import { DocsShell } from "@/components/layout/DocsShell";
+import { DocsPageHeader } from "@/components/layout/DocsPageHeader";
 
 export const metadata: Metadata = {
   title: "Who It's For · Membership Tiers & Cohorts | OASIS Odisha",
@@ -49,8 +32,8 @@ export default function WhoItsForPage() {
   const cohorts = [
     {
       id: "aspiring",
+      sectionHeading: "1. Aspiring Entrepreneurs",
       role: "Aspiring Entrepreneurs",
-      badgeVariant: "aspiring" as const,
       badgeText: "Ideation & Validation",
       icon: Compass,
       audience: "Student innovators, researchers, engineers & pre-incorporation builders",
@@ -63,12 +46,13 @@ export default function WhoItsForPage() {
         "Navigate Startup Odisha Ideation Grants and college incubator pathways",
         "Receive honest code & architecture critiques without public exposure",
       ],
-      commitments: "Active participation in community discussions and commitment to building ethical, scalable ventures.",
+      commitments:
+        "Active participation in community discussions and commitment to building ethical, scalable ventures.",
     },
     {
       id: "founders",
+      sectionHeading: "2. Founders & Co-Founders",
       role: "Founders & Co-Founders",
-      badgeVariant: "founder" as const,
       badgeText: "Building & Scaling",
       icon: Rocket,
       audience: "Seed, Pre-Series A, and bootstrapped startup operators with active ventures",
@@ -81,12 +65,13 @@ export default function WhoItsForPage() {
         "Vetted introductions to enterprise pilots across Odisha's industrial corridor",
         "Direct referrals to reliable engineering, design, and legal talent",
       ],
-      commitments: "Must be actively building or operating a registered entity or early prototype in or connected to Odisha.",
+      commitments:
+        "Must be actively building or operating a registered entity or early prototype in or connected to Odisha.",
     },
     {
       id: "mentors",
+      sectionHeading: "3. Mentors & Advisors",
       role: "Mentors & Advisors",
-      badgeVariant: "verified-mentor" as const,
       badgeText: "Verified Advisory",
       icon: Award,
       audience: "Seasoned operators, CXOs, technology leaders, angel investors & exited founders",
@@ -108,165 +93,146 @@ export default function WhoItsForPage() {
     { feature: "Access to Community Q&A & Resource Knowledgebase", aspiring: true, founder: true, mentor: true },
     { feature: "RSVP to Offline Roundtables & Demo Nights", aspiring: "Select Events", founder: true, mentor: true },
     { feature: "Founder-to-Founder Closed Channels", aspiring: false, founder: true, mentor: false },
-    { feature: "Direct 1-on-1 Mentor Connection Requests", aspiring: "Quota: 3/mo", founder: "Quota: 10/mo", mentor: "Inbound Only" },
+    {
+      feature: "Direct 1-on-1 Mentor Connection Requests",
+      aspiring: "Quota: 3/mo",
+      founder: "Quota: 10/mo",
+      mentor: "Inbound Only",
+    },
     { feature: "Investor Syndicate Introductions", aspiring: "Pitch Clinics", founder: true, mentor: true },
     { feature: "Privacy-Protected Contact Masking", aspiring: true, founder: true, mentor: true },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] selection:bg-[#F3D3A2]/30 selection:text-[#1E1F33]">
-      <PublicHeader activeRoute="who-its-for" />
-
-      {/* ── Hero Section ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#151624] via-[#1E1F33] to-[#181928] text-[var(--brand-cream)] px-4 sm:px-8 lg:px-12 pt-14 pb-18 sm:pt-20 sm:pb-24 border-b border-[var(--brand-gold)]/20">
-        <div
-          className="absolute -top-32 left-1/3 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(243,211,162,0.1)_0%,transparent_70%)] blur-3xl pointer-events-none"
-          aria-hidden="true"
+    <DocsShell>
+      <article className="space-y-10 text-[15px] leading-7 text-gray-700">
+        <DocsPageHeader
+          title="Who It's For · Membership Tiers & Cohorts"
+          meta="Built for Every Phase of the Venture Journey in Odisha"
+          subtitle="OASIS is an invitation and application-only network uniting 650+ aspiring entrepreneurs, early-stage operators, and verified advisors into one high-trust ecosystem."
         />
 
-        <div className="max-w-[1240px] mx-auto text-center space-y-5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[var(--brand-gold)]/25 backdrop-blur-md">
-            <Users className="w-3.5 h-3.5 text-[var(--brand-gold)]" />
-            <span className="font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-gold)]">
-              MEMBERSHIP TIERS &amp; COHORTS
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 pb-2">
+          <Link
+            href="/join"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#4F46E5] text-white text-sm font-medium hover:bg-[#4338CA] transition-colors"
+          >
+            Apply to Your Cohort
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/admission"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Explore Admission Protocol
+          </Link>
+        </div>
 
-          <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-light text-[var(--brand-cream)] tracking-tight max-w-4xl mx-auto leading-tight">
-            Built for Every Phase of the Venture Journey in Odisha
-          </h1>
+        {cohorts.map((cohort, idx) => {
+          const Icon = cohort.icon;
+          return (
+            <section key={cohort.id} id={cohort.id} className="scroll-mt-24 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-gray-200">
+                <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 flex items-center gap-2">
+                  <Icon className="w-4 h-4 text-[#4F46E5] shrink-0" />
+                  <span>{cohort.sectionHeading}</span>
+                </h2>
+                <span className="text-xs font-mono text-[#4F46E5] bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-100">
+                  {cohort.badgeText}
+                </span>
+              </div>
 
-          <p className="text-sm sm:text-base lg:text-lg text-[var(--brand-cream)]/75 max-w-2xl mx-auto leading-relaxed">
-            OASIS is an invitation and application-only network uniting 650+ aspiring entrepreneurs, early-stage operators, and verified advisors into one high-trust ecosystem.
+              <div className="p-5 sm:p-6 rounded-lg border border-gray-200 bg-white space-y-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="text-xs font-mono text-gray-500">
+                      COHORT #{idx + 1} · {cohort.audience}
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900">{cohort.headline}</h3>
+                  </div>
+                  <Link
+                    href={`/join?role=${cohort.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[#4F46E5] border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors shrink-0"
+                  >
+                    Apply as {cohort.role.split(" ")[0]} &rarr;
+                  </Link>
+                </div>
+
+                <p className="text-sm text-gray-700 leading-relaxed">{cohort.description}</p>
+
+                <div className="p-4 rounded-md bg-gray-50 border border-gray-200 space-y-2.5">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-900">
+                    Key Cohort Capabilities
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {cohort.benefits.map((benefit, bIdx) => (
+                      <div key={bIdx} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600">
+                  <strong className="text-gray-900">Membership Commitment:</strong> {cohort.commitments}
+                </p>
+              </div>
+            </section>
+          );
+        })}
+
+        <section id="access-matrix" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            4. Cohort Access Matrix
+          </h2>
+          <p className="text-sm text-gray-600">
+            How features and permissions are calibrated across cohorts to safeguard trust and mentor bandwidth.
           </p>
 
-          <div className="pt-4 flex flex-wrap justify-center gap-3">
-            <Button size="lg" variant="gold" className="rounded-full px-7 shadow-md" asChild>
-              <Link href="/join">Apply to Your Cohort</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-6 border-white/20 text-[var(--brand-cream)] hover:bg-white/5" asChild>
-              <Link href="/admission">Explore Admission Protocol</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Main Cohort Deep Dives ──────────────────────────────────── */}
-      <main className="flex-1 max-w-[1240px] mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-20 space-y-16">
-        <div className="space-y-12">
-          {cohorts.map((cohort, idx) => {
-            const Icon = cohort.icon;
-            return (
-              <div
-                key={cohort.id}
-                id={cohort.id}
-                className="card-luxury p-7 sm:p-10 rounded-3xl border border-[var(--border)] hover:border-[var(--brand-gold)]/40 transition-all duration-300 space-y-6 relative overflow-hidden"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border)]">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#1E1F33] border border-[#F3D3A2]/30 flex items-center justify-center text-[#F3D3A2] shrink-0 shadow-sm">
-                      <Icon className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <h2 className="font-display text-2xl sm:text-3xl font-medium text-[var(--text)]">
-                          {cohort.role}
-                        </h2>
-                        <Badge variant={cohort.badgeVariant}>{cohort.badgeText}</Badge>
-                      </div>
-                      <p className="text-xs text-[var(--muted)] font-mono mt-1">
-                        COHORT #{idx + 1} · {cohort.audience}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button variant="outline" size="sm" className="rounded-full shrink-0 border-[var(--brand-gold)]/40 text-[var(--brand-gold)] hover:bg-[var(--brand-gold)]/10" asChild>
-                    <Link href={`/join?role=${cohort.id}`}>
-                      Apply as {cohort.role.split(" ")[0]} →
-                    </Link>
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  <div className="lg:col-span-5 space-y-3">
-                    <h3 className="text-lg font-medium text-[var(--text)] leading-snug">
-                      {cohort.headline}
-                    </h3>
-                    <p className="text-sm text-[var(--muted)] leading-relaxed">
-                      {cohort.description}
-                    </p>
-                    <div className="pt-2">
-                      <span className="text-xs font-mono text-[var(--brand-gold)] block mb-1">MEMBERSHIP COMMITMENT:</span>
-                      <p className="text-xs text-[var(--muted)] italic leading-relaxed">
-                        "{cohort.commitments}"
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="lg:col-span-7 bg-[var(--surface-2)]/60 rounded-2xl p-6 border border-[var(--border)] space-y-3">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
-                      KEY COHORT CAPABILITIES
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                      {cohort.benefits.map((benefit, bIdx) => (
-                        <div key={bIdx} className="flex items-start gap-2.5 text-xs text-[var(--text)] leading-relaxed">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                          <span>{benefit}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── Side-by-Side Matrix ────────────────────────────────────── */}
-        <section className="space-y-6 pt-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-              FEATURE COMPARISON
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-normal text-[var(--text)]">
-              Cohort Access Matrix
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--muted)]">
-              How features and permissions are calibrated to safeguard trust and bandwidth.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-            <table className="w-full text-left text-xs text-[var(--text)]">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+            <table className="w-full text-left text-xs sm:text-sm text-gray-700">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)]">
-                  <th className="py-3.5 px-4 sm:px-6 font-semibold">Platform Capability</th>
-                  <th className="py-3.5 px-4 sm:px-6 font-semibold text-center text-[#F3D3A2]">Aspiring</th>
-                  <th className="py-3.5 px-4 sm:px-6 font-semibold text-center text-[#88DECC]">Founder</th>
-                  <th className="py-3.5 px-4 sm:px-6 font-semibold text-center text-amber-300">Mentor</th>
+                <tr className="border-b border-gray-200 bg-gray-50 text-gray-900">
+                  <th className="py-3 px-4 font-semibold">Platform Capability</th>
+                  <th className="py-3 px-4 font-semibold text-center">Aspiring</th>
+                  <th className="py-3 px-4 font-semibold text-center">Founder</th>
+                  <th className="py-3 px-4 font-semibold text-center">Mentor</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-gray-200">
                 {comparison.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4 sm:px-6 font-medium text-[var(--text)]">{row.feature}</td>
-                    <td className="py-3.5 px-4 sm:px-6 text-center text-[var(--muted)]">
+                  <tr key={idx} className="hover:bg-gray-50/70 transition-colors">
+                    <td className="py-3 px-4 font-medium text-gray-900">{row.feature}</td>
+                    <td className="py-3 px-4 text-center text-gray-600">
                       {typeof row.aspiring === "boolean" ? (
-                        row.aspiring ? <span className="text-emerald-400 font-bold">✓</span> : <span className="text-white/20">—</span>
+                        row.aspiring ? (
+                          <span className="text-emerald-600 font-bold">✓</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )
                       ) : (
                         row.aspiring
                       )}
                     </td>
-                    <td className="py-3.5 px-4 sm:px-6 text-center text-[var(--muted)]">
+                    <td className="py-3 px-4 text-center text-gray-600">
                       {typeof row.founder === "boolean" ? (
-                        row.founder ? <span className="text-emerald-400 font-bold">✓</span> : <span className="text-white/20">—</span>
+                        row.founder ? (
+                          <span className="text-emerald-600 font-bold">✓</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )
                       ) : (
                         row.founder
                       )}
                     </td>
-                    <td className="py-3.5 px-4 sm:px-6 text-center text-[var(--muted)]">
+                    <td className="py-3 px-4 text-center text-gray-600">
                       {typeof row.mentor === "boolean" ? (
-                        row.mentor ? <span className="text-emerald-400 font-bold">✓</span> : <span className="text-white/20">—</span>
+                        row.mentor ? (
+                          <span className="text-emerald-600 font-bold">✓</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )
                       ) : (
                         row.mentor
                       )}
@@ -278,26 +244,28 @@ export default function WhoItsForPage() {
           </div>
         </section>
 
-        {/* ── CTA Banner ────────────────────────────────────────────── */}
-        <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-[#1E1F33] via-[#23243A] to-[#1E1F33] border border-[var(--brand-gold)]/30 text-center space-y-5 shadow-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--brand-gold)]/10 border border-[var(--brand-gold)]/30 flex items-center justify-center text-[var(--brand-gold)] mx-auto">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-light text-[var(--brand-cream)] tracking-tight">
-            Find Your Place in Odisha's Premier Sanctuary
+        <section id="apply-cta" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            5. Ready to Apply?
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--brand-cream)]/75 max-w-xl mx-auto leading-relaxed">
-            Every application is evaluated by admissions personnel within 48 hours to preserve the integrity of our verified community.
-          </p>
-          <div className="pt-2">
-            <Button size="lg" variant="gold" className="rounded-full px-8 shadow-lg" asChild>
-              <Link href="/join">Start 3-Minute Application</Link>
-            </Button>
+          <div className="p-5 rounded-lg bg-gray-50 border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <strong className="text-sm font-semibold text-gray-900 block">
+                Find Your Place in Odisha&rsquo;s Premier Sanctuary
+              </strong>
+              <p className="text-xs sm:text-sm text-gray-600">
+                Every application is evaluated by admissions personnel within 48 hours to preserve the integrity of our verified community.
+              </p>
+            </div>
+            <Link
+              href="/join"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[#4F46E5] text-white text-sm font-medium hover:bg-[#4338CA] transition-colors shrink-0"
+            >
+              Start 3-Minute Application
+            </Link>
           </div>
-        </div>
-      </main>
-
-      <SiteFooter />
-    </div>
+        </section>
+      </article>
+    </DocsShell>
   );
 }

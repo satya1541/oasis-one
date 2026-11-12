@@ -1,24 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Button } from "@/components/ui/Button";
 import {
-  ShieldCheck,
   CheckCircle2,
-  Clock,
-  Lock,
-  Sparkles,
-  FileText,
-  UserCheck,
-  MessageSquare,
-  HelpCircle,
   AlertTriangle,
   ArrowRight,
   Send,
-  Eye,
-  Key,
+  UserCheck,
+  Sparkles,
 } from "lucide-react";
+import { DocsShell } from "@/components/layout/DocsShell";
+import { DocsPageHeader } from "@/components/layout/DocsPageHeader";
 
 export const metadata: Metadata = {
   title: "Admission Protocol & Verification Standards | OASIS Odisha",
@@ -96,8 +87,9 @@ export default function AdmissionPage() {
         "Clear articulation of the problem being solved or expertise offered",
         "Commitment to high-trust, respectful, and constructive peer discussions",
       ],
-      border: "border-emerald-500/30",
-      accent: "text-emerald-400",
+      boxClass: "bg-emerald-50/70 border-emerald-200",
+      titleClass: "text-emerald-900",
+      iconClass: "text-emerald-700",
       icon: CheckCircle2,
     },
     {
@@ -108,143 +100,104 @@ export default function AdmissionPage() {
         "Unsolicited sales pitching or aggressive commercial agency prospecting",
         "Misrepresented credentials or impersonation of institutional leaders",
       ],
-      border: "border-rose-500/30",
-      accent: "text-rose-400",
+      boxClass: "bg-rose-50/70 border-rose-200",
+      titleClass: "text-rose-900",
+      iconClass: "text-rose-700",
       icon: AlertTriangle,
     },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] selection:bg-[#F3D3A2]/30 selection:text-[#1E1F33]">
-      <PublicHeader activeRoute="admission" />
-
-      {/* ── Hero Section ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#151624] via-[#1E1F33] to-[#181928] text-[var(--brand-cream)] px-4 sm:px-8 lg:px-12 pt-14 pb-18 sm:pt-20 sm:pb-24 border-b border-[var(--brand-gold)]/20">
-        <div
-          className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(243,211,162,0.1)_0%,transparent_70%)] blur-3xl pointer-events-none"
-          aria-hidden="true"
+    <DocsShell>
+      <article className="space-y-10 text-[15px] leading-7 text-gray-700">
+        <DocsPageHeader
+          title="Admission Protocol & Verification Standards"
+          meta="Three Steps to Verified Membership"
+          subtitle="Admission is exclusively by application to preserve high community integrity and mutual trust. Every member is vetted by hand."
         />
 
-        <div className="max-w-[1240px] mx-auto text-center space-y-5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[var(--brand-gold)]/25 backdrop-blur-md">
-            <ShieldCheck className="w-3.5 h-3.5 text-[var(--brand-gold)]" />
-            <span className="font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-gold)]">
-              ADMISSION PROTOCOL &amp; STANDARDS
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 pb-2">
+          <Link
+            href="/join"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#4F46E5] text-white text-sm font-medium hover:bg-[#4338CA] transition-colors"
+          >
+            Start Application
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/who-its-for"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            View Membership Tiers
+          </Link>
+        </div>
 
-          <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-light text-[var(--brand-cream)] tracking-tight max-w-4xl mx-auto leading-tight">
-            Three Steps to Verified Membership
-          </h1>
-
-          <p className="text-sm sm:text-base lg:text-lg text-[var(--brand-cream)]/75 max-w-2xl mx-auto leading-relaxed">
-            Admission is exclusively by application to preserve high community integrity and mutual trust. Every member is vetted by hand.
+        <section id="admission-steps" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            1. Step-by-Step Admission Process
+          </h2>
+          <p className="text-sm text-gray-600">
+            From submission to live unlock, every step is built for speed and radical transparency.
           </p>
 
-          <div className="pt-4 flex flex-wrap justify-center gap-3">
-            <Button size="lg" variant="gold" className="rounded-full px-8 shadow-md" asChild>
-              <Link href="/join">Start Application</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-6 border-white/20 text-[var(--brand-cream)] hover:bg-white/5" asChild>
-              <Link href="/who-its-for">View Membership Tiers</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Steps Timeline ─────────────────────────────────────────── */}
-      <main className="flex-1 max-w-[1240px] mx-auto px-4 sm:px-8 lg:px-12 py-16 sm:py-20 space-y-20">
-        <div className="space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-              STEP-BY-STEP ADMISSION PROCESS
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-normal text-[var(--text)]">
-              How Your Application is Evaluated
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--muted)]">
-              From submission to live unlock, every step is built for speed and radical transparency.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-4">
             {steps.map((item) => {
               const Icon = item.icon;
               return (
                 <div
                   key={item.step}
-                  className="card-luxury p-7 sm:p-8 rounded-3xl border border-[var(--border)] flex flex-col justify-between hover:border-[var(--brand-gold)]/40 transition-all duration-300 space-y-6 relative"
+                  className="p-5 sm:p-6 rounded-lg border border-gray-200 bg-white space-y-3"
                 >
-                  <div className="space-y-5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-4xl font-light text-[var(--brand-gold)]">
-                        {item.step}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-sm font-semibold px-2.5 py-0.5 rounded bg-indigo-50 text-[#4F46E5] border border-indigo-100">
+                        STEP {item.step}
                       </span>
-                      <div className="w-11 h-11 rounded-2xl bg-[#1E1F33] border border-[#F3D3A2]/25 flex items-center justify-center text-[#F3D3A2]">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="font-display text-xl font-medium text-[var(--text)]">
-                        {item.title}
+                      <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <Icon className="w-4 h-4 text-[#4F46E5]" />
+                        <span>{item.title}</span>
                       </h3>
-                      <span className="text-xs font-mono text-[var(--brand-gold)] block mt-1">
-                        {item.timing}
-                      </span>
-                      <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed mt-2.5">
-                        {item.summary}
-                      </p>
                     </div>
-
-                    <ul className="space-y-2.5 pt-2 border-t border-[var(--border)] text-xs text-[var(--text)]">
-                      {item.details.map((d, dIdx) => (
-                        <li key={dIdx} className="flex items-start gap-2 leading-relaxed">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                          <span>{d}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <span className="text-xs font-mono text-gray-500">{item.timing}</span>
                   </div>
+
+                  <p className="text-sm text-gray-700">{item.summary}</p>
+
+                  <ul className="space-y-1.5 pt-2 border-t border-gray-100 text-xs sm:text-sm text-gray-700">
+                    {item.details.map((d, dIdx) => (
+                      <li key={dIdx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* ── Admissions Criteria Comparison ─────────────────────────── */}
-        <section className="space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="font-display text-xs uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-              COMMUNITY CURATION
-            </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-normal text-[var(--text)]">
-              Admission Standards &amp; Review Principles
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--muted)]">
-              Why our approval process maintains the highest founder trust in Odisha.
-            </p>
-          </div>
+        <section id="review-principles" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            2. Admission Standards &amp; Review Principles
+          </h2>
+          <p className="text-sm text-gray-600">
+            Why our approval process maintains the highest founder trust in Odisha.
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {standards.map((s, idx) => {
               const Icon = s.icon;
               return (
-                <div
-                  key={idx}
-                  className={`p-7 sm:p-8 rounded-3xl bg-[var(--surface)] border ${s.border} space-y-5`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-6 h-6 ${s.accent}`} />
-                    <h3 className="font-display text-xl font-medium text-[var(--text)]">
-                      {s.title}
-                    </h3>
+                <div key={idx} className={`p-5 rounded-lg border ${s.boxClass} space-y-3`}>
+                  <div className={`flex items-center gap-2 font-semibold text-sm ${s.titleClass}`}>
+                    <Icon className={`w-4 h-4 ${s.iconClass}`} />
+                    <span>{s.title}</span>
                   </div>
-
-                  <ul className="space-y-3 text-xs sm:text-sm text-[var(--text)]">
+                  <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
                     {s.items.map((it, i) => (
-                      <li key={i} className="flex items-start gap-2.5 leading-relaxed">
-                        <span className={`font-bold ${s.accent}`}>•</span>
+                      <li key={i} className="flex items-start gap-2 leading-relaxed">
+                        <span className={`font-bold ${s.iconClass}`}>•</span>
                         <span>{it}</span>
                       </li>
                     ))}
@@ -255,46 +208,49 @@ export default function AdmissionPage() {
           </div>
         </section>
 
-        {/* ── WhatsApp Community Migration Notice ────────────────────── */}
-        <div className="rounded-3xl p-7 sm:p-9 bg-[var(--surface-2)] border border-[var(--brand-gold)]/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-[var(--brand-gold)]">
-              <Sparkles className="w-4 h-4" />
-              <span>PRE-APPROVED MEMBER NOTICE</span>
-            </div>
-            <h3 className="font-display text-lg sm:text-xl font-medium text-[var(--text)]">
-              Already in the OASIS WhatsApp Group?
-            </h3>
-            <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
-              If you received a 14-day invite token via email, click it to activate your membership instantly. If your invite link expired, simply apply at <code className="text-[#88DECC] font-mono">/join</code> using your recognized email for expedited 24-hour verification.
-            </p>
-          </div>
-
-          <Button variant="gold" className="rounded-full px-6 shrink-0 shadow-md" asChild>
-            <Link href="/faq">Read Migration FAQ →</Link>
-          </Button>
-        </div>
-
-        {/* ── Final Call to Action ──────────────────────────────────── */}
-        <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-[#1E1F33] via-[#23243A] to-[#1E1F33] border border-[var(--brand-gold)]/30 text-center space-y-5 shadow-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-[var(--brand-gold)]/10 border border-[var(--brand-gold)]/30 flex items-center justify-center text-[var(--brand-gold)] mx-auto">
-            <UserCheck className="w-6 h-6" />
-          </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-light text-[var(--brand-cream)] tracking-tight">
-            Begin Your 3-Minute Admission Dossier
+        <section id="whatsapp-preapproved" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            3. Pre-Approved WhatsApp Community Members
           </h2>
-          <p className="text-xs sm:text-sm text-[var(--brand-cream)]/75 max-w-xl mx-auto leading-relaxed">
-            No long essays or complex questionnaires. Simple, high-signal information so our admissions team can verify your cohort.
-          </p>
-          <div className="pt-2">
-            <Button size="lg" variant="gold" className="rounded-full px-8 shadow-lg" asChild>
-              <Link href="/join">Start Application at /join</Link>
-            </Button>
+          <div className="p-5 rounded-lg bg-gray-50 border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <strong className="text-sm font-semibold text-gray-900 block">
+                Already in the OASIS WhatsApp Group?
+              </strong>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                If you received a 14-day invite token via email, click it to activate your membership instantly. If your invite link expired, simply apply at{" "}
+                <code className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border border-gray-200">
+                  /join
+                </code>{" "}
+                using your recognized email for expedited 24-hour verification.
+              </p>
+            </div>
+            <Link
+              href="/faq"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-800 text-xs sm:text-sm font-medium hover:bg-gray-100 transition-colors shrink-0"
+            >
+              Read Migration FAQ &rarr;
+            </Link>
           </div>
-        </div>
-      </main>
+        </section>
 
-      <SiteFooter />
-    </div>
+        <section id="begin-application" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            4. Begin Your 3-Minute Admission Dossier
+          </h2>
+          <div className="p-5 rounded-lg bg-indigo-50/70 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+              No long essays or complex questionnaires. Simple, high-signal information so our admissions team can verify your cohort.
+            </p>
+            <Link
+              href="/join"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[#4F46E5] text-white text-sm font-medium hover:bg-[#4338CA] transition-colors shrink-0"
+            >
+              Start Application at /join
+            </Link>
+          </div>
+        </section>
+      </article>
+    </DocsShell>
   );
 }

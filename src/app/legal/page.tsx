@@ -1,15 +1,14 @@
 import Link from "next/link";
 import {
-  Shield,
   FileText,
   Lock,
   Users,
   AlertCircle,
   Cookie,
-  CheckCircle2,
   ArrowRight,
-  ExternalLink,
+  CheckCircle2,
 } from "lucide-react";
+import { DocsPageHeader } from "@/components/layout/DocsPageHeader";
 
 export const metadata = {
   title: "Legal & Governance Hub · OASIS",
@@ -72,95 +71,95 @@ const POLICIES = [
 
 export default function LegalIndexPage() {
   return (
-    <div className="space-y-12">
-      {/* ── Page Header ────────────────────────────────────────── */}
-      <div className="space-y-4 pb-8 border-b border-white/10">
-        <div className="inline-flex items-center gap-2 text-[11px] font-mono text-[#88DECC] bg-[#88DECC]/10 px-3 py-1 rounded-full border border-[#88DECC]/25">
-          <Shield className="w-3.5 h-3.5" />
-          <span>STATUTORY COMPLIANCE &amp; LEGAL GOVERNANCE · VERSION 1.0</span>
-        </div>
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-white">
-          OASIS Legal &amp; Compliance Hub
-        </h1>
-        <p className="text-sm sm:text-base text-[#FCF6E3]/75 leading-relaxed max-w-2xl">
-          OASIS is an admin-approved, role-aware digital sanctuary for 650+ entrepreneurs across Odisha.
-          Below you will find our complete statutory covenants, privacy guarantees under the DPDP Act 2023,
-          and anti-fraud investor solicitation rules.
-        </p>
-      </div>
+    <article className="space-y-10 text-[15px] leading-7 text-gray-700">
+      <DocsPageHeader
+        title="OASIS Legal & Governance Hub"
+        meta="Last updated: 16 October 2026 · Version 1.0"
+        subtitle="OASIS is an admin-approved, role-aware digital sanctuary for 650+ entrepreneurs across Odisha. Review our statutory covenants, DPDP Act 2023 privacy guarantees, and governance policies."
+      />
 
-      {/* ── Policy Cards Grid ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5">
-        {POLICIES.map((policy) => {
-          const Icon = policy.icon;
-          return (
-            <Link
-              key={policy.href}
-              href={policy.href}
-              className="group block p-6 sm:p-7 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-[#F3D3A2]/50 hover:bg-white/[0.05] transition-all duration-300 space-y-3"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[#F3D3A2] group-hover:bg-[#F3D3A2]/20 group-hover:text-white transition-all shrink-0">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base sm:text-lg font-semibold text-white group-hover:text-[#F3D3A2] transition-colors">
-                      {policy.title}
-                    </h2>
-                    <div className="flex items-center gap-2 text-[11px] font-mono text-[#FCF6E3]/50">
-                      <span>Doc Type: {policy.docType}</span>
-                      <span>·</span>
-                      <span>v{policy.version}</span>
+      <section id="overview" className="scroll-mt-24 space-y-4">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          1. Overview &amp; Governing Policies
+        </h2>
+        <p>
+          Welcome to the OASIS Legal &amp; Compliance Hub. Every member, mentor, applicant, and visitor interacting with OASIS is protected and governed by the five statutory documents listed below.
+        </p>
+
+        <div className="divide-y divide-gray-200 border border-gray-200 rounded-lg bg-white">
+          {POLICIES.map((policy) => {
+            const Icon = policy.icon;
+            return (
+              <Link
+                key={policy.href}
+                href={policy.href}
+                className="group block p-5 hover:bg-gray-50 transition-colors space-y-2"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#4F46E5] shrink-0">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-semibold text-gray-900 group-hover:text-[#4F46E5] transition-colors">
+                        {policy.title}
+                      </h3>
+                      <div className="text-xs font-mono text-gray-500">
+                        {policy.docType} · v{policy.version} · {policy.statutory}
+                      </div>
                     </div>
                   </div>
+                  <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-[#4F46E5] shrink-0 pt-1">
+                    Read
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
-                <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#F3D3A2] group-hover:translate-x-1 transition-transform">
-                  <span>Read Policy</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
+                <p className="text-sm text-gray-600 leading-relaxed sm:pl-12">
+                  {policy.description}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
-              <p className="text-xs sm:text-sm text-[#FCF6E3]/75 leading-relaxed pl-0 sm:pl-[56px]">
-                {policy.description}
-              </p>
-
-              <div className="flex items-center gap-2 text-[11px] font-mono text-[#FCF6E3]/50 pl-0 sm:pl-[56px] pt-1">
-                <span className="font-semibold text-[#88DECC]">Statutory Framework:</span>
-                <span>{policy.statutory}</span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* ── Summary Compliance Table ──────────────────────────── */}
-      <div className="p-6 sm:p-7 rounded-2xl bg-white/[0.02] border border-white/10 space-y-4">
-        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Statutory Disclosures &amp; Entity Information</span>
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[#FCF6E3]/70">
-          <div>
-            <span className="font-semibold text-white">Legal Entity:</span> OASIS
+      <section id="disclosures" className="scroll-mt-24 space-y-4">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          2. Statutory Disclosures &amp; Entity Information
+        </h2>
+        <div className="p-5 rounded-lg bg-gray-50 border border-gray-200 space-y-3 text-sm">
+          <div className="font-semibold text-gray-900 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>Registered Operator &amp; Compliance Contacts</span>
           </div>
-          <div>
-            <span className="font-semibold text-white">Jurisdiction:</span> Bhubaneswar, Odisha, India
-          </div>
-          <div>
-            <span className="font-semibold text-white">Minimum Age:</span> 18+ Years (Strictly Enforced)
-          </div>
-          <div>
-            <span className="font-semibold text-white">Phone:</span> +91-904-01-98-628
-          </div>
-          <div className="sm:col-span-2">
-            <span className="font-semibold text-white">Registered Address:</span> Plot No.: 2762, Brahmeswar Patna, Bhubaneswar, Odisha, India, 751018
-          </div>
-          <div className="sm:col-span-2">
-            <span className="font-semibold text-white">Official Email:</span> Info@oasisodisha.in
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-600">
+            <div>
+              <strong className="text-gray-900">Legal Entity:</strong> OASIS
+            </div>
+            <div>
+              <strong className="text-gray-900">Jurisdiction:</strong> Bhubaneswar, Odisha, India
+            </div>
+            <div>
+              <strong className="text-gray-900">Minimum Age:</strong> 18+ Years (Strictly Enforced)
+            </div>
+            <div>
+              <strong className="text-gray-900">Phone:</strong>{" "}
+              <a href="tel:+919040198628" className="text-[#4F46E5] hover:underline">
+                +91-904-01-98-628
+              </a>
+            </div>
+            <div className="sm:col-span-2">
+              <strong className="text-gray-900">Registered Address:</strong> Plot No.: 2762, Brahmeswar Patna, Bhubaneswar, Odisha, India, 751018
+            </div>
+            <div className="sm:col-span-2">
+              <strong className="text-gray-900">Official Email:</strong>{" "}
+              <a href="mailto:Info@oasisodisha.in" className="text-[#4F46E5] hover:underline">
+                Info@oasisodisha.in
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </article>
   );
 }

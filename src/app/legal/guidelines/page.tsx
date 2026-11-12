@@ -1,181 +1,176 @@
-import Link from "next/link";
-import { Users, Clock, ShieldAlert, CheckCircle2, AlertOctagon, HelpCircle, DollarSign, Ban } from "lucide-react";
+import { CheckCircle2, Ban, AlertOctagon } from "lucide-react";
+import { DocsPageHeader } from "@/components/layout/DocsPageHeader";
 
 export const metadata = {
   title: "Community Guidelines & Content Policy · OASIS",
-  description: "Code of conduct, content policies, 24h achievement rules, and mandatory zero-tolerance policy against fraudulent fundraising for OASIS.",
+  description:
+    "Code of conduct, content policies, 24h achievement rules, and mandatory zero-tolerance policy against fraudulent fundraising for OASIS.",
 };
 
 export default function CommunityGuidelinesPage() {
   return (
-    <article className="space-y-10">
-      {/* ── Document Title Header ─────────────────────────────────── */}
-      <div className="space-y-3 pb-8 border-b border-[var(--border)]">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-[var(--brand-gold)]">
-          <span className="bg-[var(--surface-2)] px-2.5 py-0.5 rounded border border-[var(--border)]">
-            DOC TYPE: community_guidelines
-          </span>
-          <span>·</span>
-          <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            Version 1.0 · Effective 16 October 2026
-          </span>
+    <article className="space-y-9 text-[15px] leading-7 text-gray-700">
+      <DocsPageHeader
+        title="Community Guidelines & Content Policy"
+        meta="Last updated: 16 October 2026 · Version 1.0"
+        subtitle="The code of conduct, discussion standards, and mandatory content & investor solicitation rules (PRD §21.2) for Odisha's 650+ startup builders."
+      />
+
+      <div className="p-4 rounded-lg bg-gray-50 border border-gray-200 text-xs sm:text-sm grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-600">
+        <div>
+          <strong className="text-gray-900">Platform:</strong> OASIS
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-          OASIS — Community Guidelines &amp; Content Policy
-        </h1>
-        <p className="text-sm text-[var(--muted)] leading-relaxed">
-          The code of conduct, discussion standards, and mandatory content &amp; investor solicitation rules (PRD §21.2) for Odisha&rsquo;s 650+ startup builders.
+        <div>
+          <strong className="text-gray-900">Community Size:</strong> 650+ Vetted Builders
+        </div>
+        <div>
+          <strong className="text-gray-900">Contact:</strong> Info@oasisodisha.in
+        </div>
+        <div>
+          <strong className="text-gray-900">Phone:</strong> +91-904-01-98-628
+        </div>
+        <div className="sm:col-span-2">
+          <strong className="text-gray-900">Governing Regulation:</strong> Rule 3(1)(b) of the Information Technology Intermediary Rules, 2021
+        </div>
+      </div>
+
+      <section id="community-covenant" className="scroll-mt-24 space-y-4">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          1. The OASIS Community Covenant
+        </h2>
+        <p>
+          OASIS is designed as a sanctuary for builders. Our culture is defined by authentic curiosity, generosity of knowledge, and mutual respect among founders, researchers, and mentors across Odisha (Bhubaneswar, Cuttack, Rourkela, Sambalpur, Berhampur).
         </p>
-
-        {/* Quick Identity Box */}
-        <div className="mt-4 p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-xs grid grid-cols-1 sm:grid-cols-2 gap-2 text-[var(--muted)]">
-          <div><strong className="text-[var(--text)]">Platform:</strong> OASIS</div>
-          <div><strong className="text-[var(--text)]">Community Size:</strong> 650+ Vetted Builders</div>
-          <div><strong className="text-[var(--text)]">Contact:</strong> Info@oasisodisha.in</div>
-          <div><strong className="text-[var(--text)]">Phone:</strong> +91-904-01-98-628</div>
-          <div className="sm:col-span-2"><strong className="text-[var(--text)]">Governing Regulation:</strong> Rule 3(1)(b) of the Information Technology Intermediary Rules, 2021</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-gray-900 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Search Before Asking</span>
+            </strong>
+            <p className="text-gray-600">
+              Use the universal search bar (<code className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-gray-200">⌘K</code> / <code className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-gray-200">Ctrl+K</code>) before creating a post. Check if your question has already been answered.
+            </p>
+          </div>
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-gray-900 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>High-Signal Knowledge</span>
+            </strong>
+            <p className="text-gray-600">
+              Share transparent learnings from pilots and setbacks. Generic promotional ads or cryptocurrency shilling are strictly forbidden.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── Document Sections ─────────────────────────────────────── */}
-      <div className="space-y-10 text-sm leading-relaxed text-[var(--text)]/90">
-        {/* Section 1: Welcome & Ethos */}
-        <section className="space-y-4">
-          <h2 className="font-display text-2xl font-medium text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)]/50 pb-2">
-            <span className="font-mono text-base text-[var(--brand-gold)]">§ 1</span>
-            <span>The OASIS Community Covenant</span>
-          </h2>
-          <div className="space-y-3 text-xs sm:text-sm">
-            <p>
-              OASIS is designed as a sanctuary for builders. Our culture is defined by authentic curiosity, generosity of knowledge, and mutual respect among founders, researchers, and mentors across Odisha (Bhubaneswar, Cuttack, Rourkela, Sambalpur, Berhampur).
+      <section id="posting-standards" className="scroll-mt-24 space-y-3">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          2. Posting Standards &amp; 24-Hour Edit Window
+        </h2>
+        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+          <li>
+            <strong className="text-gray-900">Character Quotas:</strong> Post titles up to <strong>200 characters</strong>, post body up to <strong>10,000 characters</strong>, and responses up to <strong>5,000 characters</strong>.
+          </li>
+          <li>
+            <strong className="text-gray-900">Accurate Categorization:</strong> Classify every post as a <em>Question</em>, <em>Suggestion</em>, <em>Resource</em>, or <em>Opportunity</em>, and tag with proper sectors and functional skills.
+          </li>
+          <li>
+            <strong className="text-gray-900">24-Hour Author Edit Window:</strong> Authors may edit posts within 24 hours of publication. An &ldquo;edited&rdquo; badge appears and previous versions are securely logged for moderation.
+          </li>
+          <li>
+            <strong className="text-gray-900">Closing the Loop:</strong> When an answer solves your question, mark it as <strong>Resolved</strong> so other entrepreneurs find the solution easily.
+          </li>
+        </ul>
+      </section>
+
+      <section id="achievement-banner" className="scroll-mt-24 space-y-3">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          3. Dashboard 24-Hour Achievement Banner
+        </h2>
+        <p>
+          The dashboard Achievement Banner highlights real entrepreneurial milestones—such as MVP launch, securing a grant/patent, signing a key pilot customer, or closing an incubation cohort.
+        </p>
+        <ul className="list-disc pl-5 space-y-1.5 text-gray-700">
+          <li>
+            Keep submissions under <strong>500 characters</strong> with an optional image up to <strong>5 MB</strong>.
+          </li>
+          <li>Every submission is reviewed by moderators before going live.</li>
+          <li>
+            Once approved, achievements remain displayed for exactly <strong>24 hours (UTC)</strong> before auto-expiring.
+          </li>
+          <li>Commercial discount flyers, festive greetings, or unverified claims are rejected.</li>
+        </ul>
+      </section>
+
+      <section id="prohibited-content" className="scroll-mt-24 space-y-4">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          4. Prohibited Content &amp; Intermediary Rules
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-rose-700 flex items-center gap-1.5">
+              <Ban className="w-4 h-4 shrink-0" />
+              <span>Harassment &amp; Doxxing</span>
+            </strong>
+            <p className="text-gray-600">
+              Personal insults, intimidation, hate speech, or screenshotting and publishing private contact info and messages without consent.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-                <strong className="text-[var(--text)] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Search Before Asking</span>
-                </strong>
-                <p className="text-[var(--muted)]">
-                  Use the universal search bar (<code className="font-mono text-[11px]">⌘K</code> / <code className="font-mono text-[11px]">Ctrl+K</code>) before creating a post. Check if your question has already been answered.
-                </p>
-              </div>
-              <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-                <strong className="text-[var(--text)] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>High-Signal Knowledge</span>
-                </strong>
-                <p className="text-[var(--muted)]">
-                  Share transparent learnings from pilots and setbacks. Generic promotional ads or cryptocurrency shilling are strictly forbidden.
-                </p>
-              </div>
-            </div>
           </div>
-        </section>
-
-        {/* Section 2: Post Limits & 24h Edit Window */}
-        <section className="space-y-4">
-          <h2 className="font-display text-2xl font-medium text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)]/50 pb-2">
-            <span className="font-mono text-base text-[var(--brand-gold)]">§ 2</span>
-            <span>Posting Standards &amp; 24-Hour Edit Window</span>
-          </h2>
-          <div className="space-y-2 text-xs sm:text-sm">
-            <ul className="list-disc pl-5 space-y-1.5 text-[var(--muted)]">
-              <li><strong className="text-[var(--text)]">Character Quotas:</strong> Post titles up to <strong>200 characters</strong>, post body up to <strong>10,000 characters</strong>, and responses up to <strong>5,000 characters</strong>.</li>
-              <li><strong className="text-[var(--text)]">Accurate Categorization:</strong> Classify every post as a <em>Question</em>, <em>Suggestion</em>, <em>Resource</em>, or <em>Opportunity</em>, and tag with proper sectors and functional skills.</li>
-              <li><strong className="text-[var(--text)]">24-Hour Author Edit Window:</strong> Authors may edit posts within 24 hours of publication. An &ldquo;edited&rdquo; badge appears and previous versions are securely logged for moderation.</li>
-              <li><strong className="text-[var(--text)]">Closing the Loop:</strong> When an answer solves your question, mark it as <strong>Resolved</strong> so other entrepreneurs find the solution easily.</li>
-            </ul>
-          </div>
-        </section>
-
-        {/* Section 3: 24h Achievement Banner */}
-        <section className="space-y-4">
-          <h2 className="font-display text-2xl font-medium text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)]/50 pb-2">
-            <span className="font-mono text-base text-[var(--brand-gold)]">§ 3</span>
-            <span>Dashboard 24-Hour Achievement Banner</span>
-          </h2>
-          <div className="space-y-3 text-xs sm:text-sm">
-            <p>
-              The dashboard Achievement Banner highlights real entrepreneurial milestones—such as MVP launch, securing a grant/patent, signing a key pilot customer, or closing an incubation cohort.
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-amber-700 flex items-center gap-1.5">
+              <Ban className="w-4 h-4 shrink-0" />
+              <span>Spam &amp; Directory Harvesting</span>
+            </strong>
+            <p className="text-gray-600">
+              Cold-pitching agency services, mass messaging, or scraping member emails/phones to build external WhatsApp groups or marketing pipelines.
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-[var(--muted)]">
-              <li>Keep submissions under <strong>500 characters</strong> with an optional image up to <strong>5 MB</strong>.</li>
-              <li>Every submission is reviewed by moderators before going live.</li>
-              <li>Once approved, achievements remain displayed for exactly <strong>24 hours (UTC)</strong> before auto-expiring.</li>
-              <li>Commercial discount flyers, festive greetings, or unverified claims are rejected.</li>
-            </ul>
           </div>
-        </section>
-
-        {/* Section 4: Prohibited Content */}
-        <section className="space-y-4">
-          <h2 className="font-display text-2xl font-medium text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)]/50 pb-2">
-            <span className="font-mono text-base text-[var(--brand-gold)]">§ 4</span>
-            <span>Prohibited Content &amp; Intermediary Rules</span>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-              <strong className="text-rose-500 flex items-center gap-1.5">
-                <Ban className="w-4 h-4" />
-                <span>Harassment &amp; Doxxing</span>
-              </strong>
-              <p className="text-[var(--muted)]">
-                Personal insults, intimidation, hate speech, or screenshotting and publishing private contact info and messages without consent.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-              <strong className="text-amber-500 flex items-center gap-1.5">
-                <Ban className="w-4 h-4" />
-                <span>Spam &amp; Directory Harvesting</span>
-              </strong>
-              <p className="text-[var(--muted)]">
-                Cold-pitching agency services, mass messaging, or scraping member emails/phones to build external WhatsApp groups or marketing pipelines.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-              <strong className="text-orange-500 flex items-center gap-1.5">
-                <Ban className="w-4 h-4" />
-                <span>Misinformation &amp; Impersonation</span>
-              </strong>
-              <p className="text-[var(--muted)]">
-                Falsifying credentials, fabricated traction, or spreading misleading information on government grants or Startup Odisha schemes.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-1">
-              <strong className="text-red-500 flex items-center gap-1.5">
-                <Ban className="w-4 h-4" />
-                <span>Unlawful Content &amp; Malware</span>
-              </strong>
-              <p className="text-[var(--muted)]">
-                Infringing trade secrets, breach of NDAs, or uploading malicious executable scripts and macros.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 5: Mandatory Solicitation Policy (PRD §21.2) */}
-        <section className="space-y-4">
-          <h2 className="font-display text-2xl font-medium text-[var(--text)] flex items-center gap-2 border-b border-[var(--border)]/50 pb-2">
-            <span className="font-mono text-base text-[var(--brand-gold)]">§ 5</span>
-            <span>Fraudulent Funding &amp; Investor Solicitation (PRD §21.2)</span>
-          </h2>
-          <div className="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs space-y-3">
-            <div className="font-semibold text-rose-500 flex items-center gap-2 text-sm">
-              <AlertOctagon className="w-5 h-5 shrink-0" />
-              <span>Mandatory Zero-Tolerance Financial Fraud Policy</span>
-            </div>
-            <p className="text-[var(--text)]/90 leading-relaxed">
-              Because entrepreneurs frequently seek capital and grants on OASIS, we enforce a strict <strong>zero-tolerance policy</strong> against fraudulent funding schemes, improper solicitation, and deceptive financial promotions:
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-orange-700 flex items-center gap-1.5">
+              <Ban className="w-4 h-4 shrink-0" />
+              <span>Misinformation &amp; Impersonation</span>
+            </strong>
+            <p className="text-gray-600">
+              Falsifying credentials, fabricated traction, or spreading misleading information on government grants or Startup Odisha schemes.
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-[var(--muted)]">
-              <li><strong className="text-[var(--text)]">No Guaranteed Returns or Crypto Schemes:</strong> Members must never solicit investments offering guaranteed yields, unregistered equity crowdfunding, or speculative token offerings.</li>
-              <li><strong className="text-[var(--text)]">No Advance-Fee Funding Brokering:</strong> Charging fellow founders upfront fees for &ldquo;guaranteed investor introductions&rdquo; or claiming private access to state grants for a kickback is strictly prohibited.</li>
-              <li><strong className="text-[var(--text)]">Immediate Blacklisting:</strong> Violations of this policy result in immediate account revocation, permanent blacklisting (<code className="font-mono text-[11px]">BlacklistIdentifier</code>), and reporting to regulatory and law enforcement authorities where warranted.</li>
-            </ul>
           </div>
-        </section>
-      </div>
+          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50/70 space-y-1">
+            <strong className="text-red-700 flex items-center gap-1.5">
+              <Ban className="w-4 h-4 shrink-0" />
+              <span>Unlawful Content &amp; Malware</span>
+            </strong>
+            <p className="text-gray-600">
+              Infringing trade secrets, breach of NDAs, or uploading malicious executable scripts and macros.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="solicitation-policy" className="scroll-mt-24 space-y-3">
+        <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+          5. Fraudulent Funding &amp; Investor Solicitation (PRD §21.2)
+        </h2>
+        <div className="p-5 rounded-lg bg-rose-50 border border-rose-200 text-sm space-y-3">
+          <div className="font-semibold text-rose-900 flex items-center gap-2">
+            <AlertOctagon className="w-5 h-5 text-rose-700 shrink-0" />
+            <span>Mandatory Zero-Tolerance Financial Fraud Policy</span>
+          </div>
+          <p className="text-gray-800 leading-relaxed">
+            Because entrepreneurs frequently seek capital and grants on OASIS, we enforce a strict <strong>zero-tolerance policy</strong> against fraudulent funding schemes, improper solicitation, and deceptive financial promotions:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5 text-gray-700 text-xs sm:text-sm">
+            <li>
+              <strong className="text-gray-900">No Guaranteed Returns or Crypto Schemes:</strong> Members must never solicit investments offering guaranteed yields, unregistered equity crowdfunding, or speculative token offerings.
+            </li>
+            <li>
+              <strong className="text-gray-900">No Advance-Fee Funding Brokering:</strong> Charging fellow founders upfront fees for &ldquo;guaranteed investor introductions&rdquo; or claiming private access to state grants for a kickback is strictly prohibited.
+            </li>
+            <li>
+              <strong className="text-gray-900">Immediate Blacklisting:</strong> Violations of this policy result in immediate account revocation, permanent blacklisting (<code className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-rose-200">BlacklistIdentifier</code>), and reporting to regulatory and law enforcement authorities where warranted.
+            </li>
+          </ul>
+        </div>
+      </section>
     </article>
   );
 }

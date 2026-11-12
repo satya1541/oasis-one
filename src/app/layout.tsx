@@ -23,7 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+import { Suspense } from "react";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { RouteTracker } from "@/components/analytics/RouteTracker";
 
 export const viewport: Viewport = {
   themeColor: "#1E1F33",
@@ -127,6 +129,9 @@ export default function RootLayout({
         <JsonLd />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--bg)] text-[var(--text)]">
+        <Suspense fallback={null}>
+          <RouteTracker />
+        </Suspense>
         {children}
       </body>
     </html>

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { BrandLockup } from "@/components/brand/BrandLockup";
-import { HelpCircle, ArrowLeft, MessageCircle, ShieldCheck, Lock, Users, Sparkles, Mail, Phone } from "lucide-react";
-import { SiteFooter } from "@/components/layout/SiteFooter";
+import { Mail, Phone } from "lucide-react";
+import { DocsShell } from "@/components/layout/DocsShell";
+import { DocsPageHeader } from "@/components/layout/DocsPageHeader";
 
 export const metadata = {
   title: "Frequently Asked Questions & Member Migration FAQ",
@@ -29,8 +29,8 @@ export const metadata = {
 
 const FAQ_SECTIONS = [
   {
-    category: "General & Membership",
-    icon: Users,
+    id: "general-membership",
+    category: "1. General & Membership",
     items: [
       {
         q: "Who is eligible to join OASIS?",
@@ -51,8 +51,8 @@ const FAQ_SECTIONS = [
     ],
   },
   {
-    category: "WhatsApp Transition & Existing Member Migration",
-    icon: MessageCircle,
+    id: "whatsapp-migration",
+    category: "2. WhatsApp Transition & Existing Member Migration",
     items: [
       {
         q: "Why did OASIS launch OASIS, and are our WhatsApp groups closing?",
@@ -65,8 +65,8 @@ const FAQ_SECTIONS = [
     ],
   },
   {
-    category: "Privacy, Mentorship & Security",
-    icon: Lock,
+    id: "privacy-mentorship-security",
+    category: "3. Privacy, Mentorship & Security",
     items: [
       {
         q: "Are my phone number and email address visible to other members?",
@@ -90,130 +90,85 @@ const FAQ_SECTIONS = [
 
 export default function FaqPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
-      {/* ── Top Header ────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 w-full bg-[var(--brand-navy)] border-b border-[var(--brand-gold)]/20 px-4 sm:px-6 lg:px-12 h-16 flex items-center shadow-md">
-        <div className="w-full max-w-[1240px] mx-auto flex items-center justify-between">
-          <BrandLockup variant="horizontal" href="/" />
-          <div className="flex items-center gap-4">
-            <Link
-              href="/legal"
-              className="text-xs text-[var(--brand-cream)]/75 hover:text-[var(--brand-gold)] transition-colors"
-            >
-              Legal &amp; Policies Hub
-            </Link>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--brand-cream)]/85 hover:text-[var(--brand-gold)] transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-[var(--brand-gold)]/40 bg-white/5"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return Home</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <DocsShell>
+      {/* ── Schema.org FAQPage Structured Data ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ_SECTIONS.flatMap((sec) =>
+              sec.items.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.a,
+                },
+              })),
+            ),
+          }),
+        }}
+      />
 
-      {/* ── Document Body ─────────────────────────────────────── */}
-      <main className="flex-1 w-full max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 space-y-12">
-        {/* ── Schema.org FAQPage Structured Data ── */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: FAQ_SECTIONS.flatMap((sec) =>
-                sec.items.map((item) => ({
-                  "@type": "Question",
-                  name: item.q,
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: item.a,
-                  },
-                }))
-              ),
-            }),
-          }}
+      <article className="space-y-9 text-[15px] leading-7 text-gray-700">
+        <DocsPageHeader
+          title="Frequently Asked Questions"
+          meta="Community Knowledge & Migration Guide · 650+ Members"
+          subtitle="Everything you need to know about joining OASIS, our WhatsApp pre-launch member migration, privacy guarantees, mentor requests, and community governance."
         />
 
-        <div className="space-y-4 pb-8 border-b border-[var(--border)]">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-[var(--brand-gold)] bg-[var(--surface-2)] px-3 py-1 rounded-full border border-[var(--border)]">
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>COMMUNITY KNOWLEDGE &amp; MIGRATION GUIDE · 650+ MEMBERS</span>
-          </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-normal tracking-tight text-[var(--text)]">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-sm text-[var(--muted)] leading-relaxed max-w-2xl">
-            Everything you need to know about joining OASIS, our WhatsApp pre-launch member migration,
-            privacy guarantees, mentor requests, and community governance.
-          </p>
-        </div>
+        {FAQ_SECTIONS.map((sec) => (
+          <section key={sec.id} id={sec.id} className="scroll-mt-24 space-y-4">
+            <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+              {sec.category}
+            </h2>
 
-        {/* ── FAQ Categories ─────────────────────────────────────── */}
-        <div className="space-y-10">
-          {FAQ_SECTIONS.map((sec, idx) => {
-            const Icon = sec.icon;
-            return (
-              <section key={idx} className="space-y-5">
-                <h2 className="font-display text-xl font-medium text-[var(--text)] flex items-center gap-2 pb-2 border-b border-[var(--border)]/50">
-                  <Icon className="w-5 h-5 text-[var(--brand-gold)]" />
-                  <span>{sec.category}</span>
-                </h2>
-                <div className="space-y-4">
-                  {sec.items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-2 hover:border-[var(--brand-gold)]/50 transition-colors"
-                    >
-                      <h3 className="text-sm font-semibold text-[var(--text)] leading-snug">
-                        {item.q}
-                      </h3>
-                      <p className="text-xs text-[var(--muted)] leading-relaxed">
-                        {item.a}
-                      </p>
-                    </div>
-                  ))}
+            <div className="divide-y divide-gray-200 border border-gray-200 rounded-lg bg-white">
+              {sec.items.map((item, i) => (
+                <div key={i} className="p-4 sm:p-5 space-y-1.5">
+                  <h3 className="text-[15px] font-semibold text-gray-900 leading-snug">
+                    {item.q}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.a}</p>
                 </div>
-              </section>
-            );
-          })}
-        </div>
-
-        {/* ── Migration Help CTA ─────────────────────────────────── */}
-        <div className="p-6 rounded-2xl bg-[var(--brand-navy)] text-[var(--brand-cream)] border border-[var(--brand-gold)]/30 space-y-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-gold)]">
-            <Sparkles className="w-5 h-5" />
-            <span>Need Help With Your Account or Invite Link?</span>
-          </div>
-          <p className="text-xs text-[var(--brand-cream)]/75 leading-relaxed">
-            If your 14-day WhatsApp community invite link expired or if you have questions regarding your application status, reach out to our administration team directly:
-          </p>
-          <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--brand-cream)]/90 pt-1">
-            <div className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-[var(--brand-gold)]" />
-              <a href="mailto:Info@oasisodisha.in" className="hover:underline">
-                Info@oasisodisha.in
-              </a>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-[var(--brand-gold)]" />
-              <a href="tel:+919040198628" className="hover:underline">
-                +91-904-01-98-628
-              </a>
-            </div>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[var(--brand-gold)] text-[var(--brand-navy)] font-semibold text-xs ml-auto hover:bg-[var(--brand-gold)]/90 transition-colors"
-            >
-              <span>Contact OASIS Form →</span>
-            </Link>
-          </div>
-        </div>
-      </main>
+          </section>
+        ))}
 
-      {/* ── Footer ────────────────────────────────────────────── */}
-      <SiteFooter />
-    </div>
+        <section id="migration-help" className="scroll-mt-24 space-y-4">
+          <h2 className="text-lg font-semibold uppercase tracking-wide text-gray-900 pb-2 border-b border-gray-200">
+            4. Need Help With Your Account or Invite Link?
+          </h2>
+          <div className="p-5 rounded-lg bg-gray-50 border border-gray-200 space-y-3">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              If your 14-day WhatsApp community invite link expired or if you have questions regarding your application status, reach out to our administration team directly:
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700 pt-1">
+              <div className="flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-[#4F46E5]" />
+                <a href="mailto:Info@oasisodisha.in" className="text-[#4F46E5] hover:underline">
+                  Info@oasisodisha.in
+                </a>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-[#4F46E5]" />
+                <a href="tel:+919040198628" className="text-[#4F46E5] hover:underline">
+                  +91-904-01-98-628
+                </a>
+              </div>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-md bg-[#4F46E5] text-white font-medium text-xs sm:ml-auto hover:bg-[#4338CA] transition-colors"
+              >
+                Contact OASIS Form &rarr;
+              </Link>
+            </div>
+          </div>
+        </section>
+      </article>
+    </DocsShell>
   );
 }

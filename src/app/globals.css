@@ -563,6 +563,24 @@ body:has(.auth-split-light) {
   color-scheme: light !important;
 }
 
+html:has(.docs-shell),
+body:has(.docs-shell) {
+  --bg: #FFFFFF !important;
+  --surface: #FFFFFF !important;
+  --surface-2: #F9FAFB !important;
+  --border: #E5E7EB !important;
+  --text: #111827 !important;
+  --muted: #4B5563 !important;
+  height: auto !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  color-scheme: light !important;
+}
+
 .join-flow {
   --bg: #03080B;
   --tx: #F5FAF6;

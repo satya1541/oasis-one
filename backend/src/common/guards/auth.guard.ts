@@ -95,6 +95,7 @@ export class AuthGuard implements CanActivate {
         '/support/contact',
         '/auth/logout',
         '/auth/me',
+        '/analytics/events',
       ];
       const currentPath = request.path.replace(/^\/api\/v1/, '');
       if (!allowedPaths.some(p => currentPath.startsWith(p))) {
