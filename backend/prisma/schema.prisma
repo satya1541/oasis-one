@@ -267,6 +267,7 @@ model User {
   startupMemberships     StartupMember[]
   createdStartups        Startup[]              @relation("StartupCreator")
   usedInviteLinks        InviteLink[]           @relation("InviteRegisteredUser")
+  postLikes              PostLike[]
 
   @@index([accountStatus])
   @@index([primaryRole])
@@ -564,6 +565,7 @@ model Post {
   author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   responses PostResponse[]
   tags      PostTag[]
+  likes     PostLike[]
 
   @@fulltext([title, body])
   @@index([authorId])
@@ -603,6 +605,21 @@ model PostResponse {
   @@index([status])
   @@index([createdAt])
   @@map("post_responses")
+}
+
+model PostLike {
+  id        String   @id @default(uuid()) @db.Char(36)
+  postId    String   @map("post_id") @db.Char(36)
+  userId    String   @map("user_id") @db.Char(36)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(3)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@map("post_likes")
 }
 
 model Achievement {

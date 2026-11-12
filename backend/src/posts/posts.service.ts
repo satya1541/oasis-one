@@ -78,8 +78,14 @@ export class PostsService {
           tags: {
             include: { tag: true },
           },
+          likes: params.viewerId
+            ? {
+                where: { userId: params.viewerId },
+                select: { id: true },
+              }
+            : false,
           _count: {
-            select: { responses: true },
+            select: { responses: true, likes: true },
           },
         },
       }),
@@ -96,6 +102,7 @@ export class PostsService {
       resolvedAnswerId: p.resolvedAnswerId,
       editedAt: p.editedAt,
       createdAt: p.createdAt,
+      isOwner: p.authorId === params.viewerId,
       author: {
         id: p.author.id,
         name: p.author.profile?.name || 'Member',
@@ -107,6 +114,8 @@ export class PostsService {
       },
       tags: p.tags.map((t) => t.tag.name),
       responseCount: p._count.responses,
+      likeCount: p._count.likes,
+      likedByMe: Array.isArray(p.likes) && p.likes.length > 0,
     }));
 
     return {
@@ -118,24 +127,29 @@ export class PostsService {
   }
 
   async createPost(userId: string, dto: {
-    title: string;
+    title?: string;
     body: string;
     category?: string;
     type?: PostType;
     tags?: string[];
   }) {
-    if (!dto.title || dto.title.length > 200) {
-      throw new HttpException({ code: 'VALIDATION_FAILED', message: 'Title is required (max 200 chars)' }, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-    if (!dto.body || dto.body.length > 10000) {
+    const trimmedBody = (dto.body || '').trim();
+    if (!trimmedBody || trimmedBody.length > 10000) {
       throw new HttpException({ code: 'VALIDATION_FAILED', message: 'Body is required (max 10,000 chars)' }, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    const firstLine = trimmedBody.split(/\r?\n/).find((l) => l.trim().length > 0)?.trim() || trimmedBody;
+    const derivedTitle = firstLine.length > 120 ? `${firstLine.slice(0, 117).trimEnd()}...` : firstLine;
+    const resolvedTitle = (dto.title || '').trim() || derivedTitle;
+    if (!resolvedTitle || resolvedTitle.length > 200) {
+      throw new HttpException({ code: 'VALIDATION_FAILED', message: 'Title must be at most 200 chars' }, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     const post = await this.prisma.post.create({
       data: {
         authorId: userId,
-        title: dto.title.trim(),
-        body: dto.body.trim(),
+        title: resolvedTitle,
+        body: trimmedBody,
         category: dto.category || 'Collaboration',
         type: dto.type || PostType.question,
         status: PostStatus.published, // No approval required for posts
@@ -195,6 +209,9 @@ export class PostsService {
       },
       tags: fullPost!.tags.map((t) => t.tag.name),
       responseCount: 0,
+      likeCount: 0,
+      likedByMe: false,
+      isOwner: true,
     };
   }
 
@@ -217,6 +234,15 @@ export class PostsService {
           },
         },
         tags: { include: { tag: true } },
+        likes: viewerId
+          ? {
+              where: { userId: viewerId },
+              select: { id: true },
+            }
+          : false,
+        _count: {
+          select: { responses: true, likes: true },
+        },
       },
     });
 
@@ -229,6 +255,9 @@ export class PostsService {
       body: post.status === 'deleted' ? 'This post has been removed by its author.' : post.body,
       isOwner: post.authorId === viewerId,
       tags: post.tags.map((t) => t.tag.name),
+      responseCount: post._count.responses,
+      likeCount: post._count.likes,
+      likedByMe: Array.isArray(post.likes) && post.likes.length > 0,
       author: {
         id: post.author.id,
         name: post.author.profile?.name || 'Member',
@@ -346,6 +375,22 @@ export class PostsService {
         body: body.trim(),
         status: PostStatus.published,
       },
+      include: {
+        author: {
+          select: {
+            id: true,
+            primaryRole: true,
+            profile: {
+              select: {
+                name: true,
+                headline: true,
+                profilePhotoUrl: true,
+                city: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Realtime notification
@@ -378,7 +423,45 @@ export class PostsService {
       });
     }
 
-    return response;
+    return {
+      id: response.id,
+      postId: response.postId,
+      body: response.body,
+      status: response.status,
+      createdAt: response.createdAt,
+      author: {
+        id: response.author.id,
+        name: response.author.profile?.name || 'Member',
+        headline: response.author.profile?.headline,
+        avatarUrl: response.author.profile?.profilePhotoUrl,
+        city: response.author.profile?.city,
+        primaryRole: response.author.primaryRole,
+        role: response.author.primaryRole,
+      },
+    };
+  }
+
+  async toggleLike(postId: string, userId: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post || post.status !== 'published') {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Post not available' }, HttpStatus.NOT_FOUND);
+    }
+
+    const existing = await this.prisma.postLike.findUnique({
+      where: { postId_userId: { postId, userId } },
+    });
+
+    let liked: boolean;
+    if (existing) {
+      await this.prisma.postLike.delete({ where: { id: existing.id } }).catch(() => {});
+      liked = false;
+    } else {
+      await this.prisma.postLike.create({ data: { postId, userId } }).catch(() => {});
+      liked = true;
+    }
+
+    const likeCount = await this.prisma.postLike.count({ where: { postId } });
+    return { postId, liked, likeCount };
   }
 
   async resolvePost(postId: string, userId: string, acceptedResponseId?: string) {

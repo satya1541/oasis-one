@@ -43,9 +43,17 @@ export class PostsController {
   @Post('posts')
   async createPost(
     @CurrentUser('id') userId: string,
-    @Body() body: { title: string; body: string; category?: string; type?: PostType; tags?: string[] },
+    @Body() body: { title?: string; body: string; category?: string; type?: PostType; tags?: string[] },
   ) {
     return this.postsService.createPost(userId, body);
+  }
+
+  @Post('posts/:id/like')
+  async toggleLike(
+    @Param('id') postId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.postsService.toggleLike(postId, userId);
   }
 
   @Get('posts/:id')
