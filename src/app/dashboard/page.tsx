@@ -34,6 +34,7 @@ interface UserProfile {
   email: string;
   primaryRole: string;
   accountStatus: string;
+  applicationStatus?: string;
   adminLevel?: string | null;
   showUnlockAnimation?: boolean;
 }
@@ -145,6 +146,14 @@ function DashboardContent() {
         // Strict segregation: Super Admins are restricted strictly to /admin console
         if (currentUser?.adminLevel) {
           router.replace("/admin");
+          return;
+        }
+
+        if (
+          currentUser.accountStatus === "pending_verification" &&
+          currentUser.applicationStatus === "not_started"
+        ) {
+          router.replace("/join");
           return;
         }
 

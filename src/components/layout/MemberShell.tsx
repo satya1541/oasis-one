@@ -310,6 +310,18 @@ export function MemberShell({ children }: MemberShellProps) {
                 : "Founder";
             setUserRole(role);
 
+            // If Google signup created an account without a submitted application yet, return to /join
+            if (
+              !u.adminLevel &&
+              u.accountStatus === "pending_verification" &&
+              u.applicationStatus === "not_started"
+            ) {
+              if (typeof window !== "undefined") {
+                window.location.replace("/join");
+              }
+              return;
+            }
+
             // If unapproved and trying to access any page other than /dashboard, bounce immediately
             if (u.accountStatus !== "active" && pathname && pathname !== "/dashboard") {
               if (typeof window !== "undefined") {

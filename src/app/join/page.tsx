@@ -200,6 +200,7 @@ function JoinWizard() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isGoogleAuth, setIsGoogleAuth] = useState<boolean>(false);
+  const [hasExistingAccount, setHasExistingAccount] = useState<boolean>(false);
 
   // Step 3 Role Details State
   // Founder
@@ -331,6 +332,72 @@ function JoinWizard() {
       console.warn("Could not parse previous registration session storage", e);
     }
   }, [emailParam, nameParam, isNotRegistered]);
+
+  // ── Hydrate in-progress Google signup session (pending_verification + not_started) ─
+  useEffect(() => {
+    let active = true;
+    async function checkExistingGoogleSession() {
+      try {
+        const res = await fetch("/api/v1/auth/me", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!res.ok || !active) return;
+
+        const meJson = await res.json().catch(() => null);
+        const u = meJson?.data?.user || meJson?.data;
+        if (!u || !active) return;
+
+        if (u.adminLevel) {
+          router.replace("/admin");
+          return;
+        }
+        if (
+          u.accountStatus === "active" ||
+          (u.applicationStatus && u.applicationStatus !== "not_started")
+        ) {
+          router.replace("/dashboard");
+          return;
+        }
+
+        if (u.accountStatus === "pending_verification") {
+          setHasExistingAccount(true);
+          setIsGoogleAuth(true);
+          if (u.email) setEmail(u.email);
+          if (u.name && u.name !== "Member") {
+            setName((prev) => prev || u.name);
+          }
+
+          const roleIdx =
+            u.primaryRole === "founder"
+              ? 0
+              : u.primaryRole === "aspiring_entrepreneur"
+              ? 1
+              : u.primaryRole === "mentor"
+              ? 2
+              : -1;
+
+          if (roleIdx >= 0) {
+            setSelectedRoleIndex(roleIdx);
+            setHasUserSelectedRole(true);
+            setIsGuardReady(true);
+            if (u.name && u.name !== "Member") {
+              setStep(3);
+            } else {
+              setStep(2);
+            }
+          }
+        }
+      } catch {
+        // Ignore unauthenticated session checks
+      }
+    }
+
+    checkExistingGoogleSession();
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   // Save changes to sessionStorage whenever relevant fields change
   const persistState = useCallback(() => {
@@ -741,8 +808,13 @@ function JoinWizard() {
         ],
       };
 
-      const res = await fetch("/api/v1/auth/register", {
+      const endpoint = hasExistingAccount
+        ? "/api/v1/auth/register/complete"
+        : "/api/v1/auth/register";
+
+      const res = await fetch(endpoint, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -947,6 +1019,7 @@ function JoinWizard() {
             id="a_email"
             type="email"
             value={email}
+            readOnly={hasExistingAccount}
             onChange={(e) => {
               setEmail(e.target.value);
               setFieldErrors((prev) => ({ ...prev, email: "" }));
@@ -960,13 +1033,15 @@ function JoinWizard() {
         {isGoogleAuth ? (
           <p className="lead w">
             Signed in with Google ({email}). No password needed.{" "}
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setIsGoogleAuth(false)}
-            >
-              Use a password instead
-            </button>
+            {!hasExistingAccount && (
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => setIsGoogleAuth(false)}
+              >
+                Use a password instead
+              </button>
+            )}
           </p>
         ) : (
           <div

@@ -660,6 +660,7 @@ export class AuthService {
     userId: string,
     dto: {
       primaryRole: UserRole;
+      name?: string;
       timeZone?: string;
       city?: string;
       state?: string;
@@ -678,10 +679,18 @@ export class AuthService {
       );
     }
 
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true, applications: { take: 1 } },
+    });
     if (!user) {
       throw new HttpException({ code: 'NOT_FOUND', message: 'User not found' }, HttpStatus.NOT_FOUND);
     }
+    if (user.applications.length > 0 || user.accountStatus !== AccountStatus.pending_verification) {
+      return { ok: true };
+    }
+
+    const resolvedName = dto.name?.trim() || user.profile?.name || 'Member';
 
     await this.prisma.$transaction(async (tx) => {
       await tx.user.update({
@@ -697,6 +706,7 @@ export class AuthService {
       await tx.profile.upsert({
         where: { userId },
         update: {
+          name: resolvedName,
           city: dto.city,
           state: dto.state,
           headline: dto.headline,
@@ -707,7 +717,7 @@ export class AuthService {
         },
         create: {
           userId,
-          name: 'Member',
+          name: resolvedName,
           city: dto.city,
           state: dto.state,
           headline: dto.headline,
@@ -722,12 +732,13 @@ export class AuthService {
         data: {
           userId,
           submittedProfileSnapshot: {
+            name: resolvedName,
             role: dto.primaryRole,
             headline: dto.headline,
             bio: dto.bio,
             city: dto.city,
             state: dto.state,
-            phone: (dto as any).phone,
+            phone: (dto as any).phone || null,
             roleData: dto.roleData,
             evidenceFileIds: (dto as any).evidenceFileIds || [],
           },
