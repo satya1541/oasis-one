@@ -8,7 +8,8 @@
     "dev:backend": "pnpm --filter oasis-backend start:dev",
     "build": "next build",
     "start": "next start -p 7200",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check-user": "node backend/scripts/check-user.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

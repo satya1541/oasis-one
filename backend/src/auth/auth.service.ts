@@ -55,6 +55,12 @@ export class AuthService {
     );
   }
 
+  private hasEmailService(): boolean {
+    const transport = this.configService.get<string>('mail.transport') || 'console';
+    const host = this.configService.get<string>('mail.host') || '';
+    return transport !== 'console' && host.trim().length > 0;
+  }
+
   // ----------------------------------------------------
   // SESSIONS
   // ----------------------------------------------------
@@ -172,6 +178,7 @@ export class AuthService {
     });
 
     const isExpedited = !!invite;
+    const emailServiceConfigured = this.hasEmailService();
 
     // Create User, Profile, Application, Consents in transaction
     const result = await this.prisma.$transaction(async (tx) => {
@@ -180,7 +187,10 @@ export class AuthService {
           email,
           passwordHash,
           primaryRole: dto.primaryRole,
-          accountStatus: AccountStatus.pending_verification,
+          // Without an email transport, route completed applicants straight to committee approval
+          accountStatus: emailServiceConfigured
+            ? AccountStatus.pending_verification
+            : AccountStatus.pending_approval,
           emailVerified: false,
           phone: dto.phone || null,
           timeZone: dto.timeZone || 'Asia/Kolkata',
@@ -274,31 +284,33 @@ export class AuthService {
       return { user, application };
     });
 
-    // Generate Email Verification Token
-    const rawVerifyToken = generateRandomToken(32);
-    const tokenHash = hashToken(rawVerifyToken);
-    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (emailServiceConfigured) {
+      // Generate Email Verification Token
+      const rawVerifyToken = generateRandomToken(32);
+      const tokenHash = hashToken(rawVerifyToken);
+      const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    await this.prisma.verificationToken.create({
-      data: {
-        userId: result.user.id,
-        email,
-        tokenHash,
-        type: VerificationTokenType.email_verify,
-        expiresAt: verifyExpires,
-      },
-    });
+      await this.prisma.verificationToken.create({
+        data: {
+          userId: result.user.id,
+          email,
+          tokenHash,
+          type: VerificationTokenType.email_verify,
+          expiresAt: verifyExpires,
+        },
+      });
 
-    // Send verification email
-    const verifyUrl = `${this.frontendUrl}/verify-email?token=${rawVerifyToken}`;
-    this.mailService.sendMail({
-      to: email,
-      subject: 'Verify your email address for OASIS',
-      headline: 'Welcome to OASIS',
-      body: `Thank you for starting your registration. Please verify your email address to submit your membership application for admin review.`,
-      actionText: 'Verify Email Address',
-      actionUrl: verifyUrl,
-    });
+      // Send verification email
+      const verifyUrl = `${this.frontendUrl}/verify-email?token=${rawVerifyToken}`;
+      this.mailService.sendMail({
+        to: email,
+        subject: 'Verify your email address for OASIS',
+        headline: 'Welcome to OASIS',
+        body: `Thank you for starting your registration. Please verify your email address to submit your membership application for admin review.`,
+        actionText: 'Verify Email Address',
+        actionUrl: verifyUrl,
+      });
+    }
 
     // Create session (locked until approved)
     const { rawToken } = await this.createSession(result.user.id, dto.ipAddress, undefined, false);
@@ -586,13 +598,47 @@ export class AuthService {
       );
     }
 
+    // Google confirmed payload.email_verified === true; sync email verification and promote
+    // any applicant stuck in pending_verification who already submitted an application.
+    const userUpdates: Record<string, any> = { lastLoginAt: new Date() };
+    if (!user.emailVerified) {
+      userUpdates.emailVerified = true;
+    }
+
+    let promotedFromPendingVerification = false;
+    if (user.accountStatus === AccountStatus.pending_verification) {
+      const submittedApp = await this.prisma.application.findFirst({
+        where: {
+          userId: user.id,
+          status: { not: ApplicationStatus.not_started },
+        },
+        select: { id: true },
+      });
+      if (submittedApp) {
+        userUpdates.accountStatus = AccountStatus.pending_approval;
+        promotedFromPendingVerification = true;
+      }
+    }
+
     const isMfaAdmin = !!user.adminLevel;
     const { rawToken } = await this.createSession(user.id, ipAddress, userAgent, !isMfaAdmin);
 
-    await this.prisma.user.update({
+    user = await this.prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: userUpdates,
+      include: { profile: true },
     });
+
+    if (promotedFromPendingVerification) {
+      await this.prisma.verificationToken.updateMany({
+        where: {
+          userId: user.id,
+          type: VerificationTokenType.email_verify,
+          usedAt: null,
+        },
+        data: { usedAt: new Date() },
+      });
+    }
 
     await this.auditService.log({
       actorId: user.id,
@@ -956,6 +1002,7 @@ export class AuthService {
       id: fullUser.id,
       email: fullUser.email,
       emailVerified: fullUser.emailVerified,
+      emailServiceConfigured: this.hasEmailService(),
       name: fullUser.profile?.name || 'Member',
       avatarUrl: fullUser.profile?.profilePhotoUrl || null,
       profilePhotoUrl: fullUser.profile?.profilePhotoUrl || null,

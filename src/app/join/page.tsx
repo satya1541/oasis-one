@@ -1,65 +1,135 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { GlassLogoPill } from "@/components/brand/GlassLogoPill";
-import { JoinShowcase } from "@/components/join/JoinShowcase";
 import { UnregisteredAccountModal } from "@/components/auth/UnregisteredAccountModal";
 import { LocationAutocomplete } from "@/components/ui/LocationAutocomplete";
 import { cn } from "@/lib/utils";
-import {
-  Compass,
-  Rocket,
-  Award,
-  Check,
-  ShieldCheck,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  RotateCw,
-  X,
-  Globe,
-  Building,
-  FileCheck2,
-  FileText,
-  Phone,
-  Edit2,
-  UserCheck,
-  Sparkles,
-  Lightbulb,
-  TrendingUp,
-  Users,
-  ChevronDown,
-  Upload,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-type RoleOption = "aspiring" | "founder" | "mentor";
+// ─── Role Definitions & Tokens ───────────────────────────────────────────────
+type RoleKey = "founder" | "aspiring" | "mentor";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+interface RoleDef {
+  key: RoleKey;
+  apiRole: "founder" | "aspiring_entrepreneur" | "mentor";
+  title: string;
+  shortTitle: string;
+  subtitle: string;
+  tags: string[];
+  bullets: string[];
+  photo: string;
+  photoPos: string;
+  accent: string;
+  step2Headline: string;
+  step3Headline: string;
+  step3Title: string;
+  step3Lead: string;
+}
+
+const ROLES: RoleDef[] = [
+  {
+    key: "founder",
+    apiRole: "founder",
+    title: "Founder or Co-founder",
+    shortTitle: "Founder",
+    subtitle: "I’m building a startup",
+    tags: ["MVP · Growth", "Investor Access", "Startup Odisha"],
+    bullets: [
+      "Startup name and stage",
+      "Website and LinkedIn",
+      "Incorporation proof, if you have it",
+    ],
+    photo: "/join-assets/role-founder.webp",
+    photoPos: "47% 22%",
+    accent: "#88DECC",
+    step2Headline: "Your venture, in front of the right people.",
+    step3Headline: "Show us what you’re building.",
+    step3Title: "Tell us about your startup",
+    step3Lead: "The committee checks that your venture exists and what traction it has.",
+  },
+  {
+    key: "aspiring",
+    apiRole: "aspiring_entrepreneur",
+    title: "Aspiring Entrepreneur",
+    shortTitle: "Aspiring Entrepreneur",
+    subtitle: "I have an idea to explore",
+    tags: ["Ideation", "Validation", "Mentorship"],
+    bullets: [
+      "The sector your idea sits in",
+      "The problem you want to solve",
+      "Your city",
+    ],
+    photo: "/join-assets/role-aspiring.webp",
+    photoPos: "85% 30%",
+    accent: "#A78BFA",
+    step2Headline: "Every company starts with an idea like yours.",
+    step3Headline: "Tell us where your idea starts.",
+    step3Title: "Tell us about your idea",
+    step3Lead: "No company or paperwork needed. Share the problem and where you are.",
+  },
+  {
+    key: "mentor",
+    apiRole: "mentor",
+    title: "Mentor or Advisor",
+    shortTitle: "Mentor",
+    subtitle: "I guide and back founders",
+    tags: ["Advisory", "Angel Network", "Dealflow"],
+    bullets: [
+      "Company and job title",
+      "Years of experience",
+      "LinkedIn profile",
+    ],
+    photo: "/join-assets/role-mentor.webp",
+    photoPos: "80% 30%",
+    accent: "#F3D3A2",
+    step2Headline: "Your experience, where it matters most.",
+    step3Headline: "Show us the experience founders will lean on.",
+    step3Title: "Tell us about your experience",
+    step3Lead: "We vet every mentor so founders can trust who they meet.",
+  },
+];
+
 const FOUNDER_STAGES = [
-  "Ideation (concept validation)",
-  "MVP (prototype ready)",
-  "Early Revenue (first paying customers)",
-  "Growth (scaling operations)",
+  "Ideation",
+  "MVP / prototype ready",
+  "Early Revenue",
+  "Growth / Scaled",
 ];
-const FOUNDER_DOC_TYPES = [
-  "Certificate of Incorporation (Pvt Ltd)",
-  "LLP Incorporation Certificate",
-  "Partnership Deed",
-  "Udyam Registration Certificate (MSME)",
-  "DPIIT Recognition Certificate",
-  "Other Business Registration Proof",
+
+const FOUNDER_ROLES = [
+  "Founder / CEO",
+  "Co-founder / CTO",
+  "COO",
+  "Founding Team",
 ];
-const MENTOR_DOC_TYPES = [
-  "Experience / Employment Certificate",
-  "Professional Qualification / Certification",
-  "Company / Professional Website",
-  "Evidence of previous mentoring or startup leadership",
+
+const ASPIRING_DOMAINS = [
+  "AI & Automation",
+  "AgriTech",
+  "CleanTech",
+  "HealthTech",
+  "D2C",
+  "Handloom & Culture",
+  "Other",
 ];
+
+const MENTOR_EXPERIENCE_OPTIONS = [
+  "5–8 years",
+  "8–12 years",
+  "12–15 years",
+  "15+ years",
+];
+
+interface UploadedFileItem {
+  fileId: string;
+  name: string;
+  status: "scanning" | "verified" | "error";
+  message?: string;
+  docType?: string;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function normalizeUrl(url: string): string {
@@ -69,1184 +139,1747 @@ function normalizeUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
-function Linkedin({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.76-1.75 1.76m1.39 9.74v-8.37H5.07v8.37h2.78Z" />
-    </svg>
-  );
+function isValidLinkedIn(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  return /^(https?:\/\/)?([\w-]+\.)?linkedin\.com\/in\/[\w%-]+\/?$/i.test(trimmed);
 }
 
-// ─── Transition Variants ─────────────────────────────────────────────────────
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 48 : -48,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction > 0 ? -48 : 48,
-    opacity: 0,
-  }),
-};
+function isValidWebUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  return /^https?:\/\/[^\s.]+\.\S+/i.test(trimmed);
+}
 
-const slideTransition = {
-  type: "spring" as const,
-  stiffness: 260,
-  damping: 30,
-  mass: 0.8,
-};
+function isValidEmail(email: string): boolean {
+  const trimmed = email.trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+}
 
-// ─── Progress Bar ────────────────────────────────────────────────────────────
-function ProgressBar({ step }: { step: number }) {
-  const steps = ["Role", "Account", "Details", "Review"];
-  return (
-    <div className="w-full space-y-1.5">
-      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/50">
-        <span>Step {step} of 4 &middot; <strong className="text-[#F5FAF6] font-medium">{steps[step - 1]}</strong></span>
-        <span className="text-[#88DECC] font-semibold">{step * 25}%</span>
-      </div>
-      <div className="grid grid-cols-4 gap-2 h-1 w-full">
-        {[1, 2, 3, 4].map((s) => (
-          <motion.div
-            key={s}
-            className="rounded-full h-full"
-            initial={false}
-            animate={{
-              background:
-                s <= step
-                  ? "linear-gradient(90deg, #88DECC, #4DB8A4)"
-                  : "rgba(255,255,255,0.08)",
-              boxShadow:
-                s <= step
-                  ? "0 0 10px rgba(136,222,204,0.5)"
-                  : "none",
-            }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          />
-        ))}
-      </div>
-    </div>
-  );
+function getPasswordStrength(p: string): number {
+  if (!p) return 0;
+  let score = 0;
+  if (p.length >= 8) score++;
+  if (/[a-z]/.test(p) && /[A-Z]/.test(p)) score++;
+  if (/\d/.test(p)) score++;
+  if (/[^\w\s]/.test(p)) score++;
+  return score;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STEP 1: ROLE SELECTION
+// MAIN JOIN WIZARD COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
-function Step1Role({
-  selectedRole,
-  setSelectedRole,
-  onContinue,
-  onGoogleSignUp,
-}: {
-  selectedRole: RoleOption;
-  setSelectedRole: (r: RoleOption) => void;
-  onContinue: () => void;
-  onGoogleSignUp: () => void;
-}) {
-  const roles: {
-    key: RoleOption;
-    title: string;
-    desc: string;
-    tags: string[];
-    visualDeck: React.ReactNode;
-  }[] = [
-    {
-      key: "founder",
-      title: "Founder or Co-founder",
-      desc: "Actively building, testing an MVP, or scaling a registered startup in Odisha.",
-      tags: ["MVP · Growth", "Investor Access", "Startup Odisha"],
-      visualDeck: (
-        <div className="relative w-20 h-14 sm:w-24 sm:h-16 flex items-center justify-center shrink-0">
-          <div className="absolute -left-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 border border-emerald-400/40 shadow-lg flex items-center justify-center -rotate-12 transition-transform duration-300 group-hover:-rotate-16">
-            <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-          <div className="absolute z-10 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-[#0F2A28] to-[#061413] border border-[#88DECC]/50 shadow-xl flex items-center justify-center text-[#88DECC] transition-transform duration-300 group-hover:scale-105">
-            <Building className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="absolute -right-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 border border-cyan-400/40 shadow-lg flex items-center justify-center rotate-12 transition-transform duration-300 group-hover:rotate-16">
-            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "aspiring",
-      title: "Aspiring Entrepreneur",
-      desc: "Exploring or validating a problem statement before taking the leap.",
-      tags: ["Ideation", "Validation", "Mentorship"],
-      visualDeck: (
-        <div className="relative w-20 h-14 sm:w-24 sm:h-16 flex items-center justify-center shrink-0">
-          <div className="absolute -left-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-800 border border-indigo-400/40 shadow-lg flex items-center justify-center -rotate-12 transition-transform duration-300 group-hover:-rotate-16">
-            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-          <div className="absolute z-10 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-[#1C1635] to-[#0B0918] border border-[#A78BFA]/50 shadow-xl flex items-center justify-center text-[#A78BFA] transition-transform duration-300 group-hover:scale-105">
-            <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="absolute -right-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 border border-fuchsia-400/40 shadow-lg flex items-center justify-center rotate-12 transition-transform duration-300 group-hover:rotate-16">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "mentor",
-      title: "Mentor or Advisor",
-      desc: "Guiding, advising, and investing in high-conviction ventures across Odisha.",
-      tags: ["Advisory", "Angel Network", "Dealflow"],
-      visualDeck: (
-        <div className="relative w-20 h-14 sm:w-24 sm:h-16 flex items-center justify-center shrink-0">
-          <div className="absolute -left-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-amber-600 to-yellow-800 border border-amber-400/40 shadow-lg flex items-center justify-center -rotate-12 transition-transform duration-300 group-hover:-rotate-16">
-            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-          <div className="absolute z-10 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-[#2A200F] to-[#120D05] border border-[#F3D3A2]/50 shadow-xl flex items-center justify-center text-[#F3D3A2] transition-transform duration-300 group-hover:scale-105">
-            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="absolute -right-1 w-9 h-11 sm:w-11 sm:h-13 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 border border-orange-400/40 shadow-lg flex items-center justify-center rotate-12 transition-transform duration-300 group-hover:rotate-16">
-            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
-          </div>
-        </div>
-      ),
-    },
-  ];
-
-  return (
-    <div className="space-y-4 max-w-lg mx-auto w-full">
-      <div className="text-left space-y-1.5">
-        <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-display font-light text-[#F5FAF6] tracking-tight leading-tight">
-          How would you describe yourself?
-        </h1>
-        <p className="text-xs sm:text-sm text-[#ECF1EF]/65 leading-relaxed">
-          Select the primary path that reflects where you are today in Odisha&apos;s entrepreneurial ecosystem.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {roles.map((r) => {
-          const isSelected = selectedRole === r.key;
-          return (
-            <motion.button
-              key={r.key}
-              type="button"
-              onClick={() => setSelectedRole(r.key)}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className={cn(
-                "group relative w-full text-left rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all cursor-pointer flex items-center justify-between gap-4 border backdrop-blur-md overflow-hidden",
-                isSelected
-                  ? "bg-[#88DECC]/[0.08] border-[#88DECC] shadow-[0_0_35px_rgba(136,222,204,0.15)] ring-1 ring-[#88DECC]/40"
-                  : "bg-white/[0.03] border-white/[0.08] hover:border-white/20 hover:bg-white/[0.05]"
-              )}
-            >
-              {/* Left Info */}
-              <div className="flex-1 min-w-0 pr-1">
-                <h2 className="text-sm sm:text-base font-medium text-[#F5FAF6] tracking-tight">{r.title}</h2>
-                <p className="text-[11px] sm:text-xs text-[#ECF1EF]/60 leading-relaxed mt-1">
-                  {r.desc}
-                </p>
-                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                  {r.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="text-[9px] uppercase font-mono tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-[#88DECC]/90 border border-white/[0.08]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: Visual Fanned Badges + Radio circle */}
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="hidden xs:block">
-                  {r.visualDeck}
-                </div>
-                <div
-                  className={cn(
-                    "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-                    isSelected
-                      ? "bg-[#88DECC] border-[#88DECC] shadow-[0_0_10px_rgba(136,222,204,0.6)]"
-                      : "border-white/25 bg-black/20 group-hover:border-white/40"
-                  )}
-                >
-                  {isSelected && <Check className="w-3 h-3 text-[#03080B] stroke-[3]" />}
-                </div>
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      <div className="pt-2 flex flex-col space-y-2.5 w-full">
-        <button type="button" onClick={onContinue} className="join-cta-pill group">
-          <span className="font-medium tracking-tight">Continue to Account Setup</span>
-          <div className="join-cta-disc shrink-0">
-            <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M.6.6 4 4 .6 7.4" />
-            </svg>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-2.5">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-[9px] uppercase font-mono tracking-wider text-[#ECF1EF]/40">or</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        <button
-          type="button"
-          onClick={onGoogleSignUp}
-          className="w-full h-10 rounded-full bg-white/[0.04] border border-white/10 text-xs font-medium text-[#F5FAF6] hover:bg-white/[0.08] hover:border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" />
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
-          </svg>
-          Continue with Google
-        </button>
-
-        <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#ECF1EF]/50">
-          <ShieldCheck className="w-3 h-3 text-[#88DECC] shrink-0" />
-          <span>Every applicant is personally reviewed by an admin.</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STEP 2: ACCOUNT DETAILS
-// ═══════════════════════════════════════════════════════════════════════════════
-function Step2Account({
-  role,
-  onContinue,
-  onBack,
-  onGoogleSignUp,
-}: {
-  role: RoleOption;
-  onContinue: () => void;
-  onBack: () => void;
-  onGoogleSignUp: () => void;
-}) {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedName = sessionStorage.getItem("oasis_reg_name");
-      const savedEmail = sessionStorage.getItem("oasis_reg_email");
-      const savedPhone = sessionStorage.getItem("oasis_reg_phone");
-      if (savedName) setFullName(savedName);
-      if (savedEmail) setEmail(savedEmail);
-      if (savedPhone) setPhone(savedPhone);
-    }
-  }, []);
-
-  const hasMinLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasNumber;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim()) { setError("Please enter your full name."); return; }
-    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address."); return; }
-    const cleanPhone = phone.replace(/\D/g, "");
-    if (cleanPhone.length < 10) { setError("Please enter a valid 10-digit mobile number."); return; }
-    if (!isPasswordValid) { setError("Please ensure your password meets all requirements."); return; }
-
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("oasis_reg_name", fullName.trim());
-      sessionStorage.setItem("oasis_reg_email", email.trim());
-      sessionStorage.setItem("oasis_reg_phone", phone.trim());
-      sessionStorage.setItem("oasis_reg_password", password);
-    }
-    onContinue();
-  };
-
-  return (
-    <div className="space-y-3 max-w-lg mx-auto">
-      <div className="text-center space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-display font-light text-[#F5FAF6] tracking-tight">
-          Create your account
-        </h1>
-        <p className="text-xs sm:text-sm text-[#ECF1EF]/65">
-          Join 650+ verified founders and mentors across Odisha.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-        {error && (
-          <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-200 flex items-center gap-2">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Full name</label>
-            <input type="text" required value={fullName} onChange={(e) => { setFullName(e.target.value); if (error) setError(""); }}
-              placeholder="Your full name"
-              className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Email address</label>
-            <input type="email" required value={email} onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
-              placeholder="name@startup.in"
-              className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all" />
-          </div>
-          <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Mobile number</label>
-            <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] focus-within:ring-1.5 focus-within:ring-[#88DECC]/20 transition-all overflow-hidden h-10">
-              <span className="inline-flex items-center px-2.5 text-xs font-mono font-semibold text-[#88DECC] border-r border-white/10 bg-black/30">+91</span>
-              <input type="tel" required value={phone} onChange={(e) => { setPhone(e.target.value); if (error) setError(""); }}
-                placeholder="98765 43210" className="w-full h-full px-2.5 bg-transparent text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75">Password</label>
-              <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="text-[10px] text-[#ECF1EF]/60 hover:text-[#88DECC] flex items-center gap-1 cursor-pointer transition-colors">
-                {showPassword ? <EyeOff className="w-2.5 h-2.5" /> : <Eye className="w-2.5 h-2.5" />}
-                <span>{showPassword ? "Hide" : "Show"}</span>
-              </button>
-            </div>
-            <input type={showPassword ? "text" : "password"} required value={password}
-              onChange={(e) => { setPassword(e.target.value); if (error) setError(""); }}
-              placeholder="••••••••••••"
-              className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-1.5 focus:ring-[#88DECC]/20 outline-none transition-all" />
-          </div>
-        </div>
-
-        {/* Password rules */}
-        <div className="p-2 rounded-xl bg-black/30 border border-white/10 text-[10px]">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            {[
-              { ok: hasMinLength, label: "8+ chars" },
-              { ok: hasUppercase, label: "Uppercase" },
-              { ok: hasLowercase, label: "Lowercase" },
-              { ok: hasNumber, label: "Number (0-9)" },
-            ].map((rule) => (
-              <div key={rule.label} className={`flex items-center gap-1 ${rule.ok ? "text-[#88DECC]" : "text-[#ECF1EF]/40"}`}>
-                <Check className={`w-2.5 h-2.5 ${rule.ok ? "opacity-100" : "opacity-30"}`} />
-                <span>{rule.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 pt-1">
-          <button type="button" onClick={onBack}
-            className="h-10 px-4 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#ECF1EF]/70 hover:text-[#88DECC] hover:border-[#88DECC]/30 transition-all flex items-center gap-1.5 cursor-pointer">
-            <ArrowLeft className="w-3 h-3" /> Back
-          </button>
-          <button type="submit" className="join-cta-pill flex-1 group">
-            <span className="font-medium tracking-tight">Continue to Details</span>
-            <div className="join-cta-disc shrink-0">
-              <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M.6.6 4 4 .6 7.4" /></svg>
-            </div>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-[9px] uppercase font-mono tracking-wider text-[#ECF1EF]/40">or</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
-
-        <button type="button" onClick={onGoogleSignUp}
-          className="w-full h-10 rounded-full bg-white/[0.04] border border-white/10 text-xs font-medium text-[#F5FAF6] hover:bg-white/[0.08] hover:border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" />
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
-          </svg>
-          Continue with Google
-        </button>
-      </form>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STEP 3: VENTURE / PROFILE DETAILS
-// ═══════════════════════════════════════════════════════════════════════════════
-function Step3Details({
-  role,
-  onContinue,
-  onBack,
-}: {
-  role: RoleOption;
-  onContinue: () => void;
-  onBack: () => void;
-}) {
-  const [city, setCity] = useState("Bhubaneswar");
-  const [description, setDescription] = useState("");
-  const [linkedin, setLinkedin] = useState("");
-  const [website, setWebsite] = useState("");
-  const [error, setError] = useState("");
-  const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [uploadedEvidence, setUploadedEvidence] = useState<{ fileId: string; filename: string; docType: string } | null>(null);
-
-  // Founder fields
-  const [startupName, setStartupName] = useState("");
-  const [founderRole, setFounderRole] = useState("Founder / CEO");
-  const [stage, setStage] = useState(FOUNDER_STAGES[1]);
-  const [isRegistered, setIsRegistered] = useState<"registered" | "early_stage">("early_stage");
-  const [selectedDocType, setSelectedDocType] = useState(FOUNDER_DOC_TYPES[0]);
-
-  // Aspiring fields
-  const [ideaDomain, setIdeaDomain] = useState("AI & Automation");
-  const [govIdProvided, setGovIdProvided] = useState(false);
-
-  // Mentor fields
-  const [currentCompany, setCurrentCompany] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [yearsExperience, setYearsExperience] = useState("8+ years");
-  const [mentorDocType, setMentorDocType] = useState(MENTOR_DOC_TYPES[0]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedDetails = sessionStorage.getItem("oasis_reg_details");
-      if (savedDetails) {
-        try {
-          const p = JSON.parse(savedDetails);
-          if (p.city) setCity(p.city);
-          if (p.description) setDescription(p.description);
-          if (p.startupName) setStartupName(p.startupName);
-          if (p.website) setWebsite(p.website);
-          if (p.linkedin) setLinkedin(p.linkedin);
-          if (p.founderRole) setFounderRole(p.founderRole);
-          if (p.currentCompany) setCurrentCompany(p.currentCompany);
-          if (p.jobTitle) setJobTitle(p.jobTitle);
-          if (p.uploadedEvidence) setUploadedEvidence(p.uploadedEvidence);
-          if (p.isRegistered) setIsRegistered(p.isRegistered);
-        } catch {}
-      }
-    }
-  }, []);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, category: string) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setError("Document size must not exceed 10 MB."); return; }
-    try {
-      setUploadingDoc(true); setError("");
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("purpose", "verification_evidence");
-      const res = await fetch("/api/v1/uploads", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Failed to upload document. Please ensure it is a PDF, PNG, or JPEG.");
-      const json = await res.json();
-      setUploadedEvidence({ fileId: json.data?.id || json.id, filename: file.name, docType: category });
-    } catch (err: any) { setError(err?.message || "File upload failed."); }
-    finally { setUploadingDoc(false); }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const finalLinkedin = linkedin.trim() ? normalizeUrl(linkedin) : "";
-    const finalWebsite = website.trim() ? normalizeUrl(website) : "";
-
-    if (role === "founder") {
-      if (!startupName.trim()) { setError("Please enter your startup or venture name."); return; }
-      if (!description.trim() || description.length < 20) { setError("Please provide a short description of your startup (at least 20 characters)."); return; }
-      if (!finalWebsite && !finalLinkedin) { setError("Please provide at least a startup website / demo link or your LinkedIn profile for committee verification."); return; }
-    } else if (role === "mentor") {
-      if (!currentCompany.trim() || !jobTitle.trim()) { setError("Please provide your current organization and job title."); return; }
-      if (!finalLinkedin || !finalLinkedin.toLowerCase().includes("linkedin.com")) { setError("A valid LinkedIn profile URL is required for mentor vetting."); return; }
-    } else {
-      if (!description.trim() || description.length < 20) { setError("Please share a short description of your business idea (at least 20 characters)."); return; }
-    }
-
-    const detailsData = {
-      role, city, description, website: finalWebsite, linkedin: finalLinkedin,
-      startupName, stage, founderRole, selectedSectors: ["General"],
-      isRegistered, uploadedEvidence,
-      evidenceFileIds: uploadedEvidence ? [uploadedEvidence.fileId] : [],
-      ideaDomain, govIdProvided, currentCompany, jobTitle, yearsExperience,
-      referenceName: "", referenceContact: "",
-    };
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("oasis_reg_details", JSON.stringify(detailsData));
-    }
-    onContinue();
-  };
-
-  return (
-    <div className="max-w-lg mx-auto w-full max-h-[calc(100dvh-160px)] flex flex-col">
-      <div className="shrink-0 space-y-1 pb-3">
-        <h1 className="text-2xl sm:text-3xl font-display font-light text-[#F5FAF6] tracking-tight">
-          {role === "founder" && "Tell us about your startup"}
-          {role === "mentor" && "Tell us about your expertise"}
-          {role === "aspiring" && "Tell us what you want to build"}
-        </h1>
-        <p className="text-xs sm:text-sm text-[#ECF1EF]/65">
-          {role === "founder" && "Our admissions committee verifies venture existence and founder affiliation."}
-          {role === "mentor" && "We verify professional track record and domain leadership across Odisha."}
-          {role === "aspiring" && "Share your journey. You do not need an incorporated entity to be admitted."}
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} noValidate className="flex-1 min-h-0 flex flex-col">
-        {error && (
-          <div className="p-2 mb-2 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-200 flex items-start gap-2 shrink-0">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /><span>{error}</span>
-          </div>
-        )}
-
-        <div className="flex-1 min-h-0 overflow-y-auto auth-scrollbar pr-1.5 space-y-3">
-          <LocationAutocomplete value={city} onChange={(v) => { setCity(v); if (error) setError(""); }}
-            label="Base location in Odisha / Diaspora" placeholder="Search city, locality, or address..." required />
-
-          {/* ── ASPIRING ────────────────────────── */}
-          {role === "aspiring" && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Primary Area of Interest</label>
-                <select value={ideaDomain} onChange={(e) => setIdeaDomain(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-[#081318] border border-white/12 text-sm text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer">
-                  {["AI & Automation","AgriTech & Food Processing","B2B SaaS & Enterprise Software","CleanTech & Renewable Energy","Consumer Brands & D2C","EdTech & Skill Building","FinTech & Digital Payments","HealthTech & Diagnostics","Handloom, Handicrafts & Culture","Logistics & Mobility","Other High-Potential Idea"].map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Business idea, problem exploring, or goals <span className="text-[#88DECC]">*</span></label>
-                <textarea required rows={3} value={description} onChange={(e) => { setDescription(e.target.value); if (error) setError(""); }}
-                  placeholder="Describe the problem you're exploring, the kind of business you wish to build, or what support you seek..."
-                  className="w-full p-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] focus:ring-2 focus:ring-[#88DECC]/20 outline-none transition-all" />
-                <p className="text-[10px] text-[#ECF1EF]/50 mt-1">Minimum 20 characters.</p>
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">LinkedIn profile URL <span className="text-[9px] lowercase text-[#ECF1EF]/40">(optional)</span></label>
-                <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] transition-all overflow-hidden h-10">
-                  <span className="inline-flex items-center px-3 text-xs text-[#88DECC] border-r border-white/10 bg-black/30"><Linkedin className="w-3.5 h-3.5" /></span>
-                  <input type="text" inputMode="url" value={linkedin} onChange={(e) => { setLinkedin(e.target.value); if (error) setError(""); }}
-                    onBlur={() => { if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin)); }}
-                    placeholder="linkedin.com/in/username" className="w-full h-full px-3 bg-transparent text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── FOUNDER ─────────────────────────── */}
-          {role === "founder" && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Startup name <span className="text-[#88DECC]">*</span></label>
-                  <input type="text" required value={startupName} onChange={(e) => { setStartupName(e.target.value); if (error) setError(""); }}
-                    placeholder="e.g. AgriSpire Labs"
-                    className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] outline-none transition-all" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Your role</label>
-                  <select value={founderRole} onChange={(e) => setFounderRole(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl bg-[#081318] border border-white/12 text-sm text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer">
-                    {["Founder / CEO","Co-founder / CTO","Co-founder / COO","Founding Team Member"].map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Website / Demo link <span className="text-[#88DECC]">*</span></label>
-                  <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] transition-all overflow-hidden h-10">
-                    <span className="inline-flex items-center px-2.5 text-xs text-[#88DECC] border-r border-white/10 bg-black/30"><Globe className="w-3.5 h-3.5" /></span>
-                    <input type="text" inputMode="url" value={website} onChange={(e) => { setWebsite(e.target.value); if (error) setError(""); }}
-                      onBlur={() => { if (website.trim()) setWebsite(normalizeUrl(website)); }}
-                      placeholder="yourstartup.in" className="w-full h-full px-3 bg-transparent text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">LinkedIn <span className="text-[#88DECC]">*</span></label>
-                  <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] transition-all overflow-hidden h-10">
-                    <span className="inline-flex items-center px-2.5 text-xs text-[#88DECC] border-r border-white/10 bg-black/30"><Linkedin className="w-3.5 h-3.5" /></span>
-                    <input type="text" inputMode="url" value={linkedin} onChange={(e) => { setLinkedin(e.target.value); if (error) setError(""); }}
-                      onBlur={() => { if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin)); }}
-                      placeholder="linkedin.com/in/founder" className="w-full h-full px-3 bg-transparent text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none" />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Venture description &amp; progress <span className="text-[#88DECC]">*</span></label>
-                <textarea required rows={2} value={description} onChange={(e) => { setDescription(e.target.value); if (error) setError(""); }}
-                  placeholder="What customer problem are you solving? Current milestone?"
-                  className="w-full p-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] outline-none transition-all" />
-              </div>
-              {/* Registration Status */}
-              <div className="p-3 rounded-xl border border-white/10 bg-white/[0.02] space-y-2.5">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75">Registration Status</span>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button type="button" onClick={() => setIsRegistered("registered")}
-                    className={cn("p-2.5 rounded-xl border text-left transition-all", isRegistered === "registered" ? "bg-[#88DECC]/15 border-[#88DECC] text-[#F5FAF6]" : "bg-white/[0.02] border-white/10 text-[#ECF1EF]/60")}>
-                    <div className="font-semibold text-xs text-[#F5FAF6]">Registered</div>
-                    <div className="text-[10px] text-[#ECF1EF]/50">Pvt Ltd, LLP, MSME, DPIIT</div>
-                  </button>
-                  <button type="button" onClick={() => { setIsRegistered("early_stage"); setUploadedEvidence(null); }}
-                    className={cn("p-2.5 rounded-xl border text-left transition-all", isRegistered === "early_stage" ? "bg-[#88DECC]/15 border-[#88DECC] text-[#F5FAF6]" : "bg-white/[0.02] border-white/10 text-[#ECF1EF]/60")}>
-                    <div className="font-semibold text-xs text-[#F5FAF6]">Early Stage</div>
-                    <div className="text-[10px] text-[#ECF1EF]/50">MVP / Website proof</div>
-                  </button>
-                </div>
-                {isRegistered === "registered" && (
-                  <div className="space-y-2 pt-1 border-t border-white/10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
-                      <div className="relative">
-                        <select
-                          value={selectedDocType}
-                          onChange={(e) => setSelectedDocType(e.target.value)}
-                          className="w-full h-10 px-3 pr-8 rounded-xl bg-[#081318] border border-white/12 text-xs text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer appearance-none truncate"
-                        >
-                          {FOUNDER_DOC_TYPES.map((dt) => (
-                            <option key={dt} value={dt} className="bg-[#081318] text-[#F5FAF6]">
-                              {dt}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="w-3.5 h-3.5 text-[#ECF1EF]/50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      </div>
-                      <label className="flex items-center justify-between h-10 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/12 hover:border-[#88DECC]/50 cursor-pointer transition-colors group">
-                        <input
-                          type="file"
-                          accept=".pdf,.png,.jpg,.jpeg"
-                          onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
-                          onChange={(e) => handleFileUpload(e, selectedDocType)}
-                          className="sr-only"
-                        />
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-[#88DECC]/20 text-[#88DECC] shrink-0 group-hover:bg-[#88DECC]/30 transition-colors">
-                            Choose file
-                          </span>
-                          <span className="text-[11px] text-[#ECF1EF]/60 truncate">
-                            {uploadedEvidence ? uploadedEvidence.filename : "No file chosen"}
-                          </span>
-                        </div>
-                        <Upload className="w-3.5 h-3.5 text-[#ECF1EF]/40 group-hover:text-[#88DECC] shrink-0 ml-1.5 transition-colors" />
-                      </label>
-                    </div>
-                    {uploadingDoc && <div className="text-[10px] text-[#88DECC] flex items-center gap-1"><RotateCw className="w-3 h-3 animate-spin" /> Scanning file...</div>}
-                    {uploadedEvidence && (
-                      <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-300 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 truncate"><FileCheck2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /><span className="truncate">{uploadedEvidence.filename}</span></div>
-                        <button type="button" onClick={() => setUploadedEvidence(null)} className="text-emerald-400 hover:text-emerald-200 ml-2"><X className="w-3 h-3" /></button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── MENTOR ──────────────────────────── */}
-          {role === "mentor" && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Current Organization <span className="text-[#88DECC]">*</span></label>
-                  <input type="text" required value={currentCompany} onChange={(e) => { setCurrentCompany(e.target.value); if (error) setError(""); }}
-                    placeholder="e.g. Tata Consultancy Services"
-                    className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] outline-none transition-all" />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Professional Title <span className="text-[#88DECC]">*</span></label>
-                  <input type="text" required value={jobTitle} onChange={(e) => { setJobTitle(e.target.value); if (error) setError(""); }}
-                    placeholder="e.g. VP Engineering / Angel Investor"
-                    className="w-full h-10 px-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] outline-none transition-all" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Years of Experience</label>
-                  <select value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl bg-[#081318] border border-white/12 text-sm text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer">
-                    {["5-8 years","8-12 years","12-15 years","15+ years"].map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">LinkedIn profile <span className="text-[#88DECC]">*</span></label>
-                  <div className="flex rounded-xl bg-white/[0.04] border border-white/12 focus-within:bg-white/[0.08] focus-within:border-[#88DECC] transition-all overflow-hidden h-10">
-                    <span className="inline-flex items-center px-2.5 text-xs text-[#88DECC] border-r border-white/10 bg-black/30"><Linkedin className="w-3.5 h-3.5" /></span>
-                    <input type="text" inputMode="url" required value={linkedin} onChange={(e) => { setLinkedin(e.target.value); if (error) setError(""); }}
-                      onBlur={() => { if (linkedin.trim()) setLinkedin(normalizeUrl(linkedin)); }}
-                      placeholder="linkedin.com/in/mentor" className="w-full h-full px-3 bg-transparent text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 outline-none" />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#ECF1EF]/75 mb-1">Advisory Focus &amp; Mentoring Philosophy</label>
-                <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Share the types of founders you mentor and topics you can offer actionable guidance on..."
-                  className="w-full p-3 rounded-xl bg-white/[0.04] border border-white/12 text-sm text-[#F5FAF6] placeholder-[#ECF1EF]/30 focus:bg-white/[0.08] focus:border-[#88DECC] outline-none transition-all" />
-              </div>
-              {/* Mentor doc upload */}
-              <div className="p-3 rounded-xl border border-white/10 bg-white/[0.02] space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-[#F5FAF6] font-medium"><FileText className="w-3.5 h-3.5 text-[#88DECC]" /><span>Supporting Evidence (Optional)</span></div>
-                  <span className="text-[10px] font-mono text-[#88DECC]">Verified Badge</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
-                  <div className="relative">
-                    <select
-                      value={mentorDocType}
-                      onChange={(e) => setMentorDocType(e.target.value)}
-                      className="w-full h-10 px-3 pr-8 rounded-xl bg-[#081318] border border-white/12 text-xs text-[#F5FAF6] focus:border-[#88DECC] outline-none cursor-pointer appearance-none truncate"
-                    >
-                      {MENTOR_DOC_TYPES.map((md) => (
-                        <option key={md} value={md} className="bg-[#081318] text-[#F5FAF6]">
-                          {md}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#ECF1EF]/50 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                  <label className="flex items-center justify-between h-10 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/12 hover:border-[#88DECC]/50 cursor-pointer transition-colors group">
-                    <input
-                      type="file"
-                      accept=".pdf,.png,.jpg,.jpeg"
-                      onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
-                      onChange={(e) => handleFileUpload(e, mentorDocType)}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="px-2 py-1 rounded-md text-[10px] font-semibold bg-[#88DECC]/20 text-[#88DECC] shrink-0 group-hover:bg-[#88DECC]/30 transition-colors">
-                        Choose file
-                      </span>
-                      <span className="text-[11px] text-[#ECF1EF]/60 truncate">
-                        {uploadedEvidence ? uploadedEvidence.filename : "No file chosen"}
-                      </span>
-                    </div>
-                    <Upload className="w-3.5 h-3.5 text-[#ECF1EF]/40 group-hover:text-[#88DECC] shrink-0 ml-1.5 transition-colors" />
-                  </label>
-                </div>
-                {uploadingDoc && <div className="text-[10px] text-[#88DECC] flex items-center gap-1"><RotateCw className="w-3 h-3 animate-spin" /> Uploading...</div>}
-                {uploadedEvidence && (
-                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-300 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 truncate"><FileCheck2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /><span className="truncate">{uploadedEvidence.filename}</span></div>
-                    <button type="button" onClick={() => setUploadedEvidence(null)} className="text-emerald-400 hover:text-emerald-200 ml-2"><X className="w-3 h-3" /></button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="shrink-0 pt-3 flex items-center gap-3">
-          <button type="button" onClick={onBack}
-            className="h-10 px-4 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#ECF1EF]/70 hover:text-[#88DECC] hover:border-[#88DECC]/30 transition-all flex items-center gap-1.5 cursor-pointer">
-            <ArrowLeft className="w-3 h-3" /> Back
-          </button>
-          <button type="submit" disabled={uploadingDoc} className="join-cta-pill flex-1 group disabled:opacity-50">
-            <span className="font-medium tracking-tight">Continue to review</span>
-            <div className="join-cta-disc shrink-0">
-              <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M.6.6 4 4 .6 7.4" /></svg>
-            </div>
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STEP 4: REVIEW & CONSENT
-// ═══════════════════════════════════════════════════════════════════════════════
-function Step4Review({
-  role,
-  onBack,
-}: {
-  role: RoleOption;
-  onBack: () => void;
-}) {
+function JoinWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  interface RegData {
-    role: string; name: string; email: string; phone?: string; city: string;
-    startupName?: string; founderRole?: string; stage?: string; sectors?: string[];
-    description?: string; website?: string; linkedin?: string; isRegistered?: string;
-    uploadedEvidence?: { fileId: string; filename: string; docType: string } | null;
-    evidenceFileIds?: string[]; currentCompany?: string; jobTitle?: string;
-    yearsExperience?: string; referenceName?: string; referenceContact?: string;
-    ideaDomain?: string; govIdProvided?: boolean;
-  }
+  const notice = searchParams.get("notice");
+  const emailParam = searchParams.get("email") || "";
+  const nameParam = searchParams.get("name") || "";
+  const isNotRegistered = notice === "not_registered";
 
-  const [data, setData] = useState<RegData>({ role, name: "", email: "", phone: "", city: "", startupName: "", founderRole: "", stage: "", sectors: [], description: "", website: "", linkedin: "", evidenceFileIds: [] });
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
-  const [guidelinesAgreed, setGuidelinesAgreed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  // Navigation & Step State
+  const [step, setStep] = useState<number>(1);
+  const [selectedRoleIndex, setSelectedRoleIndex] = useState<number>(-1);
+  const [hasUserSelectedRole, setHasUserSelectedRole] = useState<boolean>(false);
+  const [coords, setCoords] = useState<Record<number, { cx: string; cy: string }>>({
+    0: { cx: "50%", cy: "45%" },
+    1: { cx: "50%", cy: "45%" },
+    2: { cx: "50%", cy: "45%" },
+  });
+  const [isGuardReady, setIsGuardReady] = useState<boolean>(false);
+  const guardTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Modal State for Google Unregistered Notice
+  const [modalOpen, setModalOpen] = useState(isNotRegistered);
+
+  // Step 2 Account State
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isGoogleAuth, setIsGoogleAuth] = useState<boolean>(false);
+
+  // Step 3 Role Details State
+  // Founder
+  const [startupName, setStartupName] = useState<string>("");
+  const [founderRole, setFounderRole] = useState<string>(FOUNDER_ROLES[0]);
+  const [stage, setStage] = useState<string>(FOUNDER_STAGES[1]);
+  const [isRegistered, setIsRegistered] = useState<"registered" | "early_stage">("early_stage");
+  const [founderWebsite, setFounderWebsite] = useState<string>("");
+  const [founderLinkedin, setFounderLinkedin] = useState<string>("");
+  const [founderDescription, setFounderDescription] = useState<string>("");
+
+  // Aspiring
+  const [ideaDomain, setIdeaDomain] = useState<string>(ASPIRING_DOMAINS[0]);
+  const [aspiringDescription, setAspiringDescription] = useState<string>("");
+  const [city, setCity] = useState<string>("Bhubaneswar");
+  const [aspiringLinkedin, setAspiringLinkedin] = useState<string>("");
+
+  // Mentor
+  const [currentCompany, setCurrentCompany] = useState<string>("");
+  const [jobTitle, setJobTitle] = useState<string>("");
+  const [yearsExperience, setYearsExperience] = useState<string>(MENTOR_EXPERIENCE_OPTIONS[1]);
+  const [mentorLinkedin, setMentorLinkedin] = useState<string>("");
+  const [mentorDescription, setMentorDescription] = useState<string>("");
+
+  // Shared Upload State
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
+
+  // Step 4 Review & Consent State
+  const [complianceChecks, setComplianceChecks] = useState<[boolean, boolean, boolean]>([false, false, false]);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string>("");
+  const [submittedRef, setSubmittedRef] = useState<string>("");
+
+  // Inline Validation Errors per Field
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Active Role Helper
+  const activeRole = selectedRoleIndex >= 0 ? ROLES[selectedRoleIndex] : ROLES[0];
+
+  // ── Lock canvas background to #03080B ───────────────────────────────────────
+  useEffect(() => {
+    const prevBodyBg = document.body.style.backgroundColor;
+    const prevBodyColor = document.body.style.color;
+    const prevHtmlBg = document.documentElement.style.backgroundColor;
+
+    document.body.style.backgroundColor = "#03080B";
+    document.body.style.color = "#F5FAF6";
+    document.documentElement.style.backgroundColor = "#03080B";
+
+    return () => {
+      document.body.style.backgroundColor = prevBodyBg;
+      document.body.style.color = prevBodyColor;
+      document.documentElement.style.backgroundColor = prevHtmlBg;
+    };
+  }, []);
+
+  // ── Restore from sessionStorage on load ──────────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const roleParam = searchParams.get("role");
+      if (roleParam) {
+        const foundIdx = ROLES.findIndex((r) => r.key === roleParam);
+        if (foundIdx >= 0) {
+          setSelectedRoleIndex(foundIdx);
+          setHasUserSelectedRole(true);
+          setIsGuardReady(true);
+        }
+      } else {
+        // Landing on join page fresh: user must choose role themselves
+        sessionStorage.removeItem("oasis_reg_role");
+        setSelectedRoleIndex(-1);
+        setHasUserSelectedRole(false);
+        setIsGuardReady(false);
+      }
+
+      const savedName = sessionStorage.getItem("oasis_reg_name") || nameParam;
+      if (savedName) setName(savedName);
+
+      const savedEmail = sessionStorage.getItem("oasis_reg_email") || emailParam;
+      if (savedEmail) {
+        setEmail(savedEmail);
+        if (isNotRegistered) setIsGoogleAuth(true);
+      }
+
+      const savedPhone = sessionStorage.getItem("oasis_reg_phone");
+      if (savedPhone) setPhone(savedPhone);
+
+      const savedPassword = sessionStorage.getItem("oasis_reg_password");
+      if (savedPassword) setPassword(savedPassword);
+
+      const savedDetailsRaw = sessionStorage.getItem("oasis_reg_details");
+      if (savedDetailsRaw) {
+        const d = JSON.parse(savedDetailsRaw);
+        if (d.startupName) setStartupName(d.startupName);
+        if (d.founderRole) setFounderRole(d.founderRole);
+        if (d.stage) setStage(d.stage);
+        if (d.isRegistered) setIsRegistered(d.isRegistered);
+        if (d.website) setFounderWebsite(d.website);
+        if (d.linkedin) {
+          setFounderLinkedin(d.linkedin);
+          setAspiringLinkedin(d.linkedin);
+          setMentorLinkedin(d.linkedin);
+        }
+        if (d.description) {
+          setFounderDescription(d.description);
+          setAspiringDescription(d.description);
+          setMentorDescription(d.description);
+        }
+        if (d.ideaDomain) setIdeaDomain(d.ideaDomain);
+        if (d.city) setCity(d.city);
+        if (d.currentCompany) setCurrentCompany(d.currentCompany);
+        if (d.jobTitle) setJobTitle(d.jobTitle);
+        if (d.yearsExperience) setYearsExperience(d.yearsExperience);
+        if (d.uploadedEvidence && d.uploadedEvidence.fileId) {
+          setUploadedFiles([
+            {
+              fileId: d.uploadedEvidence.fileId,
+              name: d.uploadedEvidence.filename || "Evidence Document",
+              status: "verified",
+              docType: d.uploadedEvidence.docType,
+            },
+          ]);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not parse previous registration session storage", e);
+    }
+  }, [emailParam, nameParam, isNotRegistered]);
+
+  // Save changes to sessionStorage whenever relevant fields change
+  const persistState = useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (selectedRoleIndex >= 0 && hasUserSelectedRole) {
+        sessionStorage.setItem("oasis_reg_role", activeRole.key);
+      } else {
+        sessionStorage.removeItem("oasis_reg_role");
+      }
+      if (name) sessionStorage.setItem("oasis_reg_name", name);
+      if (email) sessionStorage.setItem("oasis_reg_email", email);
+      if (phone) sessionStorage.setItem("oasis_reg_phone", phone);
+      if (password) sessionStorage.setItem("oasis_reg_password", password);
+
+      const currentDetails = {
+        role: activeRole.key,
+        city: activeRole.key === "aspiring" ? city : "Bhubaneswar",
+        description:
+          activeRole.key === "founder"
+            ? founderDescription
+            : activeRole.key === "aspiring"
+            ? aspiringDescription
+            : mentorDescription,
+        website: activeRole.key === "founder" ? normalizeUrl(founderWebsite) : "",
+        linkedin:
+          activeRole.key === "founder"
+            ? normalizeUrl(founderLinkedin)
+            : activeRole.key === "mentor"
+            ? normalizeUrl(mentorLinkedin)
+            : normalizeUrl(aspiringLinkedin),
+        startupName,
+        founderRole,
+        stage,
+        isRegistered,
+        ideaDomain,
+        currentCompany,
+        jobTitle,
+        yearsExperience,
+        uploadedEvidence:
+          uploadedFiles.length > 0 && uploadedFiles[0].status === "verified"
+            ? {
+                fileId: uploadedFiles[0].fileId,
+                filename: uploadedFiles[0].name,
+                docType: uploadedFiles[0].docType || "Proof",
+              }
+            : null,
+      };
+      sessionStorage.setItem("oasis_reg_details", JSON.stringify(currentDetails));
+    } catch (e) {
+      console.warn("Failed persisting to sessionStorage", e);
+    }
+  }, [
+    activeRole.key,
+    selectedRoleIndex,
+    name,
+    email,
+    phone,
+    password,
+    city,
+    founderDescription,
+    aspiringDescription,
+    mentorDescription,
+    founderWebsite,
+    founderLinkedin,
+    mentorLinkedin,
+    aspiringLinkedin,
+    startupName,
+    founderRole,
+    stage,
+    isRegistered,
+    ideaDomain,
+    currentCompany,
+    jobTitle,
+    yearsExperience,
+    uploadedFiles,
+  ]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedRole = sessionStorage.getItem("oasis_reg_role") || role;
-      const savedName = sessionStorage.getItem("oasis_reg_name") || "";
-      const savedEmail = sessionStorage.getItem("oasis_reg_email") || "";
-      const savedPhone = sessionStorage.getItem("oasis_reg_phone") || "";
-      const savedDetailsRaw = sessionStorage.getItem("oasis_reg_details");
-      let detailsObj: Partial<RegData> = {};
-      if (savedDetailsRaw) {
-        try {
-          const p = JSON.parse(savedDetailsRaw);
-          detailsObj = {
-            city: p.city, startupName: p.startupName, founderRole: p.founderRole,
-            stage: p.stage, sectors: p.selectedSectors, description: p.description,
-            website: p.website, linkedin: p.linkedin, isRegistered: p.isRegistered,
-            uploadedEvidence: p.uploadedEvidence, evidenceFileIds: p.evidenceFileIds || [],
-            currentCompany: p.currentCompany, jobTitle: p.jobTitle,
-            yearsExperience: p.yearsExperience, referenceName: p.referenceName,
-            referenceContact: p.referenceContact, ideaDomain: p.ideaDomain,
-            govIdProvided: p.govIdProvided,
-          };
-        } catch {}
-      }
-      setData(prev => ({ ...prev, role: savedRole, name: savedName, email: savedEmail, phone: savedPhone, ...detailsObj }));
+    persistState();
+  }, [persistState]);
+
+  // ── Role Selection Handlers (Step 1) ─────────────────────────────────────────
+  const handleSelectRole = (index: number, e?: React.MouseEvent) => {
+    if (guardTimerRef.current) {
+      clearTimeout(guardTimerRef.current);
     }
-  }, [role]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!ageConfirmed) { setError("Please confirm that you are 18 years of age or older."); return; }
-    if (!guidelinesAgreed) { setError("Please agree to the Community Guidelines and Privacy Notice."); return; }
+    if (e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const cx = (((e.clientX - rect.left) / rect.width) * 100).toFixed(1) + "%";
+      const cy = (((e.clientY - rect.top) / rect.height) * 100).toFixed(1) + "%";
+      setCoords((prev) => ({ ...prev, [index]: { cx, cy } }));
+    }
 
-    setSubmitting(true); setError("");
+    setSelectedRoleIndex(index);
+    setHasUserSelectedRole(true);
+    setIsGuardReady(false);
+
+    // Mis-click guard: 800ms timer before continue button becomes active
+    guardTimerRef.current = setTimeout(() => {
+      setIsGuardReady(true);
+    }, 800);
+
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(12);
+    }
+  };
+
+  const handleStep1KeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleSelectRole(index);
+    } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIdx = (index + 1) % ROLES.length;
+      handleSelectRole(nextIdx);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIdx = (index - 1 + ROLES.length) % ROLES.length;
+      handleSelectRole(prevIdx);
+    }
+  };
+
+  const handleContinueFromStep1 = () => {
+    if (!isGuardReady && hasUserSelectedRole) return;
+    setHasUserSelectedRole(true);
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleGoogleSignUp = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("oasis_reg_role", activeRole.key);
+      window.location.href = `/api/v1/auth/google?mode=signup&role=${activeRole.key}`;
+    }
+  };
+
+  // ── Real File Upload Handler ────────────────────────────────────────────────
+  const handleFileUpload = async (files: FileList | File[]) => {
+    const fileList = Array.from(files);
+    if (fileList.length === 0) return;
+
+    for (const file of fileList) {
+      const isValidType = [
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/jpg",
+      ].includes(file.type);
+
+      if (!isValidType) {
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            fileId: "err-" + Math.random(),
+            name: file.name,
+            status: "error",
+            message: "Only PDF, PNG or JPG",
+          },
+        ]);
+        continue;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            fileId: "err-" + Math.random(),
+            name: file.name,
+            status: "error",
+            message: "Over 10 MB",
+          },
+        ]);
+        continue;
+      }
+
+      const tempId = "uploading-" + Math.random().toString(36).slice(2, 8);
+      setUploadedFiles((prev) => [
+        ...prev,
+        { fileId: tempId, name: file.name, status: "scanning" },
+      ]);
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("purpose", "verification_evidence");
+
+        const res = await fetch("/api/v1/uploads", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error?.message || errData?.message || "Upload rejected");
+        }
+
+        const data = await res.json();
+        const serverFileId = data.data?.id || data.id || data.fileId || tempId;
+
+        setUploadedFiles((prev) =>
+          prev.map((item) =>
+            item.fileId === tempId
+              ? {
+                  ...item,
+                  fileId: serverFileId,
+                  status: "verified",
+                  docType:
+                    activeRole.key === "founder"
+                      ? isRegistered === "registered"
+                        ? "Certificate of Incorporation / DPIIT"
+                        : "MVP Demo / Website Proof"
+                      : "Mentor Credentials",
+                }
+              : item
+          )
+        );
+      } catch (err: any) {
+        setUploadedFiles((prev) =>
+          prev.map((item) =>
+            item.fileId === tempId
+              ? {
+                  ...item,
+                  status: "error",
+                  message: err.message || "Failed to upload",
+                }
+              : item
+          )
+        );
+      }
+    }
+  };
+
+  const removeFile = (fileId: string) => {
+    setUploadedFiles((prev) => prev.filter((f) => f.fileId !== fileId));
+  };
+
+  // ── Step 2 Validation & Continue ───────────────────────────────────────────
+  const handleContinueFromStep2 = () => {
+    const errors: Record<string, string> = {};
+
+    if (!name.trim() || name.trim().length < 2) {
+      errors.name = "Enter your full name (at least 2 letters)";
+    }
+    if (!email.trim() || !isValidEmail(email)) {
+      errors.email = "Enter a valid email address";
+    }
+    if (!isGoogleAuth) {
+      if (!password || password.length < 8) {
+        errors.password = "Password must be at least 8 characters";
+      }
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    persistState();
+    setStep(3);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ── Step 3 Validation & Continue ───────────────────────────────────────────
+  const handleContinueFromStep3 = () => {
+    const errors: Record<string, string> = {};
+
+    if (activeRole.key === "founder") {
+      if (!startupName.trim()) {
+        errors.startupName = "Startup name is required";
+      }
+      if (!founderWebsite.trim()) {
+        errors.founderWebsite = "Website or product demo link is required";
+      } else if (!isValidWebUrl(founderWebsite)) {
+        errors.founderWebsite = "Enter a full link starting with https://";
+      }
+      if (!founderLinkedin.trim()) {
+        errors.founderLinkedin = "LinkedIn profile is required for founder verification";
+      } else if (!isValidLinkedIn(founderLinkedin)) {
+        errors.founderLinkedin = "Use profile link, like linkedin.com/in/yourname";
+      }
+      if (!founderDescription.trim() || founderDescription.trim().length < 20) {
+        errors.founderDescription = `Add at least 20 characters (${founderDescription.trim().length} so far)`;
+      }
+    } else if (activeRole.key === "aspiring") {
+      if (!aspiringDescription.trim() || aspiringDescription.trim().length < 20) {
+        errors.aspiringDescription = `Add at least 20 characters (${aspiringDescription.trim().length} so far)`;
+      }
+      if (!city.trim()) {
+        errors.city = "City is required";
+      }
+      if (aspiringLinkedin.trim() && !isValidLinkedIn(aspiringLinkedin)) {
+        errors.aspiringLinkedin = "Use profile link, like linkedin.com/in/yourname";
+      }
+    } else if (activeRole.key === "mentor") {
+      if (!currentCompany.trim()) {
+        errors.currentCompany = "Company or fund is required";
+      }
+      if (!jobTitle.trim()) {
+        errors.jobTitle = "Job title is required";
+      }
+      if (!mentorLinkedin.trim()) {
+        errors.mentorLinkedin = "LinkedIn profile is required for mentor vetting";
+      } else if (!isValidLinkedIn(mentorLinkedin)) {
+        errors.mentorLinkedin = "Use profile link, like linkedin.com/in/yourname";
+      }
+      if (!mentorDescription.trim() || mentorDescription.trim().length < 20) {
+        errors.mentorDescription = `Add at least 20 characters (${mentorDescription.trim().length} so far)`;
+      }
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    persistState();
+    setStep(4);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ── Step 4 Final Submit ────────────────────────────────────────────────────
+  const handleFinalSubmit = async () => {
+    if (!complianceChecks.every(Boolean)) return;
+
+    setSubmitting(true);
+    setSubmitError("");
+
     try {
-      const password = typeof window !== "undefined" ? sessionStorage.getItem("oasis_reg_password") || "" : "";
-      if (!password) throw new Error("Account password was missing. Please return to step 2.");
+      const effectivePassword = isGoogleAuth
+        ? `OAuth_${Math.random().toString(36).slice(2, 10)}!Aa1`
+        : password;
 
-      const primaryRole = data.role === "aspiring" ? "aspiring_entrepreneur" : data.role === "mentor" ? "mentor" : "founder";
-      const headline = data.role === "founder"
-        ? `${data.founderRole || "Founder"} @ ${data.startupName || "Startup"}`
-        : data.role === "mentor"
-        ? `${data.jobTitle || "Mentor"} @ ${data.currentCompany || "Organization"}`
-        : "Aspiring Entrepreneur";
+      const dynamicHeadline =
+        activeRole.key === "founder"
+          ? `${founderRole || "Founder"} @ ${startupName || "Your startup"}`
+          : activeRole.key === "mentor"
+          ? `${jobTitle || "Mentor"} @ ${currentCompany || "Your organisation"}`
+          : `Aspiring entrepreneur${ideaDomain ? " · " + ideaDomain : ""}`;
+
+      const activeDesc =
+        activeRole.key === "founder"
+          ? founderDescription
+          : activeRole.key === "aspiring"
+          ? aspiringDescription
+          : mentorDescription;
+
+      const activeLinkedin =
+        activeRole.key === "founder"
+          ? normalizeUrl(founderLinkedin)
+          : activeRole.key === "mentor"
+          ? normalizeUrl(mentorLinkedin)
+          : normalizeUrl(aspiringLinkedin);
+
+      const verifiedFiles = uploadedFiles.filter((f) => f.status === "verified");
+      const evidenceFileIds = verifiedFiles.map((f) => f.fileId);
+
+      const payload = {
+        email: email.trim().toLowerCase(),
+        phone: phone.trim() ? `+91 ${phone.replace(/\D/g, "")}` : null,
+        password: effectivePassword,
+        primaryRole: activeRole.apiRole,
+        name: name.trim(),
+        city: activeRole.key === "aspiring" ? city : "Bhubaneswar",
+        headline: dynamicHeadline,
+        bio: activeDesc,
+        linkedin: activeLinkedin || undefined,
+        website: activeRole.key === "founder" ? normalizeUrl(founderWebsite) : undefined,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+        evidenceFileIds,
+        ageConfirmed: true,
+        ageConfirmation: true,
+        roleData: {
+          startupName: activeRole.key === "founder" ? startupName : undefined,
+          founderRole: activeRole.key === "founder" ? founderRole : undefined,
+          stage: activeRole.key === "founder" ? stage : undefined,
+          isRegistered: activeRole.key === "founder" ? isRegistered : undefined,
+          website: activeRole.key === "founder" ? normalizeUrl(founderWebsite) : undefined,
+          linkedin: activeLinkedin,
+          description: activeDesc,
+          uploadedEvidence:
+            verifiedFiles.length > 0
+              ? {
+                  fileId: verifiedFiles[0].fileId,
+                  filename: verifiedFiles[0].name,
+                  docType: verifiedFiles[0].docType || "Proof",
+                }
+              : null,
+          ideaDomain: activeRole.key === "aspiring" ? ideaDomain : undefined,
+          city: activeRole.key === "aspiring" ? city : undefined,
+          currentCompany: activeRole.key === "mentor" ? currentCompany : undefined,
+          jobTitle: activeRole.key === "mentor" ? jobTitle : undefined,
+          yearsExperience: activeRole.key === "mentor" ? yearsExperience : undefined,
+          supportingEvidence:
+            activeRole.key === "mentor" && verifiedFiles.length > 0
+              ? {
+                  fileId: verifiedFiles[0].fileId,
+                  filename: verifiedFiles[0].name,
+                }
+              : null,
+        },
+        consents: [
+          { type: "privacy_notice", version: "1.0" },
+          { type: "community_guidelines", version: "1.0" },
+        ],
+      };
 
       const res = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email, phone: data.phone || null, password, primaryRole,
-          name: data.name, city: data.city || "Bhubaneswar", headline,
-          bio: data.description || "", linkedin: data.linkedin, website: data.website,
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
-          evidenceFileIds: data.evidenceFileIds || [],
-          ageConfirmed: true, ageConfirmation: true,
-          roleData: {
-            startupName: data.startupName, stage: data.stage, founderRole: data.founderRole,
-            sectors: data.sectors, website: data.website, linkedin: data.linkedin,
-            isRegistered: data.isRegistered, uploadedEvidence: data.uploadedEvidence,
-            currentCompany: data.currentCompany, jobTitle: data.jobTitle,
-            yearsExperience: data.yearsExperience, referenceName: data.referenceName,
-            referenceContact: data.referenceContact, ideaDomain: data.ideaDomain,
-            govIdProvided: data.govIdProvided,
-          },
-          consents: [
-            { type: "privacy_notice", version: "1.0" },
-            { type: "community_guidelines", version: "1.0" },
-          ],
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        const errJson = await res.json();
+        const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error?.message || errJson.message || "Failed to submit membership application.");
       }
 
-      if (typeof window !== "undefined") sessionStorage.removeItem("oasis_reg_password");
-      router.push("/dashboard");
+      const resJson = await res.json().catch(() => ({}));
+      const generatedRef =
+        resJson?.data?.user?.id?.slice(0, 8).toUpperCase() ||
+        resJson?.user?.id?.slice(0, 8).toUpperCase() ||
+        "OAS-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+      setSubmittedRef(generatedRef);
+
+      // Clear registration storage keys on success
+      sessionStorage.removeItem("oasis_reg_role");
+      sessionStorage.removeItem("oasis_reg_details");
+      sessionStorage.removeItem("oasis_reg_name");
+      sessionStorage.removeItem("oasis_reg_email");
+      sessionStorage.removeItem("oasis_reg_phone");
+      sessionStorage.removeItem("oasis_reg_password");
+
+      setStep(5);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
-      setError(err?.message || "Failed to submit application.");
-    } finally { setSubmitting(false); }
+      setSubmitError(err?.message || "Failed to submit application. Please verify your details.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  return (
-    <div className="max-w-lg mx-auto w-full max-h-[calc(100dvh-160px)] flex flex-col">
-      <div className="shrink-0 space-y-1 pb-3">
-        <h1 className="text-2xl sm:text-3xl font-display font-light text-[#F5FAF6] tracking-tight">
-          Review your application
-        </h1>
-        <p className="text-xs sm:text-sm text-[#ECF1EF]/65">
-          Every submission is reviewed by the OASIS membership committee.
-        </p>
-      </div>
+  // ── Live Profile Calculations for Steps 3 & 4 ──────────────────────────────
+  const dynamicHeadline =
+    activeRole.key === "founder"
+      ? `${founderRole || "Founder"} @ ${startupName || "Your startup"}`
+      : activeRole.key === "mentor"
+      ? `${jobTitle || "Mentor"} @ ${currentCompany || "Your organisation"}`
+      : `Aspiring entrepreneur${ideaDomain ? " · " + ideaDomain : ""}`;
 
-      <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
-        {error && (
-          <div className="p-2 mb-2 rounded-xl bg-red-500/10 border border-red-500/25 text-xs text-red-200 flex items-start gap-2 shrink-0">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /><span>{error}</span>
+  let requiredFieldCount = 0;
+  let filledRequiredCount = 0;
+
+  if (activeRole.key === "founder") {
+    requiredFieldCount = 6;
+    if (startupName.trim()) filledRequiredCount++;
+    if (founderRole) filledRequiredCount++;
+    if (stage) filledRequiredCount++;
+    if (isValidWebUrl(founderWebsite)) filledRequiredCount++;
+    if (isValidLinkedIn(founderLinkedin)) filledRequiredCount++;
+    if (founderDescription.trim().length >= 20) filledRequiredCount++;
+  } else if (activeRole.key === "aspiring") {
+    requiredFieldCount = 3;
+    if (ideaDomain) filledRequiredCount++;
+    if (city.trim()) filledRequiredCount++;
+    if (aspiringDescription.trim().length >= 20) filledRequiredCount++;
+  } else if (activeRole.key === "mentor") {
+    requiredFieldCount = 5;
+    if (currentCompany.trim()) filledRequiredCount++;
+    if (jobTitle.trim()) filledRequiredCount++;
+    if (yearsExperience) filledRequiredCount++;
+    if (isValidLinkedIn(mentorLinkedin)) filledRequiredCount++;
+    if (mentorDescription.trim().length >= 20) filledRequiredCount++;
+  }
+
+  const progressPercent = Math.min(
+    100,
+    Math.round((filledRequiredCount / Math.max(1, requiredFieldCount)) * 100)
+  );
+
+  const passStrength = getPasswordStrength(password);
+
+  const hintText =
+    activeRole.key === "founder"
+      ? (isRegistered === "registered"
+          ? "Certificate of Incorporation or DPIIT letter"
+          : "Pitch deck, MVP screenshots or website proof") + " · PDF, PNG or JPG, 10 MB max"
+      : "Advisory agreement, angel portfolio or credentials · PDF, PNG or JPG, 10 MB max";
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // RENDER: HERO COMPONENT (LEFT COLUMN IN SPLIT LAYOUT)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const renderHero = () => (
+    <aside
+      className="hero"
+      style={
+        {
+          "--pos": activeRole.photoPos,
+          "--img": `url(${activeRole.photo})`,
+        } as React.CSSProperties
+      }
+    >
+      <div className="hp" />
+      <div className="hc">
+        <div className="chip">
+          <i />
+          {activeRole.title}
+          <button type="button" className="ghost" onClick={() => setStep(1)}>
+            Change
+          </button>
+        </div>
+        <h2>
+          {step === 4
+            ? "Almost there."
+            : step === 2
+            ? activeRole.step2Headline
+            : activeRole.step3Headline}
+        </h2>
+        {step === 2 ? (
+          <div className="tags">
+            {activeRole.tags.map((t) => (
+              <b key={t}>{t}</b>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="pc">
+              <div className="av">
+                {(name.trim() || activeRole.shortTitle)[0].toUpperCase()}
+              </div>
+              <div>
+                <b>{name.trim() || "Your name"}</b>
+                <span>{dynamicHeadline}</span>
+              </div>
+            </div>
+            <div className="bar">
+              <i style={{ width: `${progressPercent}%` }} />
+            </div>
+            <small>
+              {filledRequiredCount} of {requiredFieldCount} required answers
+            </small>
+          </>
+        )}
+      </div>
+    </aside>
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // RENDER: STEP 2 (ACCOUNT CREATION)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const renderStep2 = () => (
+    <section className="sheet">
+      <h2 className="st">Create your account</h2>
+      <p className="lead">Use Google for the fastest start, or sign up with email.</p>
+
+      <button type="button" className="g" onClick={handleGoogleSignUp}>
+        <svg
+          className="w-[18px] h-[18px] shrink-0"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            fill="#4285F4"
+            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+          />
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div className="or">or with email</div>
+
+      <div className="fg">
+        <div
+          className={cn("f", fieldErrors.name && "bad")}
+          style={{ "--n": 1 } as React.CSSProperties}
+        >
+          <label htmlFor="a_name">Full name</label>
+          <input
+            id="a_name"
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setFieldErrors((prev) => ({ ...prev, name: "" }));
+            }}
+            placeholder="e.g. Priya Sharma"
+            autoComplete="name"
+          />
+          {fieldErrors.name && <div className="err">{fieldErrors.name}</div>}
+        </div>
+
+        <div
+          className={cn("f", fieldErrors.email && "bad")}
+          style={{ "--n": 2 } as React.CSSProperties}
+        >
+          <label htmlFor="a_email">Email</label>
+          <input
+            id="a_email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setFieldErrors((prev) => ({ ...prev, email: "" }));
+            }}
+            placeholder="priya@example.com"
+            autoComplete="email"
+          />
+          {fieldErrors.email && <div className="err">{fieldErrors.email}</div>}
+        </div>
+
+        {isGoogleAuth ? (
+          <p className="lead w">
+            Signed in with Google ({email}). No password needed.{" "}
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setIsGoogleAuth(false)}
+            >
+              Use a password instead
+            </button>
+          </p>
+        ) : (
+          <div
+            className={cn("f w", fieldErrors.password && "bad")}
+            style={{ "--n": 3 } as React.CSSProperties}
+          >
+            <label htmlFor="a_pw">
+              Password
+              <button
+                type="button"
+                className="ghost"
+                style={{ float: "right", padding: 0 }}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </label>
+            <input
+              id="a_pw"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, password: "" }));
+              }}
+              autoComplete="new-password"
+            />
+            <div className="meter">
+              <i style={{ background: passStrength >= 1 ? "var(--accent)" : "" }} />
+              <i style={{ background: passStrength >= 2 ? "var(--accent)" : "" }} />
+              <i style={{ background: passStrength >= 3 ? "var(--accent)" : "" }} />
+              <i style={{ background: passStrength >= 4 ? "var(--accent)" : "" }} />
+            </div>
+            {fieldErrors.password && <div className="err">{fieldErrors.password}</div>}
           </div>
         )}
+      </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto auth-scrollbar pr-1.5 space-y-3">
-          {/* Profile Summary */}
-          <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden divide-y divide-white/[0.08]">
-            <div className="p-4">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#88DECC] font-semibold">Applicant Credentials</span>
-              <dl className="grid grid-cols-2 gap-3 text-xs mt-3">
-                <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Full name</dt><dd className="font-medium text-[#F5FAF6] mt-0.5 truncate">{data.name}</dd></div>
-                <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Email</dt><dd className="font-medium text-[#F5FAF6] mt-0.5 truncate">{data.email}</dd></div>
-                <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Mobile</dt><dd className="font-medium text-[#F5FAF6] mt-0.5 flex items-center gap-1"><Phone className="w-3 h-3 text-[#88DECC]" />+91 {data.phone || "—"}</dd></div>
-                <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Location</dt><dd className="font-medium text-[#F5FAF6] mt-0.5 truncate">{data.city}</dd></div>
-              </dl>
-            </div>
-            <div className="p-4">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#88DECC] font-semibold">
-                {data.role === "founder" ? "Startup Details" : data.role === "mentor" ? "Mentor Credentials" : "Idea & Background"}
-              </span>
-              <dl className="space-y-2 text-xs mt-3">
-                {data.role === "founder" && (<>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Startup</dt><dd className="font-medium text-[#F5FAF6] mt-0.5">{data.startupName} ({data.founderRole})</dd></div>
-                    {data.website && <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Website</dt><dd className="font-medium text-[#88DECC] mt-0.5 flex items-center gap-1 truncate"><Globe className="w-3 h-3 shrink-0" /><span className="truncate">{data.website}</span></dd></div>}
-                  </div>
-                  {data.uploadedEvidence && (
-                    <div className="inline-flex items-center gap-1.5 p-1.5 px-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px]">
-                      <FileCheck2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /><span>Attached: {data.uploadedEvidence.filename}</span>
-                    </div>
-                  )}
-                </>)}
-                {data.role === "mentor" && (<>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Organization &amp; Title</dt><dd className="font-medium text-[#F5FAF6] mt-0.5">{data.jobTitle} at {data.currentCompany}</dd></div>
-                    <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Experience</dt><dd className="font-medium text-[#F5FAF6] mt-0.5">{data.yearsExperience || "8+ years"}</dd></div>
-                  </div>
-                </>)}
-                {data.role === "aspiring" && (
-                  <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Interest Domain</dt><dd className="font-medium text-[#F5FAF6] mt-0.5">{data.ideaDomain || "General"}</dd></div>
-                )}
-                <div><dt className="text-[10px] text-[#ECF1EF]/50 uppercase font-mono">Description</dt>
-                  <dd className="mt-1 text-xs text-[#F5FAF6] leading-relaxed bg-black/40 p-2.5 rounded-xl border border-white/10 whitespace-pre-wrap break-words">{data.description || "No description provided."}</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          {/* Consents */}
-          <div className={cn("space-y-2 bg-white/[0.02] border rounded-xl p-3 transition-all", error && !ageConfirmed ? "border-red-500/50" : "border-white/10")}>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#F5FAF6] uppercase tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#88DECC]" />
-              <span className="text-[11px] font-mono">Eligibility &amp; Consents</span>
-            </div>
-            <label className="flex items-start gap-2.5 cursor-pointer select-none p-1.5 rounded-lg hover:bg-white/[0.03] transition-colors">
-              <input type="checkbox" required checked={ageConfirmed} onChange={(e) => { setAgeConfirmed(e.target.checked); if (error) setError(""); }}
-                className="mt-0.5 w-3.5 h-3.5 rounded text-[#88DECC] bg-black/40 border-white/20 focus:ring-[#88DECC]" />
-              <span className="text-[11px] text-[#ECF1EF] leading-tight">I certify that I am at least <strong className="font-semibold text-[#F5FAF6]">18 years of age</strong> and all submitted information is accurate.</span>
-            </label>
-            <label className="flex items-start gap-2.5 cursor-pointer select-none p-1.5 rounded-lg hover:bg-white/[0.03] transition-colors">
-              <input type="checkbox" required checked={guidelinesAgreed} onChange={(e) => { setGuidelinesAgreed(e.target.checked); if (error) setError(""); }}
-                className="mt-0.5 w-3.5 h-3.5 rounded text-[#88DECC] bg-black/40 border-white/20 focus:ring-[#88DECC]" />
-              <span className="text-[11px] text-[#ECF1EF] leading-tight">
-                I agree to the <Link href="/legal/guidelines" target="_blank" className="text-[#88DECC] underline font-medium">Community Guidelines</Link> and have read the <Link href="/legal/privacy" target="_blank" className="text-[#88DECC] underline font-medium">Privacy Notice</Link>.
-              </span>
-            </label>
-          </div>
-        </div>
-
-        <div className="shrink-0 pt-3 flex items-center gap-3">
-          <button type="button" onClick={onBack}
-            className="h-10 px-4 rounded-full bg-white/[0.04] border border-white/10 text-xs text-[#ECF1EF]/70 hover:text-[#88DECC] hover:border-[#88DECC]/30 transition-all flex items-center gap-1.5 cursor-pointer">
-            <ArrowLeft className="w-3 h-3" /> Back
-          </button>
-          <button type="submit" disabled={submitting || !ageConfirmed || !guidelinesAgreed}
-            className="join-cta-pill flex-1 group disabled:opacity-50 disabled:cursor-not-allowed">
-            <span className="font-medium tracking-tight">{submitting ? "Submitting application..." : "Submit application"}</span>
-            <div className="join-cta-disc shrink-0">
-              <svg viewBox="0 0 5 8" width="5" height="8" fill="none" stroke="#FFFFFF" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M.6.6 4 4 .6 7.4" /></svg>
-            </div>
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="btns">
+        <button type="button" className="ghost" onClick={() => setStep(1)}>
+          Back
+        </button>
+        <button type="button" className="btn" onClick={handleContinueFromStep2}>
+          Continue
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </section>
   );
-}
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MAIN JOIN WIZARD
-// ═══════════════════════════════════════════════════════════════════════════════
-function JoinWizard() {
-  const searchParams = useSearchParams();
-  const notice = searchParams.get("notice");
-  const emailParam = searchParams.get("email") || "";
-  const nameParam = searchParams.get("name") || "";
-  const stepParam = parseInt(searchParams.get("step") || "1", 10);
+  // ═════════════════════════════════════════════════════════════════════════════
+  // RENDER: STEP 3 (ROLE SPECIFIC DETAILS)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const renderStep3 = () => (
+    <section className="sheet">
+      <h2 className="st">{activeRole.step3Title}</h2>
+      <p className="lead">{activeRole.step3Lead}</p>
 
-  const isNotRegistered = notice === "not_registered";
-  const [modalOpen, setModalOpen] = useState(isNotRegistered);
-  const [step, setStep] = useState(Math.max(1, Math.min(4, stepParam)));
-  const [direction, setDirection] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<RoleOption>("founder");
+      <div className="fg">
+        {activeRole.key === "founder" && (
+          <>
+            <div
+              className={cn("f", fieldErrors.startupName && "bad")}
+              style={{ "--n": 1 } as React.CSSProperties}
+            >
+              <label htmlFor="i_startupName">Startup name</label>
+              <input
+                id="i_startupName"
+                type="text"
+                value={startupName}
+                onChange={(e) => {
+                  setStartupName(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, startupName: "" }));
+                }}
+                placeholder="Registered trade name or venture title"
+                autoComplete="off"
+              />
+              {fieldErrors.startupName && (
+                <div className="err">{fieldErrors.startupName}</div>
+              )}
+            </div>
 
-  useEffect(() => {
-    if (isNotRegistered) setModalOpen(true);
-  }, [isNotRegistered]);
+            <div className="f" style={{ "--n": 2 } as React.CSSProperties}>
+              <label htmlFor="i_founderRole">Your role</label>
+              <select
+                id="i_founderRole"
+                value={founderRole}
+                onChange={(e) => setFounderRole(e.target.value)}
+              >
+                {FOUNDER_ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (emailParam) sessionStorage.setItem("oasis_reg_email", emailParam);
-      if (nameParam) sessionStorage.setItem("oasis_reg_name", nameParam);
-    }
-  }, [emailParam, nameParam]);
+            <div className="f w" style={{ "--n": 3 } as React.CSSProperties}>
+              <label>Current stage</label>
+              <div className="opts">
+                {FOUNDER_STAGES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={cn("opt", stage === s && "on")}
+                    onClick={() => setStage(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-  const goTo = useCallback((target: number) => {
-    setDirection(target > step ? 1 : -1);
-    setStep(target);
-  }, [step]);
+            <div className="f w" style={{ "--n": 4 } as React.CSSProperties}>
+              <label>
+                Company status
+                <span className="lh">
+                  {isRegistered === "registered"
+                    ? "Pvt Ltd, LLP, MSME or DPIIT"
+                    : "MVP or website proof"}
+                </span>
+              </label>
+              <div className="opts">
+                <button
+                  type="button"
+                  className={cn("opt", isRegistered === "registered" && "on")}
+                  onClick={() => setIsRegistered("registered")}
+                >
+                  Registered
+                </button>
+                <button
+                  type="button"
+                  className={cn("opt", isRegistered === "early_stage" && "on")}
+                  onClick={() => setIsRegistered("early_stage")}
+                >
+                  Early stage
+                </button>
+              </div>
+            </div>
 
-  const handleGoogleSignUp = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("oasis_reg_role", selectedRole);
-      window.location.href = `/api/v1/auth/google?mode=signup&role=${selectedRole}`;
-    }
-  };
+            <div
+              className={cn("f", fieldErrors.founderWebsite && "bad")}
+              style={{ "--n": 5 } as React.CSSProperties}
+            >
+              <label htmlFor="i_website">Website or product demo</label>
+              <input
+                id="i_website"
+                type="url"
+                value={founderWebsite}
+                onChange={(e) => {
+                  setFounderWebsite(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, founderWebsite: "" }));
+                }}
+                placeholder="https://"
+                autoComplete="off"
+              />
+              {fieldErrors.founderWebsite && (
+                <div className="err">{fieldErrors.founderWebsite}</div>
+              )}
+            </div>
 
-  const handleStep1Continue = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("oasis_reg_role", selectedRole);
-    }
-    goTo(2);
-  };
+            <div
+              className={cn("f", fieldErrors.founderLinkedin && "bad")}
+              style={{ "--n": 6 } as React.CSSProperties}
+            >
+              <label htmlFor="i_linkedin">LinkedIn profile</label>
+              <input
+                id="i_linkedin"
+                type="text"
+                value={founderLinkedin}
+                onChange={(e) => {
+                  setFounderLinkedin(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, founderLinkedin: "" }));
+                }}
+                placeholder="linkedin.com/in/yourname"
+                autoComplete="off"
+              />
+              {fieldErrors.founderLinkedin && (
+                <div className="err">{fieldErrors.founderLinkedin}</div>
+              )}
+            </div>
 
-  const STEP_LABELS = ["Role", "Account", "Details", "Review"];
+            <div
+              className={cn("f w", fieldErrors.founderDescription && "bad")}
+              style={{ "--n": 7 } as React.CSSProperties}
+            >
+              <label htmlFor="i_description">
+                Elevator pitch and current progress
+                <span className="lh">
+                  {founderDescription.length} / 20 min
+                </span>
+              </label>
+              <textarea
+                id="i_description"
+                value={founderDescription}
+                onChange={(e) => {
+                  setFounderDescription(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, founderDescription: "" }));
+                }}
+                placeholder="What problem does your venture solve, what traction do you have so far?"
+              />
+              {fieldErrors.founderDescription && (
+                <div className="err">{fieldErrors.founderDescription}</div>
+              )}
+            </div>
 
+            <div className="f w" style={{ "--n": 8 } as React.CSSProperties}>
+              <label>Supporting proof · optional</label>
+              <label
+                className={cn("drop", isDraggingOver && "over")}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(true);
+                }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(false);
+                  if (e.dataTransfer.files) handleFileUpload(e.dataTransfer.files);
+                }}
+              >
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={(e) => {
+                    if (e.target.files) handleFileUpload(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <b>Drop files here or browse</b>
+                <span className="fh">{hintText}</span>
+              </label>
+
+              {uploadedFiles.length > 0 && (
+                <div className="files">
+                  {uploadedFiles.map((file) => (
+                    <div key={file.fileId} className="file">
+                      <span>{file.name}</span>
+                      <em>
+                        {file.status === "scanning"
+                          ? "Scanning…"
+                          : file.status === "verified"
+                          ? "✓ Verified"
+                          : `✕ ${file.message || "Error"}`}
+                      </em>
+                      <button
+                        type="button"
+                        className="ghost"
+                        onClick={() => removeFile(file.fileId)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeRole.key === "aspiring" && (
+          <>
+            <div className="f" style={{ "--n": 1 } as React.CSSProperties}>
+              <label htmlFor="i_ideaDomain">Primary sector</label>
+              <select
+                id="i_ideaDomain"
+                value={ideaDomain}
+                onChange={(e) => setIdeaDomain(e.target.value)}
+              >
+                {ASPIRING_DOMAINS.map((dom) => (
+                  <option key={dom} value={dom}>
+                    {dom}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div
+              className={cn("f", fieldErrors.city && "bad")}
+              style={{ "--n": 2 } as React.CSSProperties}
+            >
+              <label htmlFor="i_city">City</label>
+              <LocationAutocomplete
+                label=""
+                value={city}
+                onChange={(val) => {
+                  setCity(val);
+                  setFieldErrors((prev) => ({ ...prev, city: "" }));
+                }}
+                placeholder="Bhubaneswar, Cuttack, or where you are abroad"
+              />
+              {fieldErrors.city && <div className="err">{fieldErrors.city}</div>}
+            </div>
+
+            <div
+              className={cn("f w", fieldErrors.aspiringLinkedin && "bad")}
+              style={{ "--n": 3 } as React.CSSProperties}
+            >
+              <label htmlFor="i_aspiringLinkedin">LinkedIn profile · optional</label>
+              <input
+                id="i_aspiringLinkedin"
+                type="text"
+                value={aspiringLinkedin}
+                onChange={(e) => {
+                  setAspiringLinkedin(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, aspiringLinkedin: "" }));
+                }}
+                placeholder="linkedin.com/in/yourname"
+                autoComplete="off"
+              />
+              {fieldErrors.aspiringLinkedin && (
+                <div className="err">{fieldErrors.aspiringLinkedin}</div>
+              )}
+            </div>
+
+            <div
+              className={cn("f w", fieldErrors.aspiringDescription && "bad")}
+              style={{ "--n": 4 } as React.CSSProperties}
+            >
+              <label htmlFor="i_aspiringDescription">
+                The problem you want to solve and the support you need
+                <span className="lh">
+                  {aspiringDescription.length} / 20 min
+                </span>
+              </label>
+              <textarea
+                id="i_aspiringDescription"
+                value={aspiringDescription}
+                onChange={(e) => {
+                  setAspiringDescription(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, aspiringDescription: "" }));
+                }}
+                placeholder="Describe your early idea, what problem you observed, and what co-founder or advisor help you seek."
+              />
+              {fieldErrors.aspiringDescription && (
+                <div className="err">{fieldErrors.aspiringDescription}</div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeRole.key === "mentor" && (
+          <>
+            <div
+              className={cn("f", fieldErrors.currentCompany && "bad")}
+              style={{ "--n": 1 } as React.CSSProperties}
+            >
+              <label htmlFor="i_currentCompany">Company or fund</label>
+              <input
+                id="i_currentCompany"
+                type="text"
+                value={currentCompany}
+                onChange={(e) => {
+                  setCurrentCompany(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, currentCompany: "" }));
+                }}
+                placeholder="e.g. Tata Consultancy Services or Venture Fund"
+                autoComplete="off"
+              />
+              {fieldErrors.currentCompany && (
+                <div className="err">{fieldErrors.currentCompany}</div>
+              )}
+            </div>
+
+            <div
+              className={cn("f", fieldErrors.jobTitle && "bad")}
+              style={{ "--n": 2 } as React.CSSProperties}
+            >
+              <label htmlFor="i_jobTitle">Job title</label>
+              <input
+                id="i_jobTitle"
+                type="text"
+                value={jobTitle}
+                onChange={(e) => {
+                  setJobTitle(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, jobTitle: "" }));
+                }}
+                placeholder="e.g. VP Engineering, Managing Partner"
+                autoComplete="off"
+              />
+              {fieldErrors.jobTitle && (
+                <div className="err">{fieldErrors.jobTitle}</div>
+              )}
+            </div>
+
+            <div className="f w" style={{ "--n": 3 } as React.CSSProperties}>
+              <label>Years of experience</label>
+              <div className="opts">
+                {MENTOR_EXPERIENCE_OPTIONS.map((exp) => (
+                  <button
+                    key={exp}
+                    type="button"
+                    className={cn("opt", yearsExperience === exp && "on")}
+                    onClick={() => setYearsExperience(exp)}
+                  >
+                    {exp}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className={cn("f w", fieldErrors.mentorLinkedin && "bad")}
+              style={{ "--n": 4 } as React.CSSProperties}
+            >
+              <label htmlFor="i_mentorLinkedin">LinkedIn profile</label>
+              <input
+                id="i_mentorLinkedin"
+                type="text"
+                value={mentorLinkedin}
+                onChange={(e) => {
+                  setMentorLinkedin(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, mentorLinkedin: "" }));
+                }}
+                placeholder="linkedin.com/in/yourname"
+                autoComplete="off"
+              />
+              {fieldErrors.mentorLinkedin && (
+                <div className="err">{fieldErrors.mentorLinkedin}</div>
+              )}
+            </div>
+
+            <div
+              className={cn("f w", fieldErrors.mentorDescription && "bad")}
+              style={{ "--n": 5 } as React.CSSProperties}
+            >
+              <label htmlFor="i_mentorDescription">
+                How you mentor and where you can help founders
+                <span className="lh">
+                  {mentorDescription.length} / 20 min
+                </span>
+              </label>
+              <textarea
+                id="i_mentorDescription"
+                value={mentorDescription}
+                onChange={(e) => {
+                  setMentorDescription(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, mentorDescription: "" }));
+                }}
+                placeholder="Share your domains of expertise, past advisory experience, and how you want to contribute."
+              />
+              {fieldErrors.mentorDescription && (
+                <div className="err">{fieldErrors.mentorDescription}</div>
+              )}
+            </div>
+
+            <div className="f w" style={{ "--n": 6 } as React.CSSProperties}>
+              <label>Credentials for the Mentor Verified badge · optional</label>
+              <label
+                className={cn("drop", isDraggingOver && "over")}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(true);
+                }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(false);
+                  if (e.dataTransfer.files) handleFileUpload(e.dataTransfer.files);
+                }}
+              >
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={(e) => {
+                    if (e.target.files) handleFileUpload(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <b>Drop files here or browse</b>
+                <span className="fh">{hintText}</span>
+              </label>
+
+              {uploadedFiles.length > 0 && (
+                <div className="files">
+                  {uploadedFiles.map((file) => (
+                    <div key={file.fileId} className="file">
+                      <span>{file.name}</span>
+                      <em>
+                        {file.status === "scanning"
+                          ? "Scanning…"
+                          : file.status === "verified"
+                          ? "✓ Verified"
+                          : `✕ ${file.message || "Error"}`}
+                      </em>
+                      <button
+                        type="button"
+                        className="ghost"
+                        onClick={() => removeFile(file.fileId)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="btns">
+        <button type="button" className="ghost" onClick={() => setStep(2)}>
+          Back
+        </button>
+        <button type="button" className="btn" onClick={handleContinueFromStep3}>
+          Review application
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </section>
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // RENDER: STEP 4 (REVIEW & SUBMIT)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const renderStep4 = () => (
+    <section className="sheet">
+      <h2 className="st">Review your application</h2>
+      <p className="lead">The admissions committee reads exactly what you see here.</p>
+
+      {/* Account Section */}
+      <div className="rv">
+        <div className="rh">
+          <b>Account</b>
+          <button type="button" className="ghost" onClick={() => setStep(2)}>
+            Edit
+          </button>
+        </div>
+        <dl>
+          <dt>Name</dt>
+          <dd>{name || "—"}</dd>
+          <dt>Email</dt>
+          <dd>{email || "—"}</dd>
+          <dt>Sign-in</dt>
+          <dd>{isGoogleAuth ? "Google" : "Email and password"}</dd>
+        </dl>
+      </div>
+
+      {/* Role Details Section */}
+      <div className="rv">
+        <div className="rh">
+          <b>{activeRole.shortTitle} details</b>
+          <button type="button" className="ghost" onClick={() => setStep(3)}>
+            Edit
+          </button>
+        </div>
+        <dl>
+          {activeRole.key === "founder" && (
+            <>
+              <dt>Startup name</dt>
+              <dd>{startupName || "—"}</dd>
+              <dt>Your role</dt>
+              <dd>{founderRole || "—"}</dd>
+              <dt>Current stage</dt>
+              <dd>{stage || "—"}</dd>
+              <dt>Company status</dt>
+              <dd>{isRegistered === "registered" ? "Registered" : "Early stage"}</dd>
+              <dt>Website</dt>
+              <dd>{founderWebsite || "—"}</dd>
+              <dt>LinkedIn</dt>
+              <dd>{founderLinkedin || "—"}</dd>
+              <dt>Elevator pitch</dt>
+              <dd>{founderDescription || "—"}</dd>
+              <dt>Supporting proof</dt>
+              <dd>
+                {uploadedFiles.length > 0
+                  ? uploadedFiles
+                      .filter((f) => f.status === "verified")
+                      .map((f) => f.name)
+                      .join(", ") || "—"
+                  : "—"}
+              </dd>
+            </>
+          )}
+
+          {activeRole.key === "aspiring" && (
+            <>
+              <dt>Primary sector</dt>
+              <dd>{ideaDomain || "—"}</dd>
+              <dt>City</dt>
+              <dd>{city || "—"}</dd>
+              <dt>LinkedIn</dt>
+              <dd>{aspiringLinkedin || "—"}</dd>
+              <dt>Problem & support</dt>
+              <dd>{aspiringDescription || "—"}</dd>
+            </>
+          )}
+
+          {activeRole.key === "mentor" && (
+            <>
+              <dt>Company or fund</dt>
+              <dd>{currentCompany || "—"}</dd>
+              <dt>Job title</dt>
+              <dd>{jobTitle || "—"}</dd>
+              <dt>Experience</dt>
+              <dd>{yearsExperience || "—"}</dd>
+              <dt>LinkedIn</dt>
+              <dd>{mentorLinkedin || "—"}</dd>
+              <dt>Mentorship focus</dt>
+              <dd>{mentorDescription || "—"}</dd>
+              <dt>Credentials</dt>
+              <dd>
+                {uploadedFiles.length > 0
+                  ? uploadedFiles
+                      .filter((f) => f.status === "verified")
+                      .map((f) => f.name)
+                      .join(", ") || "—"
+                  : "—"}
+              </dd>
+            </>
+          )}
+        </dl>
+      </div>
+
+      {/* Compliance Checkboxes */}
+      <label className="ck">
+        <input
+          type="checkbox"
+          checked={complianceChecks[0]}
+          onChange={(e) =>
+            setComplianceChecks([e.target.checked, complianceChecks[1], complianceChecks[2]])
+          }
+        />
+        <span>I confirm everything above is accurate and I am authorised to submit it.</span>
+      </label>
+
+      <label className="ck">
+        <input
+          type="checkbox"
+          checked={complianceChecks[1]}
+          onChange={(e) =>
+            setComplianceChecks([complianceChecks[0], e.target.checked, complianceChecks[2]])
+          }
+        />
+        <span>I agree to the Terms of Service and Privacy Policy.</span>
+      </label>
+
+      <label className="ck">
+        <input
+          type="checkbox"
+          checked={complianceChecks[2]}
+          onChange={(e) =>
+            setComplianceChecks([complianceChecks[0], complianceChecks[1], e.target.checked])
+          }
+        />
+        <span>I understand the committee reviews every application before I get access.</span>
+      </label>
+
+      {submitError && (
+        <div className="err" style={{ marginBottom: 12 }}>
+          {submitError}
+        </div>
+      )}
+
+      <div className="btns">
+        <button type="button" className="ghost" onClick={() => setStep(3)}>
+          Back
+        </button>
+        <button
+          type="button"
+          className="btn"
+          disabled={!complianceChecks.every(Boolean) || submitting}
+          onClick={handleFinalSubmit}
+        >
+          {submitting ? "Submitting…" : "Submit to committee"}
+        </button>
+      </div>
+    </section>
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // RENDER: STEP 5 (APPLICATION SUBMITTED)
+  // ═════════════════════════════════════════════════════════════════════════════
+  const renderStep5 = () => (
+    <section className="sheet ok">
+      <svg viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="36" />
+        <path d="M24 41l11 11 21-23" />
+      </svg>
+      <h2 className="st">Application submitted</h2>
+      <p className="lead">We’ll email {email} once the committee has decided.</p>
+      <span className="pill">
+        <i />
+        Pending review · {submittedRef}
+      </span>
+      <ul className="tl">
+        <li className="d">Application received</li>
+        <li className="n">Committee review</li>
+        <li>Access to the community</li>
+      </ul>
+      <div style={{ marginTop: 28, display: "flex", justifyContent: "center" }}>
+        <Link href="/" className="btn">
+          Return to Home
+        </Link>
+      </div>
+    </section>
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // MAIN RENDER
+  // ═════════════════════════════════════════════════════════════════════════════
   return (
-    <div className="login-bg h-screen max-h-screen min-h-screen relative flex flex-col overflow-hidden bg-[#03080B] text-[#F5FAF6]">
-      {/* ── Top Header ──────────────────────────────────────────────────────── */}
-      <header className="shrink-0 relative z-20 w-full px-4 sm:px-8 lg:px-12 py-2.5 sm:py-3.5 flex items-center justify-between pointer-events-auto">
+    <div
+      className={cn("join-flow stage", step > 1 && "fit")}
+      data-has={hasUserSelectedRole || step > 1 ? "1" : undefined}
+      style={
+        {
+          "--accent": selectedRoleIndex >= 0 ? activeRole.accent : "#88DECC",
+        } as React.CSSProperties
+      }
+    >
+      <div className="glow" />
+
+      {/* Top Header */}
+      <header className="relative z-20 flex items-center justify-between pb-3 pointer-events-auto">
         <GlassLogoPill href="/" />
-        <div className="flex items-center gap-3.5 sm:gap-6">
-          <Link href="/faq" className="text-xs text-[#ECF1EF]/60 hover:text-[#88DECC] transition-colors font-medium">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/faq"
+            className="text-xs text-[rgba(236,241,239,0.75)] hover:text-[#F5FAF6] transition-colors font-medium"
+          >
             Need help?
           </Link>
-          <Link href="/login" className="join-login-pill inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-full border border-white/10 hover:border-white/25 transition-all text-[#F5FAF6]"
+          >
             <span>Log in</span>
-            <svg viewBox="0 0 4 7" width="4" height="7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <path d="M.5.5 3.5 3.5.5 6.5" />
-            </svg>
+            <ChevronRight className="w-3 h-3 text-[var(--accent)]" />
           </Link>
         </div>
       </header>
 
-      {/* ── Main Content: Split Layout ──────────────────────────────────────── */}
-      <main className="relative z-10 flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-        {/* LEFT COLUMN: Interactive Wizard */}
-        <div className="flex-1 min-h-0 flex flex-col lg:w-1/2 px-4 sm:px-8 lg:px-12 xl:px-16 pb-4">
-          {/* Step indicator pills */}
-          <div className="shrink-0 flex items-center gap-2 mb-2">
-            {STEP_LABELS.map((label, i) => (
-              <div key={label} className="flex items-center gap-2">
-                <div className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider transition-all",
-                  i + 1 === step
-                    ? "bg-[#88DECC]/15 text-[#88DECC] border border-[#88DECC]/30"
-                    : i + 1 < step
-                    ? "text-[#88DECC]/60"
-                    : "text-[#ECF1EF]/30"
-                )}>
-                  {i + 1 < step ? (
-                    <Check className="w-2.5 h-2.5" />
-                  ) : (
-                    <span className="text-[9px]">{i + 1}</span>
-                  )}
-                  <span className="hidden sm:inline">{label}</span>
-                </div>
-                {i < 3 && <div className={cn("w-4 h-px", i + 1 < step ? "bg-[#88DECC]/40" : "bg-white/10")} />}
-              </div>
-            ))}
-          </div>
-
-          {/* Progress bar */}
-          <div className="shrink-0 mb-4">
-            <ProgressBar step={step} />
-          </div>
-
-          {/* Unregistered user modal */}
-          <UnregisteredAccountModal isOpen={modalOpen} onClose={() => setModalOpen(false)} email={emailParam} onContinue={() => setModalOpen(false)} />
-
-          {isNotRegistered && !modalOpen && (
-            <div className="shrink-0 mb-3 p-1.5 px-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs flex items-center justify-between gap-3 backdrop-blur-md">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
-                <span>Applying for Google account: <strong className="font-mono text-[#F3D3A2]">{emailParam || "your email"}</strong></span>
-              </div>
-              <button type="button" onClick={() => setModalOpen(true)} className="text-[11px] underline text-[#F3D3A2] hover:opacity-80 cursor-pointer">View Notice</button>
+      {/* Stepper Progress Segments */}
+      <div className="steps" id="steps">
+        {[1, 2, 3, 4].map((segNum) => {
+          let width = "0%";
+          let bg = "var(--accent)";
+          if (step > segNum) {
+            width = "100%";
+          } else if (step === segNum) {
+            if (step === 1 && selectedRoleIndex === -1) {
+              width = "35%";
+              bg = "rgba(255, 255, 255, 0.4)";
+            } else {
+              width = "100%";
+            }
+          }
+          return (
+            <div key={segNum} className="seg">
+              <i
+                style={{
+                  width,
+                  background: bg,
+                  boxShadow:
+                    width === "100%" ? "0 0 12px var(--accent)" : "none",
+                }}
+              />
             </div>
-          )}
+          );
+        })}
+      </div>
 
-          {/* Animated Step Content */}
-          <div className="flex-1 min-h-0 flex flex-col justify-center overflow-y-auto auth-scrollbar">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={step}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={slideTransition}
-                className="w-full"
+      <p className="meta" id="meta">
+        {step === 5
+          ? "Submitted · 100%"
+          : `Step ${step} of 4 · ${step * 25}%`}
+      </p>
+
+      {/* Unregistered Account Notice Modal */}
+      <UnregisteredAccountModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        email={emailParam}
+        onContinue={() => setModalOpen(false)}
+      />
+
+      {/* Step 1: Expanding Photo Panels */}
+      <div
+        id="v1"
+        style={{ display: step === 1 ? "flex" : "none" }}
+        className="flex-1 min-h-0 flex flex-col overflow-hidden"
+      >
+        <h1>How would you describe yourself?</h1>
+        <div
+          className="panels"
+          id="panels"
+          role="radiogroup"
+          aria-label="Choose your role"
+          data-sel={selectedRoleIndex >= 0 ? selectedRoleIndex.toString() : undefined}
+        >
+          {ROLES.map((roleDef, idx) => {
+            const isSelected = selectedRoleIndex === idx;
+            return (
+              <article
+                key={roleDef.key}
+                className={cn(
+                  "panel",
+                  isSelected && "on",
+                  isSelected && isGuardReady && "ready"
+                )}
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={0}
+                style={
+                  {
+                    "--a": roleDef.accent,
+                    "--pos": roleDef.photoPos,
+                    "--img": `url(${roleDef.photo})`,
+                    "--cx": coords[idx]?.cx || "50%",
+                    "--cy": coords[idx]?.cy || "45%",
+                  } as React.CSSProperties
+                }
+                onClick={(e) => handleSelectRole(idx, e)}
+                onKeyDown={(e) => handleStep1KeyDown(e, idx)}
               >
-                {step === 1 && (
-                  <Step1Role
-                    selectedRole={selectedRole}
-                    setSelectedRole={setSelectedRole}
-                    onContinue={handleStep1Continue}
-                    onGoogleSignUp={handleGoogleSignUp}
-                  />
-                )}
-                {step === 2 && (
-                  <Step2Account
-                    role={selectedRole}
-                    onContinue={() => goTo(3)}
-                    onBack={() => goTo(1)}
-                    onGoogleSignUp={handleGoogleSignUp}
-                  />
-                )}
-                {step === 3 && (
-                  <Step3Details
-                    role={selectedRole}
-                    onContinue={() => goTo(4)}
-                    onBack={() => goTo(2)}
-                  />
-                )}
-                {step === 4 && (
-                  <Step4Review
-                    role={selectedRole}
-                    onBack={() => goTo(3)}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                <i className="ring" />
+                <div className="ph base" />
+                <div className="ph col" />
+                <div className="shade" />
+                <div className="idle" aria-hidden="true">
+                  <h2>{roleDef.title}</h2>
+                  <p>{roleDef.subtitle}</p>
+                  <div className="tags">
+                    {roleDef.tags.map((t) => (
+                      <b key={t}>{t}</b>
+                    ))}
+                  </div>
+                </div>
+                <div className="strip" aria-hidden="true">
+                  <span />
+                  <h2>{roleDef.shortTitle}</h2>
+                </div>
+                <div className="open">
+                  <h2>{roleDef.title}</h2>
+                  <p>{roleDef.subtitle}</p>
+                  <small>Next we’ll ask for</small>
+                  <ul>
+                    {roleDef.bullets.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                  <button
+                    className="go"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContinueFromStep1();
+                    }}
+                  >
+                    Continue as {roleDef.shortTitle}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
+      </div>
 
-        {/* RIGHT COLUMN: Cinematic Showcase (desktop only) */}
-        <div className="hidden lg:flex lg:w-1/2 relative border-l border-white/[0.06]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#070D12] via-[#0a1218] to-[#03080B]" />
-          <JoinShowcase role={selectedRole} step={step} />
+      {/* Steps 2–4 & Step 5 in Container */}
+      {step > 1 && (
+        <div id="vx">
+          {step < 5 ? (
+            <div className="split">
+              {renderHero()}
+              {step === 2 && renderStep2()}
+              {step === 3 && renderStep3()}
+              {step === 4 && renderStep4()}
+            </div>
+          ) : (
+            renderStep5()
+          )}
         </div>
-      </main>
+      )}
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="shrink-0 relative z-10 w-full py-1.5 text-center text-[10px] text-[#ECF1EF]/35 font-mono">
-        OASIS &middot; Curated &amp; Admin Vetted Startup Community &middot; Odisha
-      </footer>
+      {/* Screen Reader Announcement */}
+      <p className="sr" aria-live="polite">
+        {selectedRoleIndex >= 0 ? `Selected: ${activeRole.title}` : ""}
+      </p>
     </div>
   );
 }
 
 export default function JoinPage() {
   return (
-    <Suspense fallback={<div className="login-bg min-h-screen bg-[#03080B]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#03080B]" />}>
       <JoinWizard />
     </Suspense>
   );

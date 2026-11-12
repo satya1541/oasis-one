@@ -101,9 +101,9 @@ export default function AdminMembersPage() {
     try {
       setLoading(true);
       const [meRes, membersRes, changesRes] = await Promise.all([
-        fetch("/api/v1/auth/me"),
-        fetch("/api/v1/admin/members?pageSize=200"),
-        fetch("/api/v1/admin/profile-changes"),
+        fetch("/api/v1/auth/me", { cache: "no-store" }),
+        fetch("/api/v1/admin/members?pageSize=500", { cache: "no-store" }),
+        fetch("/api/v1/admin/profile-changes", { cache: "no-store" }),
       ]);
 
       if (meRes.ok) {
@@ -113,8 +113,61 @@ export default function AdminMembersPage() {
 
       if (membersRes.ok) {
         const json = await membersRes.json();
-        const list = Array.isArray(json.data) ? json.data : (json.data?.items || []);
-        setMembers(list.filter((m: any) => m.adminLevel !== "super_admin"));
+        const rawList: MemberRecord[] = Array.isArray(json.data)
+          ? json.data
+          : json.data?.items || [];
+        let filteredList = rawList.filter((m) => m.adminLevel !== "super_admin");
+
+        // Guard against an older backend deployment omitting `hasApplication` on /admin/members
+        if (filteredList.some((m) => typeof m.hasApplication !== "boolean")) {
+          try {
+            const appsRes = await fetch("/api/v1/admin/applications?pageSize=500", {
+              cache: "no-store",
+            });
+            if (appsRes.ok) {
+              const appsJson = await appsRes.json();
+              const appsList = Array.isArray(appsJson.data)
+                ? appsJson.data
+                : appsJson.data?.items || [];
+              const latestByUserId = new Map<string, { status: string; ts: number }>();
+              const latestByEmail = new Map<string, { status: string; ts: number }>();
+
+              for (const app of appsList) {
+                if (!app?.status) continue;
+                const ts = new Date(app.submittedAt || app.createdAt || 0).getTime() || 0;
+                if (app.userId) {
+                  const prev = latestByUserId.get(app.userId);
+                  if (!prev || ts > prev.ts) {
+                    latestByUserId.set(app.userId, { status: app.status, ts });
+                  }
+                }
+                const normEmail = typeof app.email === "string" ? app.email.toLowerCase() : "";
+                if (normEmail) {
+                  const prev = latestByEmail.get(normEmail);
+                  if (!prev || ts > prev.ts) {
+                    latestByEmail.set(normEmail, { status: app.status, ts });
+                  }
+                }
+              }
+
+              filteredList = filteredList.map((m) => {
+                if (typeof m.hasApplication === "boolean") return m;
+                const matched =
+                  latestByUserId.get(m.id) ??
+                  (m.email ? latestByEmail.get(m.email.toLowerCase()) : undefined);
+                return {
+                  ...m,
+                  hasApplication: Boolean(matched),
+                  applicationStatus: m.applicationStatus ?? matched?.status ?? null,
+                };
+              });
+            }
+          } catch (fallbackErr) {
+            console.warn("Fallback applications fetch failed:", fallbackErr);
+          }
+        }
+
+        setMembers(filteredList);
       }
 
       if (changesRes.ok) {
@@ -307,13 +360,15 @@ export default function AdminMembersPage() {
     if (statusFilter === "active") {
       matchesStatus = m.status === "active";
     } else if (statusFilter === "no_application") {
-      matchesStatus = m.status === "pending_verification" && !m.hasApplication;
+      matchesStatus =
+        (m.status === "pending_verification" || m.status === "pending_approval") &&
+        m.hasApplication === false;
     } else if (statusFilter === "needs_info") {
       matchesStatus = m.applicationStatus === "info_requested";
     } else if (statusFilter === "pending_approval") {
       matchesStatus =
-        m.status === "pending_approval" ||
-        (m.status === "pending_verification" && !!m.hasApplication);
+        (m.status === "pending_approval" || m.status === "pending_verification") &&
+        m.hasApplication !== false;
     }
 
     return matchesSearch && matchesRole && matchesStatus;
@@ -505,7 +560,8 @@ export default function AdminMembersPage() {
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                               <span>Active</span>
                             </span>
-                          ) : member.status === "pending_verification" && !member.hasApplication ? (
+                          ) : (member.status === "pending_verification" || member.status === "pending_approval") &&
+                            member.hasApplication === false ? (
                             <div className="flex flex-col gap-1 items-start">
                               <span
                                 title="User created an account via Google/Email but has not completed and submitted an admissions application yet"
@@ -563,14 +619,33 @@ export default function AdminMembersPage() {
                                 In Applications &rarr; Approved tab &rarr;
                               </Link>
                             </div>
+                          ) : member.applicationStatus === "rejected" ? (
+                            <div className="flex flex-col gap-1 items-start">
+                              <span className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-rose-950/60 text-rose-400 border border-rose-800 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                                <span>Application Rejected</span>
+                              </span>
+                              <Link
+                                href={`/admin/applications?status=rejected&search=${encodeURIComponent(member.name || member.email)}`}
+                                className="text-[10px] text-rose-300/80 hover:text-rose-200 underline font-sans flex items-center gap-0.5"
+                              >
+                                In Applications &rarr; Rejected tab &rarr;
+                              </Link>
+                            </div>
                           ) : member.status === "pending_approval" || member.status === "pending_verification" ? (
                             <div className="flex flex-col gap-1 items-start">
                               <span
-                                title="Application dossier submitted for review"
+                                title={
+                                  member.hasApplication === true
+                                    ? "Application dossier submitted for review"
+                                    : "Account is awaiting email verification or admissions review"
+                                }
                                 className="px-2.5 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-cyan-950/60 text-cyan-300 border border-cyan-800 flex items-center gap-1.5"
                               >
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                                <span>In Review</span>
+                                <span>
+                                  {member.hasApplication === true ? "In Review" : "Pending Verification / Review"}
+                                </span>
                               </span>
                               <Link
                                 href={`/admin/applications?status=all&search=${encodeURIComponent(member.name || member.email)}`}

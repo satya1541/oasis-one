@@ -31,6 +31,7 @@ export function LockedDashboardView({
 }: LockedDashboardViewProps) {
   const [copiedRef, setCopiedRef] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [showEmailVerifyBanner, setShowEmailVerifyBanner] = useState(false);
   const [referenceId, setReferenceId] = useState("");
   const [appStatus, setAppStatus] = useState("pending");
   const [decisionReason, setDecisionReason] = useState("");
@@ -59,11 +60,14 @@ export function LockedDashboardView({
           }
         }
 
-        const meRes = await fetch("/api/v1/auth/me");
+        const meRes = await fetch("/api/v1/auth/me", { cache: "no-store" });
         if (meRes.ok) {
           const json = await meRes.json();
           if (isMounted && json.data) {
             setUserEmail(json.data.email || "");
+            setShowEmailVerifyBanner(
+              json.data.emailVerified === false && json.data.emailServiceConfigured !== false
+            );
           }
         }
 
@@ -170,22 +174,24 @@ export function LockedDashboardView({
       />
 
       {/* ── Email Verification Banner ─────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300 gap-3 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="font-sans leading-relaxed">
-            Please verify your email address to expedite committee vetting. A verification link was dispatched to your inbox.
-          </span>
+      {showEmailVerifyBanner && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300 gap-3 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="font-sans leading-relaxed">
+              Please verify your email address to expedite committee vetting. A verification link was dispatched to your inbox.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleResendEmail}
+            disabled={resendCooldown}
+            className="text-xs font-semibold text-amber-300 hover:text-amber-200 hover:underline disabled:opacity-50 shrink-0 cursor-pointer text-left sm:text-right"
+          >
+            {resendCooldown ? "Link sent (wait 60s)" : "Resend email"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleResendEmail}
-          disabled={resendCooldown}
-          className="text-xs font-semibold text-amber-300 hover:text-amber-200 hover:underline disabled:opacity-50 shrink-0 cursor-pointer text-left sm:text-right"
-        >
-          {resendCooldown ? "Link sent (wait 60s)" : "Resend email"}
-        </button>
-      </div>
+      )}
 
       {/* ── Application Status Card (Live) ────────────────────────── */}
       <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl join-glass-panel border border-white/10 text-[#F5FAF6] shadow-[0_12px_36px_rgba(0,0,0,0.5)] space-y-6 relative overflow-hidden">

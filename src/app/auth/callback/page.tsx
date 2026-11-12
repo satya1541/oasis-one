@@ -18,7 +18,7 @@ function AuthCallbackContent() {
 
     async function checkAuth() {
       try {
-        const res = await fetch("/api/v1/auth/me");
+        const res = await fetch("/api/v1/auth/me", { cache: "no-store" });
         if (!res.ok) {
           throw new Error("Failed to verify authentication session.");
         }
@@ -41,11 +41,21 @@ function AuthCallbackContent() {
         }
 
         if (user.accountStatus === "pending_verification") {
-          router.replace("/verify-email");
-          return;
+          if (user.applicationStatus === "not_started") {
+            router.replace("/join");
+            return;
+          }
+          if (!user.emailVerified && user.emailServiceConfigured !== false) {
+            router.replace(`/verify-email?email=${encodeURIComponent(user.email || "")}`);
+            return;
+          }
         }
 
-        if (user.accountStatus === "suspended" || user.accountStatus === "revoked") {
+        if (
+          user.accountStatus === "suspended" ||
+          user.accountStatus === "revoked" ||
+          user.accountStatus === "blacklisted"
+        ) {
           router.replace("/suspended");
           return;
         }

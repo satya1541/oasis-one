@@ -180,7 +180,16 @@ export class SearchService {
 
     return {
       people: {
-        items: peopleItems,
+        items: peopleItems.map((p) => ({
+          id: p.userId,
+          userId: p.userId,
+          name: p.name,
+          headline: p.headline,
+          city: p.city,
+          profilePhotoUrl: p.profilePhotoUrl,
+          mentorVerified: p.mentorVerified,
+          role: p.user?.primaryRole || 'founder',
+        })),
         total: peopleTotal,
         counts: peopleTotal,
       },

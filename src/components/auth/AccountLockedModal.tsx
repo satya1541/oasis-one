@@ -53,6 +53,9 @@ export function AccountLockedModal({
   const [submittingReply, setSubmittingReply] = useState(false);
   const [replySuccess, setReplySuccess] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docUploadSuccess, setDocUploadSuccess] = useState<string | null>(null);
+  const [docUploadError, setDocUploadError] = useState<string | null>(null);
 
   // Load application & message details
   const fetchAppData = async () => {
@@ -183,7 +186,7 @@ export function AccountLockedModal({
       setStatusMessage(null);
       setReplySuccess(null);
 
-      const res = await fetch("/api/v1/auth/me");
+      const res = await fetch("/api/v1/auth/me", { cache: "no-store" });
       if (res.ok) {
         const json = await res.json();
         const user = json.data;
@@ -272,10 +275,6 @@ export function AccountLockedModal({
       }
     }
   };
-
-  const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [docUploadSuccess, setDocUploadSuccess] = useState<string | null>(null);
-  const [docUploadError, setDocUploadError] = useState<string | null>(null);
 
   const handleApplicantDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

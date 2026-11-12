@@ -100,16 +100,24 @@ function SearchPageContent() {
           const data = json.data || {};
           if (isMounted) {
             setPeople(
-              (data.people?.items || []).map((p: any) => ({
-                id: p.id,
-                name: p.name || "Member",
-                role: p.role || "founder",
-                roleLabel: p.role === "mentor" ? "Mentor" : p.role === "aspiring_entrepreneur" ? "Aspiring" : "Founder",
-                city: p.city || "Odisha",
-                headline: p.headline,
-                bio: p.bio,
-                verified: p.mentorVerified,
-              }))
+              (data.people?.items || []).map((p: any, idx: number) => {
+                const personRole = p.role || p.user?.primaryRole || "founder";
+                return {
+                  id: p.id || p.userId || `person-${idx}`,
+                  name: p.name || "Member",
+                  role: personRole,
+                  roleLabel:
+                    personRole === "mentor"
+                      ? "Mentor"
+                      : personRole === "aspiring_entrepreneur"
+                      ? "Aspiring"
+                      : "Founder",
+                  city: p.city || "Odisha",
+                  headline: p.headline,
+                  bio: p.bio,
+                  verified: p.mentorVerified,
+                };
+              })
             );
             setQuestions(data.posts?.items || []);
             setEvents(data.events?.items || []);
@@ -264,9 +272,9 @@ function SearchPageContent() {
                   <span>Members &amp; Advisors ({filteredPeople.length})</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredPeople.map((person) => (
+                  {filteredPeople.map((person, idx) => (
                     <div
-                      key={person.id}
+                      key={`${person.id}-${idx}`}
                       className="group p-5 rounded-3xl bg-[var(--surface)] border border-[#EAE1CF] dark:border-[#2C2E4A]/80 hover:border-[#86601F]/40 dark:hover:border-[#F3D3A2]/40 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between space-y-3"
                     >
                       <div className="space-y-3">
