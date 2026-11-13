@@ -28,6 +28,7 @@ import {
   ExternalLink,
   Globe,
   MapPin,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -87,6 +88,11 @@ export default function AdminMembersPage() {
   // Role Change Modal State (Super Admin Only)
   const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
   const [newRole, setNewRole] = useState<"founder" | "mentor" | "aspiring_entrepreneur">("founder");
+
+  // Incomplete Member Purge Modal State (Super Admin Only)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<MemberRecord | null>(null);
+  const [deletingMember, setDeletingMember] = useState(false);
 
   // Member Full Details & Documents Modal State
   const [viewingMember, setViewingMember] = useState<any | null>(null);
@@ -276,6 +282,40 @@ export default function AdminMembersPage() {
       setFeedback({ type: "error", message: err.message || "Failed to change role" });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handlePurgeMember = async () => {
+    if (!memberToDelete) return;
+    try {
+      setDeletingMember(true);
+      const res = await fetch(`/api/v1/admin/members/${memberToDelete.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFeedback({
+          type: "error",
+          message: json.error?.message || json.message || "Failed to delete member account",
+        });
+        return;
+      }
+
+      setMembers((prev) => prev.filter((m) => m.id !== memberToDelete.id));
+      setFeedback({
+        type: "success",
+        message: `Account for ${memberToDelete.email} and all database records have been permanently removed.`,
+      });
+      setDeleteModalOpen(false);
+      setMemberToDelete(null);
+      setTimeout(() => setFeedback(null), 6000);
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || "An unexpected error occurred while deleting account",
+      });
+    } finally {
+      setDeletingMember(false);
     }
   };
 
@@ -484,7 +524,7 @@ export default function AdminMembersPage() {
           </div>
 
           {/* Members Table */}
-          <Card className="border-white/10 bg-[#1E1F33] overflow-hidden">
+          <Card className="border-white/10 bg-[#1E1F33] p-0 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center p-16 text-xs text-[#A9A7C4] gap-2">
                 <RotateCw className="w-4 h-4 animate-spin text-[#F3D3A2]" />
@@ -496,14 +536,14 @@ export default function AdminMembersPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[880px]">
                   <thead>
                     <tr className="border-b border-white/10 text-[#A9A7C4] uppercase font-mono text-[10px] tracking-wider bg-[#141522]/50">
                       <th className="py-3 px-4 font-semibold">Member</th>
-                      <th className="py-3 px-4 font-semibold">Role &amp; Verification</th>
-                      <th className="py-3 px-4 font-semibold">Account Status</th>
-                      <th className="py-3 px-4 font-semibold">Joined Date</th>
-                      <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                      <th className="py-3 px-3 font-semibold w-[130px]">Role &amp; Verification</th>
+                      <th className="py-3 px-3 font-semibold w-[175px]">Account Status</th>
+                      <th className="py-3 px-3 font-semibold w-[100px] whitespace-nowrap">Joined Date</th>
+                      <th className="py-3 px-4 font-semibold w-[330px] text-left">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -530,7 +570,7 @@ export default function AdminMembersPage() {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             <span className="capitalize text-white">
                               {(member.role || "member").replace(/_/g, " ")}
@@ -554,7 +594,7 @@ export default function AdminMembersPage() {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           {member.status === "active" ? (
                             <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800 flex items-center gap-1.5 w-fit">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -667,7 +707,7 @@ export default function AdminMembersPage() {
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4 font-mono text-[#A9A7C4]">
+                        <td className="py-3 px-3 font-mono text-[#A9A7C4] whitespace-nowrap">
                           {member.createdAt
                             ? new Date(member.createdAt).toLocaleDateString("en-IN", {
                                 day: "numeric",
@@ -677,15 +717,15 @@ export default function AdminMembersPage() {
                             : "—"}
                         </td>
 
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="flex items-center justify-start gap-1.5 whitespace-nowrap">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => handleOpenMemberDetails(member)}
-                              className="border-white/15 text-[#88DECC] hover:bg-[#88DECC]/10 text-[11px] h-7 gap-1"
+                              className="border-white/15 text-[#88DECC] hover:bg-[#88DECC]/10 text-[11px] h-7 px-2.5 gap-1 whitespace-nowrap shrink-0"
                             >
-                              <Eye className="w-3 h-3 text-[#88DECC]" />
+                              <Eye className="w-3 h-3 text-[#88DECC] shrink-0" />
                               <span>Profile &amp; Vault</span>
                             </Button>
                             {isSuperAdmin && (
@@ -697,9 +737,9 @@ export default function AdminMembersPage() {
                                   setNewRole((member.role as any) || "founder");
                                   setRoleChangeModalOpen(true);
                                 }}
-                                className="border-white/15 text-white hover:bg-white/5 text-[11px] h-7 gap-1"
+                                className="border-white/15 text-white hover:bg-white/5 text-[11px] h-7 px-2.5 gap-1 whitespace-nowrap shrink-0"
                               >
-                                <UserCog className="w-3 h-3 text-[#F3D3A2]" />
+                                <UserCog className="w-3 h-3 text-[#F3D3A2] shrink-0" />
                                 <span>Role</span>
                               </Button>
                             )}
@@ -710,10 +750,28 @@ export default function AdminMembersPage() {
                                 setSelectedMember(member);
                                 setRestrictionDrawerOpen(true);
                               }}
-                              className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-[11px] h-7"
+                              className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10 text-[11px] h-7 px-2.5 whitespace-nowrap shrink-0"
                             >
-                              Enforce Safety
+                              <span>Enforce Safety</span>
                             </Button>
+                            {isSuperAdmin &&
+                              (member.status === "pending_verification" ||
+                                member.status === "pending_approval") &&
+                              member.hasApplication === false && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setMemberToDelete(member);
+                                    setDeleteModalOpen(true);
+                                  }}
+                                  className="border-rose-500/50 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 hover:text-white text-[11px] h-7 px-2.5 gap-1 whitespace-nowrap shrink-0 font-medium shadow-sm shadow-rose-950/40"
+                                  title="Permanently remove incomplete user account and all database entries"
+                                >
+                                  <Trash2 className="w-3 h-3 text-rose-400 shrink-0" />
+                                  <span>Delete</span>
+                                </Button>
+                              )}
                           </div>
                         </td>
                       </tr>
@@ -873,6 +931,138 @@ export default function AdminMembersPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Purge Incomplete Member Modal (Super Admin Only) ── */}
+      {deleteModalOpen && memberToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-[#12131F] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-[0_25px_70px_rgba(0,0,0,0.85)] relative text-left overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Ambient luxury lighting accents */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-rose-500/80 to-transparent" />
+            <div className="absolute -top-24 -right-24 w-56 h-56 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-56 h-56 bg-[#D4AF37]/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Close Button */}
+            <button
+              type="button"
+              disabled={deletingMember}
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setMemberToDelete(null);
+              }}
+              className="absolute top-5 right-5 p-2 rounded-xl text-[#A9A7C4] hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500/25 via-rose-500/10 to-transparent border border-rose-500/30 flex items-center justify-center text-rose-400 shadow-inner shrink-0 mt-0.5">
+                <Trash2 className="w-6 h-6 text-rose-400" />
+              </div>
+              <div className="pr-6">
+                <h3 className="font-display text-lg sm:text-xl font-medium tracking-tight text-white">
+                  Permanently Delete Incomplete Account
+                </h3>
+                <p className="text-xs text-[#A9A7C4] mt-0.5 font-sans leading-relaxed">
+                  Safely purge uncompleted registration across all database tables.
+                </p>
+              </div>
+            </div>
+
+            {/* Member Details Card */}
+            <div className="rounded-2xl bg-[#1E1F33]/80 border border-white/10 p-4 mb-4 space-y-3 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#141522] border border-white/15 flex items-center justify-center font-display font-medium text-sm text-[#F3D3A2] shrink-0">
+                  {(memberToDelete.name || memberToDelete.email || "M").slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-medium text-white text-sm truncate">
+                    {memberToDelete.name || "Incomplete Applicant"}
+                  </div>
+                  <div className="font-mono text-xs text-[#A9A7C4] truncate select-all">
+                    {memberToDelete.email}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[#A9A7C4] block mb-1">
+                    Account Status
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full font-mono text-[9.5px] uppercase font-semibold bg-amber-950/60 text-amber-300 border border-amber-800 inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>No Application</span>
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[#A9A7C4] block mb-1">
+                    Joined Date
+                  </span>
+                  <span className="text-xs text-white font-mono">
+                    {memberToDelete.createdAt
+                      ? new Date(memberToDelete.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Irreversible Action Warning */}
+            <div className="p-3.5 rounded-2xl bg-rose-950/30 border border-rose-500/25 mb-6 text-xs text-rose-200/90 leading-relaxed flex items-start gap-3">
+              <div className="w-7 h-7 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 mt-0.5">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div>
+                <strong className="text-rose-300 font-semibold block mb-0.5">
+                  Irreversible Committee Action:
+                </strong>
+                <p className="text-rose-200/80 text-[11px] leading-relaxed">
+                  This user created an account but never completed an admissions application. This action permanently wipes their credentials, sessions, profile draft, and any associated file assets across all database tables. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deletingMember}
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setMemberToDelete(null);
+                }}
+                className="border-white/15 text-white hover:bg-white/5 text-xs rounded-xl px-4 py-2 h-auto"
+              >
+                Cancel
+              </Button>
+              <button
+                type="button"
+                disabled={deletingMember}
+                onClick={handlePurgeMember}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-rose-700 via-rose-600 to-rose-700 hover:from-rose-600 hover:to-rose-500 text-white font-medium text-xs px-5 py-2.5 rounded-xl shadow-[0_4px_16px_rgba(225,29,72,0.35)] border border-rose-400/40 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              >
+                {deletingMember ? (
+                  <>
+                    <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Purging from DB...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Confirm Permanent Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

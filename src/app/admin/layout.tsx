@@ -220,7 +220,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   });
 
   return (
-    <div className="admin-portal dark min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg flex flex-col lg:flex-row relative selection:bg-[#88DECC]/30 selection:text-[#03080B]">
+    <div className="admin-portal dark min-h-screen bg-[#03080B] text-[#F5FAF6] login-bg flex flex-col relative selection:bg-[#88DECC]/30 selection:text-[#03080B]">
       {/* ── Authorization Security Overlay (shown while validating session & MFA) ── */}
       {(checking || !authorized) && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center login-bg bg-[#03080B] text-[#F5FAF6] p-4 select-none">
@@ -259,7 +259,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Desktop Admin Sidebar (Obsidian Glass) ─────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 h-screen h-[100dvh] max-h-screen sticky top-0 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-40">
+      <aside className="hidden lg:flex w-64 bg-[#070D12]/95 backdrop-blur-2xl flex-col justify-between shrink-0 border-r border-white/10 h-screen fixed inset-y-0 left-0 overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.4)] z-40">
         <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
           {/* Header */}
           <div className="p-4 border-b border-white/10 space-y-3 shrink-0">
@@ -297,7 +297,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* System & Session Status with Sign Out */}
-        <div className="p-3.5 border-t border-white/10 space-y-2.5 shrink-0 sticky bottom-0 bg-[#070D12]/95 backdrop-blur-2xl z-10 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
+        <div className="p-3.5 border-t border-white/10 space-y-2.5 shrink-0 bg-[#070D12]/95 backdrop-blur-2xl z-10 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
           <div className="flex items-center justify-between text-[11px] text-[#ECF1EF]/70">
             <span className="font-medium text-xs">OASIS Governance</span>
             <span className="inline-flex items-center gap-1 text-[10px] text-[#88DECC] font-mono">
@@ -388,7 +388,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Content View ──────────────────────────────────────────────────────── */}
-      <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">{children}</main>
+      <div className="lg:pl-64 flex flex-col flex-1 min-w-0">
+        <main className="flex-1 min-w-0 p-5 sm:p-8 lg:p-10">{children}</main>
+      </div>
     </div>
   );
 }

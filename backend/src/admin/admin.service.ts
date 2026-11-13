@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { MailService } from '../mail/mail.service';
 import { AuditService } from '../audit/audit.service';
+import { FilesService } from '../files/files.service';
 import {
   hashToken,
   generateRandomToken,
@@ -37,6 +38,7 @@ export class AdminService {
     private readonly mail: MailService,
     private readonly audit: AuditService,
     private readonly config: ConfigService,
+    private readonly filesService: FilesService,
   ) {
     this.fieldKey =
       this.config.get<string>('auth.fieldEncryptionKey') ||
@@ -904,6 +906,113 @@ export class AdminService {
     });
 
     return { ok: true, newRole };
+  }
+
+  async purgeIncompleteMember(adminId: string, memberId: string, ipAddress?: string) {
+    if (adminId === memberId) {
+      throw new HttpException({ code: 'BAD_REQUEST', message: 'You cannot delete your own account' }, HttpStatus.BAD_REQUEST);
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: memberId },
+      include: {
+        profile: true,
+        applications: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!targetUser) {
+      throw new HttpException({ code: 'NOT_FOUND', message: 'Member not found' }, HttpStatus.NOT_FOUND);
+    }
+
+    // Guard 1: Never delete an administrator account
+    if (targetUser.adminLevel) {
+      throw new HttpException({ code: 'FORBIDDEN', message: 'Cannot delete an administrator account' }, HttpStatus.FORBIDDEN);
+    }
+
+    // Guard 2: Never delete an active approved member
+    if (targetUser.accountStatus === 'active') {
+      throw new HttpException({
+        code: 'BAD_REQUEST',
+        message: 'Cannot purge an active approved member. Apply sanctions or account deactivation instead.'
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    // Guard 3: Never delete a user who has submitted an application for review
+    const app = targetUser.applications?.[0];
+    const submittedStatuses = ['pending', 'approved', 'rejected', 'info_requested'];
+    if (app && submittedStatuses.includes(app.status)) {
+      throw new HttpException({
+        code: 'BAD_REQUEST',
+        message: `User has a submitted application (${app.status}). Process this applicant through the Admissions queue.`
+      }, HttpStatus.BAD_REQUEST);
+    }
+
+    const deletedEmail = targetUser.email;
+    const deletedName = targetUser.profile?.name || 'Incomplete Account';
+
+    // 1. Permanently delete all uploaded files owned by this user from disk/S3 & DB
+    const userFiles = await this.prisma.uploadedFile.findMany({
+      where: { ownerId: memberId },
+    });
+    for (const f of userFiles) {
+      await this.filesService.purgeFile(f.id).catch(() => {});
+    }
+
+    // 2. Clear non-foreign-key or unconstrained tables in a transaction
+    await this.prisma.$transaction(async (tx) => {
+      // Delete verification tokens
+      await tx.verificationToken.deleteMany({
+        where: { OR: [{ userId: memberId }, { email: deletedEmail }] },
+      });
+
+      // Delete phone verifications
+      await tx.phoneVerification.deleteMany({
+        where: { userId: memberId },
+      });
+
+      // Delete analytics events
+      await tx.analyticsEvent.deleteMany({
+        where: { userId: memberId },
+      });
+
+      // Disconnect invite links if user used one
+      await tx.inviteLink.updateMany({
+        where: { registeredUserId: memberId },
+        data: { registeredUserId: null },
+      });
+
+      // Delete master user (cascades sessions, identities, profile, consent_records, draft applications, etc.)
+      await tx.user.delete({
+        where: { id: memberId },
+      });
+    });
+
+    // 3. Revoke active realtime sockets / session tokens
+    await this.realtime.revokeUserSessions(memberId, 'account_deleted');
+
+    // 4. Record permanent admin audit log
+    await this.audit.log({
+      actorId: adminId,
+      action: 'admin.member.hard_delete_incomplete',
+      targetType: 'user',
+      targetId: memberId,
+      reason: `Permanently deleted incomplete account (${deletedEmail}) with no submitted application`,
+      metadata: {
+        deletedEmail,
+        deletedName,
+        purgedAt: new Date().toISOString(),
+      },
+      ipAddress,
+    });
+
+    return {
+      success: true,
+      message: `Account for ${deletedEmail} and all database entries have been permanently removed.`,
+    };
   }
 
   async issueRestriction(

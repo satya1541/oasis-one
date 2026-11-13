@@ -174,4 +174,24 @@ export class FilesService {
     const downloadUrl = await this.storage.getPresignedGetUrl(file.storageKey, 120);
     return { file, downloadUrl };
   }
+
+  /**
+   * Permanently purges a file from object storage / disk and removes its record.
+   */
+  async purgeFile(fileId: string): Promise<void> {
+    const file = await this.prisma.uploadedFile.findUnique({
+      where: { id: fileId },
+    });
+    if (!file) return;
+
+    try {
+      await this.storage.deleteObject(file.storageKey);
+    } catch (err) {
+      this.logger.warn(`Failed to delete object from storage: ${file.storageKey}`, err);
+    }
+
+    await this.prisma.uploadedFile.delete({
+      where: { id: fileId },
+    }).catch(() => {});
+  }
 }

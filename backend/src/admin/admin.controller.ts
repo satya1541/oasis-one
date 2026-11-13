@@ -187,6 +187,18 @@ export class AdminController {
     return this.adminService.changeMemberRole(id, role, adminId, clientIp);
   }
 
+  @UseGuards(AdminGuard, AdminLevelGuard)
+  @RequireAdminLevel(AdminLevel.super_admin)
+  @Delete('members/:id')
+  async purgeIncompleteMember(
+    @Param('id') id: string,
+    @CurrentUser('id') adminId: string,
+    @Req() req: Request,
+  ) {
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
+    return this.adminService.purgeIncompleteMember(adminId, id, clientIp);
+  }
+
   @UseGuards(AdminGuard)
   @Post('members/:id/restrictions')
   async issueRestriction(
