@@ -110,7 +110,9 @@ export default function AdminMfaPage() {
               await fetch("/api/v1/auth/logout", { method: "POST" });
             } catch {}
             if (typeof window !== "undefined") {
-              window.location.href = "/login";
+              sessionStorage.clear();
+              localStorage.clear();
+              window.location.href = "/login?logout=true";
             }
           }}
           className="join-login-pill inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 text-xs hover:text-rose-400 cursor-pointer"

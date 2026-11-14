@@ -48,13 +48,26 @@ export default function LoginPage() {
         const user = json?.data;
         if (user && isMounted) {
           if (user.adminLevel) {
-            window.location.replace("/admin");
+            window.location.replace(user.mfaVerified ? "/admin" : "/admin/mfa");
             return;
           }
-          if (user.accountStatus === "active") {
-            window.location.replace("/dashboard");
+          if (
+            user.accountStatus === "suspended" ||
+            user.accountStatus === "revoked" ||
+            user.accountStatus === "blacklisted"
+          ) {
+            window.location.replace("/suspended");
             return;
           }
+          if (
+            user.accountStatus === "pending_verification" &&
+            user.applicationStatus === "not_started"
+          ) {
+            window.location.replace("/join");
+            return;
+          }
+          window.location.replace("/dashboard");
+          return;
         }
         if (isMounted) setCheckingSession(false);
       })

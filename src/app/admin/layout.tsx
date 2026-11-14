@@ -315,7 +315,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               if (typeof window !== "undefined") {
                 sessionStorage.clear();
                 localStorage.clear();
-                window.location.href = "/login";
+                window.location.href = "/login?logout=true";
               }
             }}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition-colors cursor-pointer border border-rose-500/20"
@@ -376,7 +376,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               if (typeof window !== "undefined") {
                 sessionStorage.clear();
                 localStorage.clear();
-                window.location.href = "/login";
+                window.location.href = "/login?logout=true";
               }
             }}
             className="w-full flex items-center gap-2 p-2.5 rounded-lg text-xs text-rose-300 hover:bg-rose-500/10 transition-colors border-t border-white/10 cursor-pointer pt-3 mt-2"

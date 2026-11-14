@@ -807,7 +807,7 @@ export function MemberShell({ children }: MemberShellProps) {
                         if (typeof window !== "undefined") {
                           sessionStorage.clear();
                           localStorage.clear();
-                          window.location.href = "/login";
+                          window.location.href = "/login?logout=true";
                         }
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2 hover:bg-rose-500/10 text-rose-300 hover:text-rose-200 text-left transition-colors cursor-pointer"
@@ -990,7 +990,7 @@ export function MemberShell({ children }: MemberShellProps) {
                   if (typeof window !== "undefined") {
                     sessionStorage.clear();
                     localStorage.clear();
-                    window.location.href = "/login";
+                    window.location.href = "/login?logout=true";
                   }
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition-colors cursor-pointer text-left"

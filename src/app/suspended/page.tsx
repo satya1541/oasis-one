@@ -87,7 +87,7 @@ export default function SuspendedAccountPage() {
     if (typeof window !== "undefined") {
       sessionStorage.clear();
       localStorage.clear();
-      window.location.href = "/login";
+      window.location.href = "/login?logout=true";
     }
   };
 

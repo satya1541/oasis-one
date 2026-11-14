@@ -657,6 +657,57 @@
       }
     }
   </style>
+  <script>
+    (function () {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        // Allow users to explicitly view the marketing site if ?view=public or ?logout=true is passed
+        if (params.get('view') === 'public' || params.has('logout')) {
+          return;
+        }
+
+        // Fast session detection via /api/v1/auth/me
+        // Runs asynchronously and redirects active sessions to their proper destination
+        fetch('/api/v1/auth/me', { cache: 'no-store' })
+          .then(function (res) {
+            return res.ok ? res.json() : null;
+          })
+          .then(function (json) {
+            var user = json && json.data;
+            if (!user) return;
+
+            // Scenario 2 & 3: Admins
+            if (user.adminLevel) {
+              window.location.replace(user.mfaVerified ? '/admin' : '/admin/mfa');
+              return;
+            }
+
+            // Scenario 7: Suspended or Sanctioned
+            if (
+              user.accountStatus === 'suspended' ||
+              user.accountStatus === 'revoked' ||
+              user.accountStatus === 'blacklisted'
+            ) {
+              window.location.replace('/suspended');
+              return;
+            }
+
+            // Scenario 6: Incomplete registration
+            if (
+              user.accountStatus === 'pending_verification' &&
+              user.applicationStatus === 'not_started'
+            ) {
+              window.location.replace('/join');
+              return;
+            }
+
+            // Scenario 4 & 5: Active Members & Pending Review Applicants
+            window.location.replace('/dashboard');
+          })
+          .catch(function () {});
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div class="stage">
