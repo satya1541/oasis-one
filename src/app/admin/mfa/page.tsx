@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GlassLogoPill } from "@/components/brand/GlassLogoPill";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,17 @@ export default function AdminMfaPage() {
   // Default admin secret generated during platform bootstrap
   const [manualKey, setManualKey] = useState("JBSWY3DPEHPK3PXP");
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/v1/auth/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.data?.mfaVerified) {
+          router.replace("/admin");
+        }
+      })
+      .catch(() => {});
+  }, [router]);
 
   const handleSetupFetch = async () => {
     setIsSetupMode(true);

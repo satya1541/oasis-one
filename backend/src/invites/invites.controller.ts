@@ -40,12 +40,20 @@ export class InvitesController {
     const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.ip;
     const { user, sessionToken } = await this.invitesService.acceptInvite(token, body, clientIp);
 
+    const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const host = (req.headers['host'] as string) || '';
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    const domain = isLocalhost ? undefined : (process.env.COOKIE_DOMAIN || undefined);
+    const maxAgeMs = 30 * 24 * 60 * 60 * 1000;
+
     res.cookie('oasis_sid', sessionToken, {
       httpOnly: true,
-      secure: this.isProd,
+      secure: isLocalhost ? false : (isHttps || this.isProd),
       sameSite: 'lax',
       path: '/',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent session
+      domain,
+      maxAge: maxAgeMs,
+      expires: new Date(Date.now() + maxAgeMs),
     });
 
     return {

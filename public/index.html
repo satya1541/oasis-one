@@ -1046,6 +1046,26 @@
         else if (hash === '#how-it-works') window.location.href = '/admission';
         else if (hash === '#sanctuary') window.location.href = '/experience';
       }
+      // Smart session detection: If authenticated user lands on landing page, update sign-in buttons to portal destination
+      try {
+        var hasAdminMfa = localStorage.getItem('oasis_admin_mfa') === 'true';
+        var cachedMember = localStorage.getItem('oasis_member_session');
+        var targetUrl = hasAdminMfa ? '/admin' : (cachedMember ? '/dashboard' : null);
+        var targetLabel = hasAdminMfa ? 'Admin Console' : (cachedMember ? 'Dashboard' : null);
+
+        if (targetUrl && targetLabel) {
+          var loginLinks = document.querySelectorAll('a[href="/login"]');
+          loginLinks.forEach(function(el) {
+            el.href = targetUrl;
+            if (el.textContent.trim().toLowerCase().indexOf('log in') !== -1) {
+              el.textContent = targetLabel;
+            } else if (el.textContent.trim().toLowerCase().indexOf('member portal sign in') !== -1) {
+              el.textContent = 'Go to ' + targetLabel;
+            }
+          });
+        }
+      } catch (e) {}
+
       handleHashRouting();
       window.addEventListener('hashchange', handleHashRouting);
     })();

@@ -15,19 +15,56 @@ export default function LoginPage() {
   const [lockedEmail, setLockedEmail] = useState("");
   const [unregisteredModalOpen, setUnregisteredModalOpen] = useState(false);
   const [unregisteredEmail, setUnregisteredEmail] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const notice = params.get("notice");
     const emailQuery = params.get("email");
+    const hasError = params.has("error");
+    const isLogout = params.has("logout");
+
     if (notice === "not_registered") {
+      setCheckingSession(false);
       const timer = window.setTimeout(() => {
         setUnregisteredEmail(emailQuery || "");
         setUnregisteredModalOpen(true);
       }, 0);
       return () => window.clearTimeout(timer);
     }
+
+    // If redirected due to error or deliberate sign-out, stay on login page
+    if (hasError || isLogout) {
+      setCheckingSession(false);
+      return;
+    }
+
+    // Gmail-style persistent session auto-detection: if already authenticated, route directly in
+    let isMounted = true;
+    fetch("/api/v1/auth/me", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        const user = json?.data;
+        if (user && isMounted) {
+          if (user.adminLevel) {
+            window.location.replace("/admin");
+            return;
+          }
+          if (user.accountStatus === "active") {
+            window.location.replace("/dashboard");
+            return;
+          }
+        }
+        if (isMounted) setCheckingSession(false);
+      })
+      .catch(() => {
+        if (isMounted) setCheckingSession(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSignIn = async ({
@@ -89,6 +126,26 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="login-bg min-h-screen flex flex-col items-center justify-center bg-[#03080B] text-[#F5FAF6] selection:bg-[#88DECC]/30">
+        <div className="relative flex justify-center items-center py-4">
+          <div className="absolute inset-0 rounded-full bg-[#88DECC]/20 blur-2xl animate-pulse" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1E1F33] p-2 border border-[#E9C68C]/35 shadow-lg flex items-center justify-center relative z-10 animate-pulse">
+            <Image
+              src="/login-assets/oasis-emblem-gold.png"
+              alt="OASIS"
+              width={40}
+              height={40}
+              priority
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

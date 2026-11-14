@@ -35,23 +35,49 @@ export class AuthController {
     this.frontendUrl = this.configService.get<string>('frontendUrl') || 'https://oasisodisha.in';
   }
 
-  private setSessionCookie(res: Response, token: string) {
-    const domain = process.env.COOKIE_DOMAIN || undefined;
+  private isRequestSecure(req?: Request): boolean {
+    if (!req) return this.isProd;
+    const xForwardedProto = req.headers?.['x-forwarded-proto'];
+    if (xForwardedProto === 'https') return true;
+    if (req.secure) return true;
+    const host = (req.headers?.['host'] as string) || '';
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      return false;
+    }
+    return this.isProd;
+  }
+
+  private getCookieDomain(req?: Request): string | undefined {
+    const host = (req?.headers?.['host'] as string) || '';
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      return undefined;
+    }
+    return process.env.COOKIE_DOMAIN || undefined;
+  }
+
+  private setSessionCookie(res: Response, token: string, req?: Request) {
+    const isHttps = this.isRequestSecure(req);
+    const domain = this.getCookieDomain(req);
+    const maxAgeMs = 30 * 24 * 60 * 60 * 1000; // 30 days persistent session (rolling)
+    const expiresDate = new Date(Date.now() + maxAgeMs);
+
     res.cookie('oasis_sid', token, {
       httpOnly: true,
-      secure: this.isProd,
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       domain,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent session (rolling)
+      maxAge: maxAgeMs,
+      expires: expiresDate,
     });
   }
 
-  private clearSessionCookie(res: Response) {
-    const domain = process.env.COOKIE_DOMAIN || undefined;
+  private clearSessionCookie(res: Response, req?: Request) {
+    const isHttps = this.isRequestSecure(req);
+    const domain = this.getCookieDomain(req);
     res.clearCookie('oasis_sid', {
       httpOnly: true,
-      secure: this.isProd,
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       domain,
@@ -64,14 +90,17 @@ export class AuthController {
     let csrfToken = req.cookies?.['oasis_csrf'];
     if (!csrfToken) {
       csrfToken = generateRandomToken(24);
-      const domain = process.env.COOKIE_DOMAIN || undefined;
+      const isHttps = this.isRequestSecure(req);
+      const domain = this.getCookieDomain(req);
+      const maxAgeMs = 30 * 24 * 60 * 60 * 1000;
       res.cookie('oasis_csrf', csrfToken, {
         httpOnly: false, // Accessible to frontend JS for double-submit header
-        secure: this.isProd,
+        secure: isHttps,
         sameSite: 'lax',
         path: '/',
         domain,
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: maxAgeMs,
+        expires: new Date(Date.now() + maxAgeMs),
       });
     }
     return { csrfToken };
@@ -84,6 +113,7 @@ export class AuthController {
     @Query('next') next: string | undefined,
     @Query('mode') mode: string | undefined,
     @Query('role') role: string | undefined,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     // Validate next is a relative path (prevent open redirect)
@@ -95,11 +125,11 @@ export class AuthController {
     const authMode = mode === 'signup' ? 'signup' : 'login';
     const { authUrl, state, codeVerifier } = this.authService.getGoogleAuthUrl(invite, validatedNext, authMode, role);
 
-    // Save PKCE verifier, state, mode and role in temporary HttpOnly cookie (valid for 10 min)
-    const domain = process.env.COOKIE_DOMAIN || undefined;
+    const isHttps = this.isRequestSecure(req);
+    const domain = this.getCookieDomain(req);
     res.cookie('oasis_pkce', JSON.stringify({ state, codeVerifier, next: validatedNext, mode: authMode, role }), {
       httpOnly: true,
-      secure: this.isProd,
+      secure: isHttps,
       sameSite: 'lax',
       maxAge: 10 * 60 * 1000,
       path: '/',
@@ -192,7 +222,7 @@ export class AuthController {
       }
 
       const { user, rawToken } = result;
-      this.setSessionCookie(res, rawToken);
+      this.setSessionCookie(res, rawToken, req);
 
       return res.redirect(`${this.frontendUrl}${nextPath}`);
     } catch (err: any) {
@@ -213,7 +243,7 @@ export class AuthController {
       ipAddress: clientIp,
     });
 
-    this.setSessionCookie(res, rawToken);
+    this.setSessionCookie(res, rawToken, req);
     return {
       user: {
         id: user.id,
@@ -260,7 +290,7 @@ export class AuthController {
       userAgent,
     );
 
-    this.setSessionCookie(res, rawToken);
+    this.setSessionCookie(res, rawToken, req);
     return {
       user: {
         id: user.id,
@@ -284,7 +314,7 @@ export class AuthController {
       const tokenHash = hashToken(sessionToken);
       await this.authService.destroySession(tokenHash);
     }
-    this.clearSessionCookie(res);
+    this.clearSessionCookie(res, req);
     return { message: 'Signed out successfully' };
   }
 
