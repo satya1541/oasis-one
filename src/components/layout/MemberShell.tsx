@@ -166,8 +166,10 @@ function setCachedSession(u: any) {
   if (!u) isHydrated = false;
   try {
     if (u) {
+      localStorage.setItem("oasis_member_session", JSON.stringify(u));
       sessionStorage.setItem("oasis_member_session", JSON.stringify(u));
     } else {
+      localStorage.removeItem("oasis_member_session");
       sessionStorage.removeItem("oasis_member_session");
     }
   } catch (_) {}
@@ -221,10 +223,12 @@ export function MemberShell({ children }: MemberShellProps) {
     isHydrated = true;
     let isMounted = true;
 
-    // Immediately restore from sessionStorage if available to avoid any network delay
+    // Immediately restore from persistent storage if available to avoid any network delay
     if (!globalSessionUser && typeof window !== "undefined") {
       try {
-        const stored = sessionStorage.getItem("oasis_member_session");
+        const stored =
+          localStorage.getItem("oasis_member_session") ||
+          sessionStorage.getItem("oasis_member_session");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === "object" && parsed.id) {

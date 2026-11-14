@@ -43,7 +43,7 @@ export class AuthController {
       sameSite: 'lax',
       path: '/',
       domain,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days persistent session (rolling)
     });
   }
 

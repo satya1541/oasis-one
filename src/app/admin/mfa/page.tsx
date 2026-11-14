@@ -76,6 +76,7 @@ export default function AdminMfaPage() {
 
       if (typeof window !== "undefined") {
         sessionStorage.setItem("oasis_admin_mfa", "true");
+        localStorage.setItem("oasis_admin_mfa", "true");
       }
       router.push("/admin");
     } catch (err: any) {

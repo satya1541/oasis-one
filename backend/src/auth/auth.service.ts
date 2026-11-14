@@ -69,7 +69,7 @@ export class AuthService {
     const rawToken = generateRandomToken(32);
     const tokenHash = hashToken(rawToken);
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours sliding
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days persistent sliding session
 
     const session = await this.prisma.session.create({
       data: {

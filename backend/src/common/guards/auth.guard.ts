@@ -70,18 +70,18 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    // Sliding session update (sliding 24h, capped at 7 days from creation)
-    const maxExpiry = new Date(session.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const newExpiry = new Date(Math.min(now.getTime() + 24 * 60 * 60 * 1000, maxExpiry.getTime()));
-    
-    // Update asynchronously without blocking request critical path
-    this.prisma.session.update({
-      where: { id: session.id },
-      data: {
-        lastActiveAt: now,
-        expiresAt: newExpiry,
-      },
-    }).catch(() => {});
+    // Rolling 30-day session update on user activity (throttled to every 15 minutes to reduce DB writes)
+    const fifteenMinutesAgo = new Date(now.getTime() - 15 * 60 * 1000);
+    if (!session.lastActiveAt || session.lastActiveAt < fifteenMinutesAgo) {
+      const newExpiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days rolling
+      this.prisma.session.update({
+        where: { id: session.id },
+        data: {
+          lastActiveAt: now,
+          expiresAt: newExpiry,
+        },
+      }).catch(() => {});
+    }
 
     const user = session.user;
     (request as any).user = user;

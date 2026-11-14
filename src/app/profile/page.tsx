@@ -201,11 +201,14 @@ export default function ProfilePage() {
         setProfilePhotoUrl(newUrl);
         showNotification("success", "Profile photo updated successfully!");
         try {
-          const raw = sessionStorage.getItem("oasis_member_session");
+          const raw =
+            localStorage.getItem("oasis_member_session") ||
+            sessionStorage.getItem("oasis_member_session");
           if (raw) {
             const parsed = JSON.parse(raw);
             parsed.profilePhotoUrl = newUrl;
             parsed.avatarUrl = newUrl;
+            localStorage.setItem("oasis_member_session", JSON.stringify(parsed));
             sessionStorage.setItem("oasis_member_session", JSON.stringify(parsed));
           }
         } catch (_) {}
